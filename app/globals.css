@@ -1,26 +1,9 @@
 @import "tailwindcss";
+@config "../tailwind.config.js";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@theme {
+  /* Map next/font CSS variables into Tailwind's theme so font-display and
+     font-body utility classes resolve to the loaded web fonts at runtime. */
+  --font-display: var(--font-fraunces);
+  --font-body: var(--font-dm-sans);
 }
