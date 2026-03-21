@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { CreateSeriesModal } from './create-series-modal'
+import { CreateSeriesModal } from '@/components/forms/create-series-modal'
 
 export function NewSeriesTrigger() {
   const [open, setOpen] = useState(false)
