@@ -8,6 +8,7 @@ import { CollectionsTab } from '@/components/series/collections-tab'
 import { ChecklistTemplateTab } from '@/components/series/checklist-template-tab'
 import { CommsTab } from '@/components/series/comms-tab'
 import { NewShowTrigger } from '@/components/series/new-show-trigger'
+import { EditSeriesTrigger } from '@/components/series/edit-series-trigger'
 import {
   getSeriesDetail,
   getCollectionsForSeries,
@@ -99,14 +100,7 @@ export default async function SeriesDetailPage({ params, searchParams }) {
         </div>
 
         <div className="flex items-center gap-2 shrink-0">
-          {/* Edit Series — stub link; full edit modal can be wired later */}
-          <a
-            href={`/dashboard/series/${id}/edit`}
-            className="inline-flex items-center justify-center h-9 px-3 text-sm font-medium font-body rounded-lg
-              bg-transparent text-deep border border-mid hover:bg-peach transition-colors"
-          >
-            Edit Series
-          </a>
+          <EditSeriesTrigger series={series} />
           <NewShowTrigger seriesId={id} defaults={showDefaults} />
         </div>
       </div>
