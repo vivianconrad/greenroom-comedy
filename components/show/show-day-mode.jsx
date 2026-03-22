@@ -4,6 +4,7 @@ import { useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { cn, formatDate, timeToMinutes, minutesToTime } from '@/lib/utils'
 import { toggleChecklistItem } from '@/lib/actions/show'
+import { toggleDutyCompleted } from '@/lib/actions/duties'
 import { Button } from '@/components/ui/button'
 
 function buildRunOfShow(performers, showTime) {
@@ -16,7 +17,7 @@ function buildRunOfShow(performers, showTime) {
   })
 }
 
-export function ShowDayMode({ show, onExit }) {
+export function ShowDayMode({ show, duties = [], onExit }) {
   const router = useRouter()
   const [, startTransition] = useTransition()
 
@@ -28,6 +29,13 @@ export function ShowDayMode({ show, onExit }) {
   function handleToggle(itemId) {
     startTransition(async () => {
       await toggleChecklistItem(itemId)
+      router.refresh()
+    })
+  }
+
+  function handleDutyToggle(dutyId) {
+    startTransition(async () => {
+      await toggleDutyCompleted(dutyId)
       router.refresh()
     })
   }
@@ -123,6 +131,55 @@ export function ShowDayMode({ show, onExit }) {
             </div>
           )}
         </section>
+
+        {/* Duties */}
+        {duties.length > 0 && (
+          <section>
+            <h2 className="font-display text-2xl text-cream mb-6">Day-of Duties</h2>
+            <div className="flex flex-col gap-6">
+              {duties.map((group) => (
+                <div key={group.assignedTo}>
+                  <h3 className="text-soft text-sm font-semibold font-body uppercase tracking-wide mb-3">
+                    {group.assignedTo}
+                  </h3>
+                  <div>
+                    {group.duties.map((duty) => (
+                      <div
+                        key={duty.id}
+                        className="flex items-center gap-5 py-4 border-b border-mid/20 last:border-0 cursor-pointer group"
+                        onClick={() => handleDutyToggle(duty.id)}
+                      >
+                        <div
+                          className={cn(
+                            'w-8 h-8 rounded-full border-2 shrink-0 flex items-center justify-center transition-all',
+                            duty.done
+                              ? 'bg-sage border-sage'
+                              : 'border-mid/50 group-hover:border-soft'
+                          )}
+                        >
+                          {duty.done && (
+                            <span className="text-white text-sm font-bold">✓</span>
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <span className={cn(
+                            'text-xl transition-colors',
+                            duty.done ? 'line-through text-soft' : 'text-cream'
+                          )}>
+                            {duty.duty}
+                          </span>
+                          {duty.time_note && (
+                            <p className="text-soft text-sm mt-0.5">{duty.time_note}</p>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
       </div>
     </div>
   )

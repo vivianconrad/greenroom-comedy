@@ -4,14 +4,16 @@ import { cn, timeToMinutes, minutesToTime } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { EmptyState } from '@/components/ui/empty-state'
 
-const ACT_TYPE_STYLES = {
-  opening: { bar: 'bg-peach', badge: 'bg-peach text-mid' },
-  host: { bar: 'bg-lav-bg', badge: 'bg-lav-bg text-lav' },
-  performer: { bar: 'bg-sage-bg', badge: 'bg-sage-bg text-green' },
-  headliner: { bar: 'bg-coral/20', badge: 'bg-coral/20 text-coral' },
-  game: { bar: 'bg-butter', badge: 'bg-butter text-amber' },
-  close: { bar: 'bg-peach', badge: 'bg-peach text-mid' },
+// Colors keyed by the show_performers.role column value
+const ROLE_STYLES = {
+  host:       { bar: 'bg-lav-bg',    badge: 'bg-lav-bg text-lav'     },
+  headliner:  { bar: 'bg-coral/20',  badge: 'bg-coral/20 text-coral'  },
+  opener:     { bar: 'bg-peach',     badge: 'bg-peach text-mid'       },
+  performer:  { bar: 'bg-sage-bg',   badge: 'bg-sage-bg text-green'   },
+  other:      { bar: 'bg-cream',     badge: 'bg-cream text-soft'      },
 }
+
+const FALLBACK_STYLES = { bar: 'bg-cream', badge: 'bg-cream text-soft' }
 
 function buildRunOfShow(performers, showTime) {
   if (!showTime) return performers.map((p) => ({ ...p, startTime: null }))
@@ -63,10 +65,7 @@ export function RunOfShowTab({ show }) {
 
       <div className="bg-white rounded-card border border-peach divide-y divide-peach">
         {ros.map((p) => {
-          const styles = ACT_TYPE_STYLES[p.act_type] ?? {
-            bar: 'bg-cream',
-            badge: 'bg-cream text-soft',
-          }
+          const styles = ROLE_STYLES[p.role] ?? FALLBACK_STYLES
 
           return (
             <div key={p.showPerformerId} className="flex items-center gap-3 px-4 py-3">
@@ -83,7 +82,7 @@ export function RunOfShowTab({ show }) {
                 {p.startTime ?? '—'}
               </span>
 
-              {/* Act type color bar */}
+              {/* Role color bar */}
               <span className={cn('w-1 self-stretch rounded-full shrink-0', styles.bar)} />
 
               {/* Name + walk-up song */}
@@ -99,17 +98,15 @@ export function RunOfShowTab({ show }) {
                 <span className="text-xs text-soft shrink-0">{p.set_length}m</span>
               )}
 
-              {/* Act type badge */}
-              {p.act_type && (
-                <span
-                  className={cn(
-                    'px-2 py-0.5 rounded-full text-xs font-medium shrink-0 capitalize',
-                    styles.badge
-                  )}
-                >
-                  {p.act_type}
-                </span>
-              )}
+              {/* Role badge */}
+              <span
+                className={cn(
+                  'px-2 py-0.5 rounded-full text-xs font-medium shrink-0 capitalize',
+                  styles.badge
+                )}
+              >
+                {p.role}
+              </span>
             </div>
           )
         })}

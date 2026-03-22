@@ -2,10 +2,11 @@
 
 import { useState, useTransition } from 'react'
 import Link from 'next/link'
-import { login } from '@/lib/actions/auth'
+import { login, loginAsDemo } from '@/lib/actions/auth'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { isValidEmail } from '@/lib/utils'
 
 function GoogleIcon() {
   return (
@@ -30,12 +31,11 @@ function GoogleIcon() {
   )
 }
 
-const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
-
 export default function LoginPage() {
   const [errors, setErrors] = useState({})
   const [isPending, startTransition] = useTransition()
   const [oauthPending, setOauthPending] = useState(false)
+  const [demoPending, setDemoPending] = useState(false)
 
   function handleSubmit(e) {
     e.preventDefault()
@@ -64,8 +64,17 @@ export default function LoginPage() {
       },
     })
     if (error) {
-      setError(error.message)
+      setErrors({ form: error.message })
       setOauthPending(false)
+    }
+  }
+
+  async function handleDemo() {
+    setDemoPending(true)
+    const result = await loginAsDemo()
+    if (result?.error) {
+      setErrors({ form: result.error })
+      setDemoPending(false)
     }
   }
 
@@ -145,6 +154,32 @@ export default function LoginPage() {
           Sign up
         </Link>
       </p>
+
+      {/* Demo mode */}
+      <div className="relative mt-6">
+        <div className="absolute inset-0 flex items-center">
+          <div className="w-full border-t border-peach" />
+        </div>
+        <div className="relative flex justify-center">
+          <span className="bg-white px-3 text-xs text-soft font-body">or</span>
+        </div>
+      </div>
+
+      <div className="mt-5 text-center">
+        <Button
+          type="button"
+          variant="secondary"
+          size="md"
+          className="w-full"
+          loading={demoPending}
+          onClick={handleDemo}
+        >
+          Try Demo Mode
+        </Button>
+        <p className="mt-2 text-xs text-soft font-body">
+          Explore with sample data — no signup needed
+        </p>
+      </div>
     </div>
   )
 }

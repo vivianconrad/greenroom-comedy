@@ -183,7 +183,7 @@ function SeriesItem({ series, defaultOpen = false }) {
 
 // ─── Inner sidebar content ────────────────────────────────────────────────────
 
-function SidebarContent({ series, onClose }) {
+function SidebarContent({ series, isDemo, onClose }) {
   return (
     <div className="flex h-full flex-col">
       {/* Logo + optional close button */}
@@ -197,6 +197,11 @@ function SidebarContent({ series, onClose }) {
           <span className="font-display text-lg font-semibold text-deep tracking-tight">
             Greenroom
           </span>
+          {isDemo && (
+            <span className="text-[10px] font-semibold font-body uppercase tracking-wide text-coral bg-coral/10 rounded px-1.5 py-0.5 leading-none">
+              Demo
+            </span>
+          )}
         </Link>
 
         {/* Close button — only shown on mobile overlay */}
@@ -265,7 +270,7 @@ function SidebarContent({ series, onClose }) {
 
 // ─── Main export ──────────────────────────────────────────────────────────────
 
-export function Sidebar({ series }) {
+export function Sidebar({ series, isDemo = false }) {
   const [mobileOpen, setMobileOpen] = useState(false)
   const pathname = usePathname()
 
@@ -296,7 +301,7 @@ export function Sidebar({ series }) {
     <>
       {/* ── Desktop sidebar ── */}
       <aside className="hidden md:flex w-[220px] shrink-0 flex-col border-r border-peach bg-white">
-        <SidebarContent series={series} />
+        <SidebarContent series={series} isDemo={isDemo} />
       </aside>
 
       {/* ── Mobile: hamburger button (fixed, top-left) ── */}
@@ -330,7 +335,7 @@ export function Sidebar({ series }) {
 
           {/* Sliding panel */}
           <div className="absolute inset-y-0 left-0 w-72 max-w-full bg-white shadow-xl flex flex-col">
-            <SidebarContent series={series} onClose={close} />
+            <SidebarContent series={series} isDemo={isDemo} onClose={close} />
           </div>
         </div>
       )}

@@ -1,13 +1,30 @@
 import { notFound } from 'next/navigation'
 import { getShowDetail } from '@/lib/queries/show'
+import { getCommLog, getRecipientGroups } from '@/lib/queries/comms'
 import { ShowPageLayout } from '@/components/show/show-page-layout'
 
 export default async function ShowPage({ params, searchParams }) {
   const { id } = await params
-  const { tab = 'dashboard' } = await searchParams
+  const { tab = 'dashboard', group, template } = await searchParams
 
-  const show = await getShowDetail(id)
+  const [show, commLog, recipientGroups] = await Promise.all([
+    getShowDetail(id),
+    getCommLog(id),
+    getRecipientGroups(id),
+  ])
+
   if (!show) notFound()
 
-  return <ShowPageLayout show={show} activeTab={tab} />
+  // Pass comms pre-selection through if navigating from another tab
+  const commsPreset = group || template ? { group, template } : null
+
+  return (
+    <ShowPageLayout
+      show={show}
+      activeTab={tab}
+      commLog={commLog}
+      recipientGroups={recipientGroups}
+      commsPreset={commsPreset}
+    />
+  )
 }

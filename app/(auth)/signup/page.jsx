@@ -6,6 +6,7 @@ import { signup } from '@/lib/actions/auth'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { isValidEmail } from '@/lib/utils'
 
 function GoogleIcon() {
   return (
@@ -29,8 +30,6 @@ function GoogleIcon() {
     </svg>
   )
 }
-
-const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
 
 export default function SignupPage() {
   const [errors, setErrors] = useState({})

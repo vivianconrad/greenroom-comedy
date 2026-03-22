@@ -21,7 +21,7 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en" className={`${fraunces.variable} ${dmSans.variable}`}>
-      <body className="font-body bg-cream min-h-screen">{children}</body>
+      <body className="font-body bg-cream min-h-screen" suppressHydrationWarning>{children}</body>
     </html>
   )
 }

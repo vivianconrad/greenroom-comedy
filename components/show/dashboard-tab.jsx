@@ -1,7 +1,7 @@
 'use client'
 
 import { useTransition } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 import { cn, formatTime, daysUntil } from '@/lib/utils'
 import { toggleChecklistItem } from '@/lib/actions/show'
 import { Card } from '@/components/ui/card'
@@ -27,6 +27,7 @@ function DetailRow({ label, value }) {
 
 export function DashboardTab({ show }) {
   const router = useRouter()
+  const pathname = usePathname()
   const [, startTransition] = useTransition()
 
   const today = new Date()
@@ -61,7 +62,38 @@ export function DashboardTab({ show }) {
 
   const venue = show.venue_name ?? show.series?.venue_name
 
+  // 3-day comms prompt
+  const daysToShow = daysUntil(show.date)
+  const showingSoon = daysToShow >= 0 && daysToShow <= 3
+  const callTimeTemplate = (show.commTemplates ?? []).find((t) =>
+    /call.?time|reminder|running.?order/i.test(t.name)
+  )
+  const commsUrl = callTimeTemplate
+    ? `${pathname}?tab=comms&group=performers&template=${callTimeTemplate.id}`
+    : `${pathname}?tab=comms&group=performers`
+
   return (
+    <div className="space-y-4">
+      {/* ── 3-day comms prompt ── */}
+      {showingSoon && (
+        <div className="flex items-center justify-between gap-4 rounded-card border border-coral/30 bg-coral/5 px-4 py-3">
+          <div>
+            <p className="text-sm font-medium text-deep font-body">
+              {daysToShow === 0 ? 'Tonight! Send final details to your performers?' : `${daysToShow}d away — send call time + running order?`}
+            </p>
+            <p className="text-xs text-soft font-body mt-0.5">
+              Call: {formatTime(show.call_time) ?? 'not set'} · Doors: {formatTime(show.doors_time) ?? 'not set'} · Show: {formatTime(show.show_time) ?? 'not set'}
+            </p>
+          </div>
+          <button
+            onClick={() => router.push(commsUrl)}
+            className="shrink-0 text-sm font-medium text-coral hover:underline font-body"
+          >
+            Go to Comms →
+          </button>
+        </div>
+      )}
+
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
       {/* Progress */}
       <Card className="p-6">
@@ -184,6 +216,7 @@ export function DashboardTab({ show }) {
           {show.theme && <DetailRow label="Theme" value={show.theme} />}
         </dl>
       </Card>
+    </div>
     </div>
   )
 }

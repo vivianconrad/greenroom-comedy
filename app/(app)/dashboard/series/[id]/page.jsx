@@ -6,6 +6,7 @@ import { ShowsTab } from '@/components/series/shows-tab'
 import { PerformersTab } from '@/components/series/performers-tab'
 import { CollectionsTab } from '@/components/series/collections-tab'
 import { ChecklistTemplateTab } from '@/components/series/checklist-template-tab'
+import { DutyTemplatesTab } from '@/components/series/duty-templates-tab'
 import { CommsTab } from '@/components/series/comms-tab'
 import { NewShowTrigger } from '@/components/series/new-show-trigger'
 import { EditSeriesTrigger } from '@/components/series/edit-series-trigger'
@@ -15,6 +16,7 @@ import {
   getChecklistTemplate,
   getCommTemplates,
   getSeriesPerformers,
+  getDutyTemplates,
 } from '@/lib/queries/series-detail'
 
 // ─── Frequency label helper ───────────────────────────────────────────────────
@@ -35,11 +37,12 @@ export default async function SeriesDetailPage({ params, searchParams }) {
   // Parallel data fetch — only load what's needed for active tab, but series
   // detail is always needed for the header. Fetch everything in parallel to
   // keep it simple; queries are fast and conditional fetching adds complexity.
-  const [series, collections, checklistTasks, commTemplates, performers] =
+  const [series, collections, checklistTasks, dutyTemplates, commTemplates, performers] =
     await Promise.all([
       getSeriesDetail(id),
       getCollectionsForSeries(id),
       getChecklistTemplate(id),
+      getDutyTemplates(id),
       getCommTemplates(id),
       getSeriesPerformers(id),
     ])
@@ -52,7 +55,7 @@ export default async function SeriesDetailPage({ params, searchParams }) {
     if (show) redirect(`/dashboard/shows/${show.id}`)
   }
 
-  const activeTab = ['shows', 'performers', 'collections', 'checklist', 'comms'].includes(tab)
+  const activeTab = ['shows', 'performers', 'collections', 'checklist', 'duties', 'comms'].includes(tab)
     ? tab
     : 'shows'
 
@@ -121,8 +124,11 @@ export default async function SeriesDetailPage({ params, searchParams }) {
       {activeTab === 'checklist' && (
         <ChecklistTemplateTab tasks={checklistTasks} seriesId={id} />
       )}
+      {activeTab === 'duties' && (
+        <DutyTemplatesTab templates={dutyTemplates} seriesId={id} />
+      )}
       {activeTab === 'comms' && (
-        <CommsTab templates={commTemplates} />
+        <CommsTab templates={commTemplates} seriesId={id} />
       )}
     </div>
   )

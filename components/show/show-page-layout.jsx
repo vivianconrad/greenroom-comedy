@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useSearchParams, useRouter, usePathname } from 'next/navigation'
 import { cn, formatShortDate, daysUntil } from '@/lib/utils'
 import { Breadcrumb } from '@/components/layout/breadcrumb'
 import { Pill } from '@/components/ui/pill'
@@ -10,6 +11,7 @@ import { DashboardTab } from './dashboard-tab'
 import { ChecklistTab } from './checklist-tab'
 import { PerformersTab } from './performers-tab'
 import { RunOfShowTab } from './run-of-show-tab'
+import { DutiesTab } from './duties-tab'
 import { PromoTab } from './promo-tab'
 import { TicketsTab } from './tickets-tab'
 import { MaterialsTab } from './materials-tab'
@@ -27,12 +29,29 @@ function DaysAwayPill({ date }) {
   return <Pill variant="info">{days}d away</Pill>
 }
 
-export function ShowPageLayout({ show, activeTab }) {
-  const [showDayMode, setShowDayMode] = useState(false)
+export function ShowPageLayout({ show, duties = [], activeTab, commLog = [], recipientGroups = {}, commsPreset = null }) {
+  const searchParams = useSearchParams()
+  const router = useRouter()
+  const pathname = usePathname()
   const [editOpen, setEditOpen] = useState(false)
 
+  const showDayMode = searchParams.get('mode') === 'showday'
+
+  function enterShowDayMode() {
+    const params = new URLSearchParams(searchParams.toString())
+    params.set('mode', 'showday')
+    router.push(`${pathname}?${params.toString()}`)
+  }
+
+  function exitShowDayMode() {
+    const params = new URLSearchParams(searchParams.toString())
+    params.delete('mode')
+    const qs = params.toString()
+    router.push(qs ? `${pathname}?${qs}` : pathname)
+  }
+
   if (showDayMode) {
-    return <ShowDayMode show={show} onExit={() => setShowDayMode(false)} />
+    return <ShowDayMode show={show} duties={show.duties ?? duties} onExit={exitShowDayMode} />
   }
 
   const breadcrumb = [
@@ -62,7 +81,7 @@ export function ShowPageLayout({ show, activeTab }) {
           <Button variant="secondary" size="sm" onClick={() => setEditOpen(true)}>
             Edit
           </Button>
-          <Button variant="primary" size="sm" onClick={() => setShowDayMode(true)}>
+          <Button variant="primary" size="sm" onClick={enterShowDayMode}>
             Show Day Mode →
           </Button>
         </div>
@@ -75,10 +94,18 @@ export function ShowPageLayout({ show, activeTab }) {
       {activeTab === 'checklist' && <ChecklistTab show={show} />}
       {activeTab === 'performers' && <PerformersTab show={show} />}
       {activeTab === 'runofshow' && <RunOfShowTab show={show} />}
+      {activeTab === 'duties' && <DutiesTab show={show} duties={show.duties ?? duties} />}
       {activeTab === 'promo' && <PromoTab show={show} />}
       {activeTab === 'tickets' && <TicketsTab show={show} />}
       {activeTab === 'materials' && <MaterialsTab show={show} />}
-      {activeTab === 'comms' && <CommsTab show={show} />}
+      {activeTab === 'comms' && (
+        <CommsTab
+          show={show}
+          commLog={commLog}
+          recipientGroups={recipientGroups}
+          preset={commsPreset}
+        />
+      )}
       {activeTab === 'financials' && <FinancialsTab show={show} />}
       {activeTab === 'notes' && <NotesTab show={show} />}
     </div>

@@ -8,6 +8,7 @@ const TABS = [
   { key: 'performers', label: 'Performers' },
   { key: 'collections', label: 'Collections' },
   { key: 'checklist', label: 'Checklist Template' },
+  { key: 'duties', label: 'Duty Templates' },
   { key: 'comms', label: 'Comms' },
 ]
 
