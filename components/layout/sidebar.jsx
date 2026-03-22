@@ -3,8 +3,8 @@
 import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { cn } from '@/lib/utils'
-import { formatShortDate } from '@/lib/utils'
+import { cn, formatShortDate } from '@/lib/utils'
+import { CreateSeriesModal } from '@/components/forms/create-series-modal'
 
 // ─── Icons ──────────────────────────────────────────────────────────────────
 
@@ -184,6 +184,8 @@ function SeriesItem({ series, defaultOpen = false }) {
 // ─── Inner sidebar content ────────────────────────────────────────────────────
 
 function SidebarContent({ series, isDemo, onClose }) {
+  const [newSeriesOpen, setNewSeriesOpen] = useState(false)
+
   return (
     <div className="flex h-full flex-col">
       {/* Logo + optional close button */}
@@ -235,18 +237,19 @@ function SidebarContent({ series, isDemo, onClose }) {
         )}
 
         {/* New series / show */}
-        <Link
-          href="/dashboard/new"
+        <button
+          onClick={() => setNewSeriesOpen(true)}
           className={cn(
-            'mt-3 flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm font-body',
+            'mt-3 w-full flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm font-body',
             'text-soft hover:bg-peach hover:text-deep transition-colors'
           )}
-          onClick={onClose}
         >
           <PlusIcon />
           New series / show
-        </Link>
+        </button>
       </div>
+
+      <CreateSeriesModal open={newSeriesOpen} onClose={() => setNewSeriesOpen(false)} />
 
       {/* Global tools */}
       <div className="shrink-0 border-t border-peach px-2 py-3 space-y-0.5">
