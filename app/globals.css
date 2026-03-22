@@ -1,6 +1,10 @@
 @import "tailwindcss";
 @config "../tailwind.config.js";
 
+html {
+  scroll-behavior: smooth;
+}
+
 @theme {
   /* Map next/font CSS variables into Tailwind's theme so font-display and
      font-body utility classes resolve to the loaded web fonts at runtime. */

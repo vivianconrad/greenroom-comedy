@@ -30,11 +30,7 @@ function GoogleIcon() {
   )
 }
 
-function validatePassword(password) {
-  if (!password) return 'Password is required.'
-  if (password.length < 8) return 'Password must be at least 8 characters.'
-  return null
-}
+const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
 
 export default function SignupPage() {
   const [errors, setErrors] = useState({})
@@ -44,11 +40,15 @@ export default function SignupPage() {
   function handleSubmit(e) {
     e.preventDefault()
     const formData = new FormData(e.currentTarget)
+    const email = formData.get('email')
     const password = formData.get('password')
 
-    const passwordError = validatePassword(password)
-    if (passwordError) {
-      setErrors({ password: passwordError })
+    const nextErrors = {}
+    if (!isValidEmail(email)) nextErrors.email = 'Please enter a valid email address.'
+    if (!password || password.length < 8) nextErrors.password = 'Password must be at least 8 characters.'
+
+    if (Object.keys(nextErrors).length) {
+      setErrors(nextErrors)
       return
     }
 
@@ -122,6 +122,7 @@ export default function SignupPage() {
           type="email"
           placeholder="you@example.com"
           autoComplete="email"
+          error={errors.email}
           required
         />
         <Input

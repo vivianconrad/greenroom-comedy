@@ -30,18 +30,27 @@ function GoogleIcon() {
   )
 }
 
+const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+
 export default function LoginPage() {
-  const [error, setError] = useState(null)
+  const [errors, setErrors] = useState({})
   const [isPending, startTransition] = useTransition()
   const [oauthPending, setOauthPending] = useState(false)
 
   function handleSubmit(e) {
     e.preventDefault()
-    setError(null)
     const formData = new FormData(e.currentTarget)
+    const email = formData.get('email')
+
+    if (!isValidEmail(email)) {
+      setErrors({ email: 'Please enter a valid email address.' })
+      return
+    }
+
+    setErrors({})
     startTransition(async () => {
       const result = await login(formData)
-      if (result?.error) setError(result.error)
+      if (result?.error) setErrors({ form: result.error })
     })
   }
 
@@ -101,6 +110,7 @@ export default function LoginPage() {
           type="email"
           placeholder="you@example.com"
           autoComplete="email"
+          error={errors.email}
           required
         />
         <Input
@@ -112,9 +122,9 @@ export default function LoginPage() {
           required
         />
 
-        {error && (
+        {errors.form && (
           <p role="alert" className="text-sm text-red font-body -mt-1">
-            {error}
+            {errors.form}
           </p>
         )}
 
