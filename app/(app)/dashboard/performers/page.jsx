@@ -20,7 +20,7 @@ export default async function PerformersPage() {
     supabase
       .from('series')
       .select('id, name')
-      .eq('user_id', user.id)
+      .eq('owner_id', user.id)
       .order('name', { ascending: true })
       .then(({ data }) => data ?? []),
   ])
