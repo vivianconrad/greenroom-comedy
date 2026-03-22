@@ -1,11 +1,11 @@
 'use client'
 
-import { useState, useEffect, useTransition } from 'react'
+import { useState, useEffect, useMemo, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { cn, formatDate, formatTime, timeToMinutes, minutesToTime, fillTemplate } from '@/lib/utils'
+import { useCopyToClipboard } from '@/lib/hooks'
 import { toggleChecklistItem } from '@/lib/actions/show'
 import { toggleDutyCompleted } from '@/lib/actions/duties'
-import { Button } from '@/components/ui/button'
 
 // ─── Color bars by act_type ───────────────────────────────────────────────────
 
@@ -184,15 +184,7 @@ function ContactPopup({ person, onClose }) {
 // ─── Quick Contacts row ───────────────────────────────────────────────────────
 
 function ContactRow({ name, sub, contactMethod, contactInfo }) {
-  const [copied, setCopied] = useState(false)
-
-  function handleCopy() {
-    if (!contactInfo) return
-    navigator.clipboard.writeText(contactInfo).then(() => {
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
-    })
-  }
+  const [copied, copy] = useCopyToClipboard()
 
   return (
     <div
@@ -200,7 +192,7 @@ function ContactRow({ name, sub, contactMethod, contactInfo }) {
         'flex items-center justify-between py-4 border-b border-mid/15 last:border-0',
         contactInfo && 'cursor-pointer active:bg-mid/10 transition-colors'
       )}
-      onClick={handleCopy}
+      onClick={() => copy(contactInfo)}
     >
       <div>
         <div className="text-lg font-medium text-cream">{name}</div>
@@ -222,30 +214,14 @@ function ContactRow({ name, sub, contactMethod, contactInfo }) {
 
 // ─── Quick Comms modal ────────────────────────────────────────────────────────
 
-const RECIPIENT_GROUPS = [
-  { key: 'everyone',   label: 'Everyone' },
-  { key: 'performers', label: 'Performers' },
-  { key: 'hosts',      label: 'Hosts' },
-  { key: 'crew',       label: 'Crew' },
-]
-
 function QuickCommsModal({ show, onClose }) {
-  const [group, setGroup] = useState('everyone')
-  const [copied, setCopied] = useState(false)
+  const [copied, copy] = useCopyToClipboard(2500)
 
   const template =
     (show.commTemplates ?? []).find((t) => /group|details|blast/i.test(t.name)) ??
     show.commTemplates?.[0]
 
   const rendered = template ? fillTemplate(template.body, show) : ''
-
-  function handleCopy() {
-    if (!rendered) return
-    navigator.clipboard.writeText(rendered).then(() => {
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2500)
-    })
-  }
 
   return (
     <div
@@ -274,30 +250,12 @@ function QuickCommsModal({ show, onClose }) {
               <p className="text-cream font-medium">{template.name}</p>
             </div>
 
-            <div className="mb-4">
-              <p className="text-soft text-xs uppercase tracking-wide mb-2">Send to</p>
-              <div className="flex flex-wrap gap-2">
-                {RECIPIENT_GROUPS.map((g) => (
-                  <button
-                    key={g.key}
-                    onClick={() => setGroup(g.key)}
-                    className={cn(
-                      'px-3 py-1.5 rounded-full text-sm transition-colors',
-                      group === g.key ? 'bg-coral text-cream' : 'bg-mid/20 text-soft'
-                    )}
-                  >
-                    {g.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
             <div className="bg-mid/10 rounded-xl p-4 mb-5">
               <p className="text-cream text-sm whitespace-pre-wrap leading-relaxed">{rendered}</p>
             </div>
 
             <button
-              onClick={handleCopy}
+              onClick={() => copy(rendered)}
               className={cn(
                 'w-full py-3 rounded-xl font-medium text-base transition-colors',
                 copied ? 'bg-sage text-deep' : 'bg-coral text-cream active:bg-coral/80'
@@ -330,8 +288,11 @@ export function ShowDayMode({ show, duties: dutiesProp = [], onExit }) {
     return () => clearInterval(t)
   }, [])
 
-  // Run of show
-  const ros = buildRunOfShow(show.performers ?? [], show.show_time)
+  // Run of show — memoized so tick-only re-renders don't recompute
+  const ros = useMemo(
+    () => buildRunOfShow(show.performers ?? [], show.show_time),
+    [show.performers, show.show_time]
+  )
   const currentIdx = getCurrentSlotIndex(ros)
 
   // Day-of tasks: pending first, done after

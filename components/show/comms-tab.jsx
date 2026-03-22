@@ -3,6 +3,7 @@
 import { useState, useEffect, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { cn, fillTemplate } from '@/lib/utils'
+import { useCopyToClipboard } from '@/lib/hooks'
 import { logMessageSent } from '@/lib/actions/comms'
 import { Button } from '@/components/ui/button'
 import { EmptyState } from '@/components/ui/empty-state'
@@ -112,7 +113,7 @@ export function CommsTab({ show, commLog = [], recipientGroups = {}, preset = nu
   const [customSelected, setCustomSelected] = useState(new Set())
   const [templateId, setTemplateId] = useState(preset?.template ?? '')
   const [body, setBody] = useState('')
-  const [copied, setCopied] = useState(false)
+  const [copied, copy] = useCopyToClipboard()
   const [sending, startSend] = useTransition()
   const [sentError, setSentError] = useState(null)
 
@@ -140,14 +141,6 @@ export function CommsTab({ show, commLog = [], recipientGroups = {}, preset = nu
       if (next.has(id)) next.delete(id)
       else next.add(id)
       return next
-    })
-  }
-
-  function handleCopy() {
-    if (!body.trim()) return
-    navigator.clipboard.writeText(body).then(() => {
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
     })
   }
 
@@ -290,7 +283,7 @@ export function CommsTab({ show, commLog = [], recipientGroups = {}, preset = nu
           <Button
             variant="primary"
             size="md"
-            onClick={handleCopy}
+            onClick={() => copy(body)}
             disabled={!body.trim()}
           >
             {copied ? '✓ Copied!' : 'Copy to clipboard'}
