@@ -3,7 +3,7 @@
 import { useState, useTransition } from 'react'
 import Link from 'next/link'
 import { login, loginAsDemo } from '@/lib/actions/auth'
-import { createClient } from '@/lib/supabase/client'
+// import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { isValidEmail } from '@/lib/utils'
@@ -34,7 +34,7 @@ function GoogleIcon() {
 export default function LoginPage() {
   const [errors, setErrors] = useState({})
   const [isPending, startTransition] = useTransition()
-  const [oauthPending, setOauthPending] = useState(false)
+    // const [oauthPending, setOauthPending] = useState(false)
   const [demoPending, setDemoPending] = useState(false)
 
   function handleSubmit(e) {
@@ -53,21 +53,21 @@ export default function LoginPage() {
       if (result?.error) setErrors({ form: result.error })
     })
   }
-
-  async function handleGoogle() {
-    setOauthPending(true)
-    const supabase = createClient()
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
-      },
-    })
-    if (error) {
-      setErrors({ form: error.message })
-      setOauthPending(false)
-    }
-  }
+  
+  // async function handleGoogle() {
+  //   setOauthPending(true)
+  //   const supabase = createClient()
+  //   const { error } = await supabase.auth.signInWithOAuth({
+  //     provider: 'google',
+  //     options: {
+  //       redirectTo: `${window.location.origin}/auth/callback`,
+  //     },
+  //   })
+  //   if (error) {
+  //     setErrors({ form: error.message })
+  //     setOauthPending(false)
+  //   }
+  // }
 
   async function handleDemo() {
     setDemoPending(true)
@@ -89,8 +89,8 @@ export default function LoginPage() {
         </p>
       </div>
 
-      {/* Google OAuth */}
-      <Button
+      {/* TODO: Re-enable Google OAuth once the provider is configured in Supabase */}
+      {/* <Button
         type="button"
         variant="secondary"
         size="md"
@@ -109,7 +109,7 @@ export default function LoginPage() {
         <div className="relative flex justify-center">
           <span className="bg-white px-3 text-xs text-soft font-body">or</span>
         </div>
-      </div>
+      </div> */}
 
       {/* Email / password form */}
       <form onSubmit={handleSubmit} className="flex flex-col gap-4" noValidate>
