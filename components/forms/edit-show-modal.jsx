@@ -62,6 +62,13 @@ export function EditShowModal({ open, onClose, show }) {
           placeholder="e.g. The Comedy Store"
         />
 
+        <Input
+          label="Hosts"
+          name="hosts"
+          defaultValue={show.hosts ?? ''}
+          placeholder="e.g. Vi, Maddie, Emma"
+        />
+
         <div className="grid grid-cols-3 gap-3">
           <Input label="Call time" name="call_time" type="time" defaultValue={show.call_time ?? ''} />
           <Input label="Doors" name="doors_time" type="time" defaultValue={show.doors_time ?? ''} />

@@ -20,10 +20,26 @@ const ACT_COLORS = {
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function buildRunOfShow(performers, showTime) {
-  if (!showTime) return performers.map((p) => ({ ...p, startTime: null, startMinutes: null }))
+function buildRunOfShow(performers, showTime, hostsStr) {
+  // Inject virtual host opening slot if hosts are set
+  const hostNames = hostsStr ? hostsStr.split(',').map((h) => h.trim()).filter(Boolean) : []
+  const slots = hostNames.length > 0
+    ? [
+        {
+          showPerformerId: '__hosts__',
+          name: hostNames.join(' & '),
+          act_type: 'host',
+          role: 'host',
+          set_length: null,
+          isVirtual: true,
+        },
+        ...performers,
+      ]
+    : performers
+
+  if (!showTime) return slots.map((p) => ({ ...p, startTime: null, startMinutes: null }))
   let cursor = timeToMinutes(showTime)
-  return performers.map((p) => {
+  return slots.map((p) => {
     const startMinutes = cursor
     const startTime = minutesToTime(cursor)
     cursor += p.set_length ?? 0
@@ -290,8 +306,8 @@ export function ShowDayMode({ show, duties: dutiesProp = [], onExit }) {
 
   // Run of show — memoized so tick-only re-renders don't recompute
   const ros = useMemo(
-    () => buildRunOfShow(show.performers ?? [], show.show_time),
-    [show.performers, show.show_time]
+    () => buildRunOfShow(show.performers ?? [], show.show_time, show.hosts),
+    [show.performers, show.show_time, show.hosts]
   )
   const currentIdx = getCurrentSlotIndex(ros)
 
@@ -350,6 +366,11 @@ export function ShowDayMode({ show, duties: dutiesProp = [], onExit }) {
                   <> · {show.venue ?? show.series?.venue}</>
                 )}
               </p>
+              {show.hosts && (
+                <p className="text-cream/80 text-base font-medium mt-1">
+                  {show.hosts}
+                </p>
+              )}
             </div>
             <div className="flex flex-col items-end gap-2 shrink-0">
               <LiveClock />

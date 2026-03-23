@@ -214,6 +214,7 @@ export function DashboardTab({ show }) {
           />
           <DetailRow label="Platform" value={show.ticket_platform} />
           {show.theme && <DetailRow label="Theme" value={show.theme} />}
+          {show.hosts && <DetailRow label="Hosts" value={show.hosts} />}
         </dl>
       </Card>
     </div>

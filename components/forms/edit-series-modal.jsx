@@ -156,6 +156,13 @@ export function EditSeriesModal({ open, onClose, series }) {
           </div>
         </div>
 
+        <Input
+          label="Default hosts"
+          name="default_hosts"
+          defaultValue={series.default_hosts ?? ''}
+          placeholder="e.g. Vi, Maddie, Emma"
+        />
+
         <Textarea
           label="Description"
           name="description"

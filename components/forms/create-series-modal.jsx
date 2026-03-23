@@ -187,6 +187,13 @@ export function CreateSeriesModal({ open, onClose }) {
           </div>
         </div>
 
+        {/* Default hosts */}
+        <Input
+          label="Default hosts"
+          name="default_hosts"
+          placeholder="e.g. Vi, Maddie, Emma"
+        />
+
         {/* Description */}
         <Textarea
           label="Description"

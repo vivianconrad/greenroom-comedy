@@ -10,7 +10,7 @@ import { createShow } from '@/lib/actions/series'
  * Modal for adding a show to an existing series.
  *
  * @param {string}  seriesId   — ID of the parent series
- * @param {object}  defaults   — { venue, call_time, doors_time, show_time }
+ * @param {object}  defaults   — { venue, call_time, doors_time, show_time, default_hosts }
  *                               Pre-filled from the series record
  * @param {boolean} open
  * @param {()=>void} onClose
@@ -94,6 +94,14 @@ export function CreateShowModal({ seriesId, defaults = {}, open, onClose }) {
           label="Theme"
           name="theme"
           placeholder="Optional — e.g. Best of 2025"
+        />
+
+        {/* Hosts — pre-filled from series default */}
+        <Input
+          label="Hosts"
+          name="hosts"
+          placeholder="e.g. Vi, Maddie, Emma"
+          defaultValue={defaults.default_hosts ?? ''}
         />
 
         {errors.form && (

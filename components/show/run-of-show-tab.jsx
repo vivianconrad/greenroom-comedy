@@ -15,10 +15,26 @@ const ROLE_STYLES = {
 
 const FALLBACK_STYLES = { bar: 'bg-cream', badge: 'bg-cream text-soft' }
 
-function buildRunOfShow(performers, showTime) {
-  if (!showTime) return performers.map((p) => ({ ...p, startTime: null }))
+function buildRunOfShow(performers, showTime, hostsStr) {
+  // Inject virtual host opening slot if hosts are set
+  const hostNames = hostsStr ? hostsStr.split(',').map((h) => h.trim()).filter(Boolean) : []
+  const slots = hostNames.length > 0
+    ? [
+        {
+          showPerformerId: '__hosts__',
+          name: hostNames.join(' & '),
+          role: 'host',
+          act_type: 'host',
+          set_length: null,
+          isVirtual: true,
+        },
+        ...performers,
+      ]
+    : performers
+
+  if (!showTime) return slots.map((p) => ({ ...p, startTime: null }))
   let cursor = timeToMinutes(showTime)
-  return performers.map((p) => {
+  return slots.map((p) => {
     const startTime = minutesToTime(cursor)
     cursor += p.set_length ?? 0
     return { ...p, startTime }
@@ -26,7 +42,7 @@ function buildRunOfShow(performers, showTime) {
 }
 
 export function RunOfShowTab({ show }) {
-  const ros = buildRunOfShow(show.performers, show.show_time)
+  const ros = buildRunOfShow(show.performers, show.show_time, show.hosts)
 
   if (ros.length === 0) {
     return (

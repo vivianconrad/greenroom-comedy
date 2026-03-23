@@ -64,6 +64,7 @@ export default async function SeriesDetailPage({ params, searchParams }) {
     call_time: series.default_call_time,
     doors_time: series.default_doors_time,
     show_time: series.default_show_time,
+    default_hosts: series.default_hosts,
   }
 
   return (

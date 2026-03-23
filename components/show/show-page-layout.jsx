@@ -76,6 +76,11 @@ export function ShowPageLayout({ show, duties = [], activeTab, commLog = [], rec
             {show.theme && <Pill variant="neutral">{show.theme}</Pill>}
             <DaysAwayPill date={show.date} />
           </div>
+          {show.hosts && (
+            <p className="text-sm text-soft mt-1">
+              Hosted by {show.hosts}
+            </p>
+          )}
         </div>
         <div className="flex gap-2 shrink-0">
           <Button variant="secondary" size="sm" onClick={() => setEditOpen(true)}>
