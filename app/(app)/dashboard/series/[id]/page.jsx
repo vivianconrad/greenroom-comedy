@@ -90,6 +90,10 @@ export default async function SeriesDetailPage({ params, searchParams }) {
             )}
           </div>
 
+          {series.tagline && (
+            <p className="mt-1 text-base font-body text-mid">{series.tagline}</p>
+          )}
+
           <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2 text-sm font-body text-soft">
             {series.venue && (
               <span>{series.venue}</span>
@@ -101,6 +105,16 @@ export default async function SeriesDetailPage({ params, searchParams }) {
               </span>
             )}
           </div>
+
+          {series.description_long && (
+            <details className="mt-3 group">
+              <summary className="text-xs font-body text-soft cursor-pointer hover:text-mid select-none list-none flex items-center gap-1">
+                <span className="group-open:hidden">About ▸</span>
+                <span className="hidden group-open:inline">About ▾</span>
+              </summary>
+              <p className="mt-2 text-sm font-body text-mid whitespace-pre-line">{series.description_long}</p>
+            </details>
+          )}
         </div>
 
         <div className="flex items-center gap-2 shrink-0">

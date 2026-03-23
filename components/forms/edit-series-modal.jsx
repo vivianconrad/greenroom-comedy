@@ -163,12 +163,19 @@ export function EditSeriesModal({ open, onClose, series }) {
           placeholder="e.g. Vi, Maddie, Emma"
         />
 
+        <Input
+          label="Tagline"
+          name="tagline"
+          defaultValue={series.tagline ?? ''}
+          placeholder="One sentence about your show"
+        />
+
         <Textarea
-          label="Description"
-          name="description"
-          defaultValue={series.description ?? ''}
-          placeholder="What's this series about? (optional)"
-          maxLength={500}
+          label="Elevator pitch"
+          name="description_long"
+          defaultValue={series.description_long ?? ''}
+          placeholder="A paragraph about your show for longer descriptions"
+          maxLength={1000}
         />
 
         {errors.form && (

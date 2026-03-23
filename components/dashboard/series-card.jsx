@@ -50,6 +50,10 @@ export function SeriesCard({ series }) {
               {series.name}
             </Link>
 
+            {series.tagline && (
+              <p className="text-sm font-body text-mid mt-0.5 line-clamp-1">{series.tagline}</p>
+            )}
+
             {/* Meta pills */}
             <div className="flex flex-wrap items-center gap-2 mt-2">
               {series.is_one_off ? (

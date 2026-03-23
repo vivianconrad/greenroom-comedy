@@ -102,6 +102,9 @@ export function CreateSeriesModal({ open, onClose }) {
     if (!showType) {
       errs.show_type = 'Select a show type.'
     }
+    if (frequency === 'one_off' && !formData.get('date')?.toString()) {
+      errs.date = 'Show date is required.'
+    }
     return errs
   }
 
@@ -170,6 +173,17 @@ export function CreateSeriesModal({ open, onClose }) {
           )}
         </div>
 
+        {/* Show date — required for one-offs */}
+        {isOneOff && (
+          <Input
+            label="Show date"
+            name="date"
+            type="date"
+            error={errors.date}
+            required
+          />
+        )}
+
         {/* Default venue */}
         <Input
           label="Default venue"
@@ -194,12 +208,19 @@ export function CreateSeriesModal({ open, onClose }) {
           placeholder="e.g. Vi, Maddie, Emma"
         />
 
-        {/* Description */}
+        {/* Tagline */}
+        <Input
+          label="Tagline"
+          name="tagline"
+          placeholder="One sentence about your show"
+        />
+
+        {/* Description long */}
         <Textarea
-          label="Description"
-          name="description"
-          placeholder="What's this series about? (optional)"
-          maxLength={500}
+          label="Elevator pitch"
+          name="description_long"
+          placeholder="A paragraph about your show for longer descriptions"
+          maxLength={1000}
         />
 
         {errors.form && (
