@@ -24,7 +24,7 @@ export function PromoTab({ show }) {
   const [, startTransition] = useTransition()
 
   const promoItems = (show.checklistItems ?? []).filter(
-    (i) => i.category === 'Promo' && i.is_active !== false
+    (i) => i.category === 'Promo' && i.enabled !== false
   )
 
   if (promoItems.length === 0) {
@@ -80,7 +80,7 @@ export function PromoTab({ show }) {
                     item.done && 'line-through text-soft'
                   )}
                 >
-                  {item.name}
+                  {item.task}
                 </span>
                 {item.default_owner && (
                   <span className="text-xs text-soft shrink-0">{item.default_owner}</span>

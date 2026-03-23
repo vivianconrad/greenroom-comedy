@@ -142,8 +142,8 @@ export function EditSeriesModal({ open, onClose, series }) {
 
         <Input
           label="Default venue"
-          name="venue_name"
-          defaultValue={series.venue_name ?? ''}
+          name="venue"
+          defaultValue={series.venue ?? ''}
           placeholder="e.g. The Comedy Store"
         />
 

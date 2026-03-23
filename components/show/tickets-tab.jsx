@@ -26,11 +26,10 @@ export function TicketsTab({ show }) {
     ticket_platform: show.ticket_platform ?? '',
     ticket_price: show.ticket_price ?? '',
     ticket_url: show.ticket_url ?? '',
-    ticket_capacity: show.ticket_capacity ?? '',
-    comp_tickets: show.comp_tickets ?? '',
+    capacity: show.capacity ?? '',
   })
 
-  const sold = show.ticket_count ?? 0
+  const sold = show.tickets_sold ?? 0
   const price = parseFloat(form.ticket_price) || 0
   const revenue = sold * price
 
@@ -45,8 +44,7 @@ export function TicketsTab({ show }) {
       ticket_price: form.ticket_price !== '' ? parseFloat(form.ticket_price) : null,
       ticket_platform: form.ticket_platform || null,
       ticket_url: form.ticket_url || null,
-      ticket_capacity: form.ticket_capacity !== '' ? parseInt(form.ticket_capacity) : null,
-      comp_tickets: form.comp_tickets !== '' ? parseInt(form.comp_tickets) : null,
+      capacity: form.capacity !== '' ? parseInt(form.capacity) : null,
     })
     setSaving(false)
     setSaved(true)
@@ -101,17 +99,9 @@ export function TicketsTab({ show }) {
             label="Capacity"
             type="number"
             min="0"
-            value={form.ticket_capacity}
-            onChange={(e) => handleChange('ticket_capacity', e.target.value)}
+            value={form.capacity}
+            onChange={(e) => handleChange('capacity', e.target.value)}
             placeholder="e.g. 80"
-          />
-          <Input
-            label="Comp tickets"
-            type="number"
-            min="0"
-            value={form.comp_tickets}
-            onChange={(e) => handleChange('comp_tickets', e.target.value)}
-            placeholder="e.g. 5"
           />
         </div>
       </div>

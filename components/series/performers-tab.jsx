@@ -93,8 +93,8 @@ export function PerformersTab({ performers, seriesId }) {
                   <span className="font-medium text-deep">{p.name}</span>
                 </Td>
                 <Td>
-                  {p.performer_type ? (
-                    <Pill variant="neutral">{p.performer_type}</Pill>
+                  {p.act_type ? (
+                    <Pill variant="neutral">{p.act_type}</Pill>
                   ) : (
                     <span className="text-soft/40">—</span>
                   )}
@@ -120,10 +120,10 @@ export function PerformersTab({ performers, seriesId }) {
                   {p.lastPerformed ? formatShortDate(p.lastPerformed) : <span className="text-soft/40">—</span>}
                 </Td>
                 <Td className="text-center">
-                  <BoolIcon value={p.is_book_again} />
+                  <BoolIcon value={p.book_again} />
                 </Td>
                 <Td className="text-center">
-                  <BoolIcon value={p.is_audience_fav} />
+                  <BoolIcon value={p.audience_favourite} />
                 </Td>
               </tr>
             ))}

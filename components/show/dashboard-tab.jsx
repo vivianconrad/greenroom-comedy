@@ -35,7 +35,7 @@ export function DashboardTab({ show }) {
   const threeDays = new Date(today)
   threeDays.setDate(today.getDate() + 3)
 
-  const activeItems = (show.checklistItems ?? []).filter((i) => i.is_active !== false)
+  const activeItems = (show.checklistItems ?? []).filter((i) => i.enabled !== false)
   const total = activeItems.length
   const done = activeItems.filter((i) => i.done).length
   const progress = total > 0 ? Math.round((done / total) * 100) : 0
@@ -60,7 +60,7 @@ export function DashboardTab({ show }) {
     })
   }
 
-  const venue = show.venue_name ?? show.series?.venue_name
+  const venue = show.venue ?? show.series?.venue
 
   // 3-day comms prompt
   const daysToShow = daysUntil(show.date)
@@ -151,7 +151,7 @@ export function DashboardTab({ show }) {
                         item.done && 'line-through text-soft'
                       )}
                     >
-                      {item.name}
+                      {item.task}
                     </p>
                     <p className={cn('text-xs', isOverdue ? 'text-red' : 'text-amber')}>
                       {isOverdue
@@ -179,8 +179,8 @@ export function DashboardTab({ show }) {
               <li key={p.showPerformerId} className="flex items-center gap-3">
                 <div className="flex-1 min-w-0">
                   <div className="text-sm font-medium text-deep truncate">{p.name}</div>
-                  {p.performer_type && (
-                    <div className="text-xs text-soft">{p.performer_type}</div>
+                  {p.act_type && (
+                    <div className="text-xs text-soft">{p.act_type}</div>
                   )}
                 </div>
                 {p.set_length != null && (
@@ -207,8 +207,8 @@ export function DashboardTab({ show }) {
           <DetailRow
             label="Tickets"
             value={
-              show.ticket_count != null
-                ? `${show.ticket_count}${show.ticket_capacity ? ` / ${show.ticket_capacity}` : ''}`
+              show.tickets_sold != null
+                ? `${show.tickets_sold}${show.capacity ? ` / ${show.capacity}` : ''}`
                 : null
             }
           />

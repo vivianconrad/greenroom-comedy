@@ -3,7 +3,6 @@
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { cn } from '@/lib/utils'
-import { Toggle } from '@/components/ui/toggle'
 import { Modal } from '@/components/ui/modal'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -65,7 +64,7 @@ function DutyTemplateModal({ seriesId, template, open, onClose }) {
           label="Assigned to"
           name="assigned_to"
           placeholder="e.g. Vi, Emma, Maddie"
-          defaultValue={template?.assigned_to ?? ''}
+          defaultValue={template?.default_assigned_to ?? ''}
           autoFocus
         />
         <Input
@@ -108,13 +107,6 @@ function TemplateRow({ template }) {
   const [isPending, startTransition] = useTransition()
   const [editOpen, setEditOpen] = useState(false)
 
-  function handleToggle(checked) {
-    startTransition(async () => {
-      await updateDutyTemplate(template.id, { is_active: checked })
-      router.refresh()
-    })
-  }
-
   function handleDelete() {
     startTransition(async () => {
       await deleteDutyTemplate(template.id)
@@ -124,28 +116,15 @@ function TemplateRow({ template }) {
 
   return (
     <>
-      <li className={cn(
-        'flex items-center gap-3 py-3 px-4 group hover:bg-cream/50 transition-colors',
-        !template.is_active && 'opacity-50'
-      )}>
-        <Toggle
-          checked={template.is_active}
-          onChange={handleToggle}
-          disabled={isPending}
-          aria-label={template.is_active ? 'Deactivate duty' : 'Activate duty'}
-        />
-
+      <li className="flex items-center gap-3 py-3 px-4 group hover:bg-cream/50 transition-colors">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            {template.assigned_to && (
+            {template.default_assigned_to && (
               <span className="text-xs font-semibold font-body text-mid bg-peach px-1.5 py-0.5 rounded">
-                {template.assigned_to}
+                {template.default_assigned_to}
               </span>
             )}
-            <span className={cn(
-              'text-sm font-body text-deep',
-              !template.is_active && 'line-through text-soft'
-            )}>
+            <span className="text-sm font-body text-deep">
               {template.duty}
             </span>
           </div>

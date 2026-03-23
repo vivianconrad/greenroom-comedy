@@ -412,7 +412,7 @@ export function PerformersTab({ show }) {
                   </span>
                   <RolePill role={p.role} />
                 </div>
-                {p.performer_type && <div className="text-xs text-soft">{p.performer_type}</div>}
+                {p.act_type && <div className="text-xs text-soft">{p.act_type}</div>}
               </div>
               {p.set_length != null && (
                 <span className="text-xs text-soft shrink-0">{p.set_length}m</span>
@@ -494,18 +494,18 @@ export function PerformersTab({ show }) {
                 {selected.tags_ok === false && (
                   <Pill variant="warning" className="text-xs">No tags</Pill>
                 )}
-                <Pill variant={selected.is_paid ? 'success' : 'neutral'} className="text-xs">
-                  {selected.is_paid ? 'Paid' : 'Payment pending'}
+                <Pill variant={selected.paid ? 'success' : 'neutral'} className="text-xs">
+                  {selected.paid ? 'Paid' : 'Payment pending'}
                 </Pill>
               </div>
 
               <Button
-                variant={selected.is_paid ? 'ghost' : 'secondary'}
+                variant={selected.paid ? 'ghost' : 'secondary'}
                 size="sm"
                 onClick={() => handleMarkPaid(selected.showPerformerId)}
                 className="w-full"
               >
-                {selected.is_paid ? 'Mark unpaid' : 'Mark paid'}
+                {selected.paid ? 'Mark unpaid' : 'Mark paid'}
               </Button>
             </Card>
           </div>

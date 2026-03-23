@@ -81,7 +81,7 @@ function LogEntry({ entry }) {
             )}
             <span className="text-xs text-soft font-body">
               → {entry.recipient_group}
-              {entry.recipient_count > 0 && ` (${entry.recipient_count})`}
+              {(entry.recipient_names?.length ?? 0) > 0 && ` (${entry.recipient_names.length})`}
             </span>
           </div>
           <p className="text-xs text-soft font-body mt-0.5">{sentDate}</p>
@@ -158,7 +158,7 @@ export function CommsTab({ show, commLog = [], recipientGroups = {}, preset = nu
 
       const result = await logMessageSent(show.id, {
         recipient_group: groupLabel,
-        recipient_count: recipients.length,
+        recipient_names: recipients.map((r) => r.name),
         subject: tmpl?.name ?? null,
         body: body.trim(),
       })

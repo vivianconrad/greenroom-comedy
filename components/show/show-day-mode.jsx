@@ -297,7 +297,7 @@ export function ShowDayMode({ show, duties: dutiesProp = [], onExit }) {
 
   // Day-of tasks: pending first, done after
   const showDayTasks = (show.checklistItems ?? []).filter(
-    (i) => i.stage === 'day' && i.is_active !== false
+    (i) => i.stage === 'day' && i.enabled !== false
   )
   const pendingTasks = showDayTasks.filter((t) => !(optimistic[t.id] ?? t.done))
   const doneTasks = showDayTasks.filter((t) => optimistic[t.id] ?? t.done)
@@ -306,7 +306,7 @@ export function ShowDayMode({ show, duties: dutiesProp = [], onExit }) {
   const duties = show.duties ?? dutiesProp
 
   const pendingDutyCount = duties.reduce(
-    (sum, g) => sum + g.duties.filter((d) => !(optimistic[d.id] ?? d.done)).length,
+    (sum, g) => sum + g.duties.filter((d) => !(optimistic[d.id] ?? d.completed)).length,
     0
   )
 
@@ -346,8 +346,8 @@ export function ShowDayMode({ show, duties: dutiesProp = [], onExit }) {
               </h1>
               <p className="text-soft text-sm mt-0.5">
                 {formatDate(show.date)}
-                {(show.venue_name ?? show.series?.venue_name) && (
-                  <> · {show.venue_name ?? show.series?.venue_name}</>
+                {(show.venue ?? show.series?.venue) && (
+                  <> · {show.venue ?? show.series?.venue}</>
                 )}
               </p>
             </div>
@@ -475,8 +475,8 @@ export function ShowDayMode({ show, duties: dutiesProp = [], onExit }) {
             defaultOpen={false}
           >
             {duties.map((group) => {
-              const pending = group.duties.filter((d) => !(optimistic[d.id] ?? d.done))
-              const done = group.duties.filter((d) => optimistic[d.id] ?? d.done)
+              const pending = group.duties.filter((d) => !(optimistic[d.id] ?? d.completed))
+              const done = group.duties.filter((d) => optimistic[d.id] ?? d.completed)
               return (
                 <div key={group.assignedTo} className="mb-6 last:mb-0">
                   <p className="text-xs text-soft uppercase tracking-wider font-semibold mb-1">
@@ -490,8 +490,8 @@ export function ShowDayMode({ show, duties: dutiesProp = [], onExit }) {
                       key={d.id}
                       label={d.duty}
                       sub={d.time_note}
-                      done={optimistic[d.id] ?? d.done}
-                      onToggle={() => handleDutyToggle(d.id, optimistic[d.id] ?? d.done)}
+                      done={optimistic[d.id] ?? d.completed}
+                      onToggle={() => handleDutyToggle(d.id, optimistic[d.id] ?? d.completed)}
                     />
                   ))}
                 </div>
@@ -514,7 +514,7 @@ export function ShowDayMode({ show, duties: dutiesProp = [], onExit }) {
             [...pendingTasks, ...doneTasks].map((task) => (
               <CheckRow
                 key={task.id}
-                label={task.name}
+                label={task.task}
                 sub={task.default_owner ?? null}
                 done={optimistic[task.id] ?? task.done}
                 onToggle={() =>

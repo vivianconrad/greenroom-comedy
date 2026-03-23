@@ -57,8 +57,8 @@ export function EditShowModal({ open, onClose, show }) {
 
         <Input
           label="Venue"
-          name="venue_name"
-          defaultValue={show.venue_name ?? ''}
+          name="venue"
+          defaultValue={show.venue ?? ''}
           placeholder="e.g. The Comedy Store"
         />
 

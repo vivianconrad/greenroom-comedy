@@ -28,17 +28,15 @@ export function FinancialsTab({ show }) {
   const router = useRouter()
   const [, startTransition] = useTransition()
 
-  const revenue = (show.ticket_count ?? 0) * (show.ticket_price ?? 0)
+  const revenue = (show.tickets_sold ?? 0) * (show.ticket_price ?? 0)
 
-  const venueExpenses = show.venue_cost
-    ? [{ key: 'venue', label: 'Venue', amount: show.venue_cost, is_paid: true, type: 'fixed' }]
-    : []
+  const venueExpenses = []
 
   const performerExpenses = show.performers.map((p) => ({
     key: p.showPerformerId,
     label: p.name,
     amount: p.payment_amount,
-    is_paid: p.is_paid,
+    paid: p.paid,
     type: 'performer',
     showPerformerId: p.showPerformerId,
   }))
@@ -81,10 +79,10 @@ export function FinancialsTab({ show }) {
                 {e.type === 'performer' ? (
                   <button onClick={() => handleTogglePaid(e.showPerformerId)}>
                     <Pill
-                      variant={e.is_paid ? 'success' : 'warning'}
+                      variant={e.paid ? 'success' : 'warning'}
                       className="text-xs cursor-pointer hover:opacity-80 transition-opacity"
                     >
-                      {e.is_paid ? 'Paid' : 'Unpaid'}
+                      {e.paid ? 'Paid' : 'Unpaid'}
                     </Pill>
                   </button>
                 ) : (

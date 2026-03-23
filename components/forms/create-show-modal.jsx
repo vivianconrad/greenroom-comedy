@@ -10,7 +10,7 @@ import { createShow } from '@/lib/actions/series'
  * Modal for adding a show to an existing series.
  *
  * @param {string}  seriesId   — ID of the parent series
- * @param {object}  defaults   — { venue_name, call_time, doors_time, show_time }
+ * @param {object}  defaults   — { venue, call_time, doors_time, show_time }
  *                               Pre-filled from the series record
  * @param {boolean} open
  * @param {()=>void} onClose
@@ -84,9 +84,9 @@ export function CreateShowModal({ seriesId, defaults = {}, open, onClose }) {
         {/* Venue — pre-filled from series default */}
         <Input
           label="Venue"
-          name="venue_name"
+          name="venue"
           placeholder="e.g. The Comedy Store"
-          defaultValue={defaults.venue_name ?? ''}
+          defaultValue={defaults.venue ?? ''}
         />
 
         {/* Theme — optional */}

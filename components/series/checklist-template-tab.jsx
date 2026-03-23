@@ -108,22 +108,22 @@ function TaskRow({ task }) {
   return (
     <li className={cn(
       'flex items-center gap-3 py-3 px-4 group hover:bg-cream/50 transition-colors',
-      !task.is_active && 'opacity-50'
+      !task.enabled && 'opacity-50'
     )}>
       <Toggle
-        checked={task.is_active}
+        checked={task.enabled}
         onChange={handleToggle}
         disabled={isPending}
-        aria-label={task.is_active ? 'Deactivate task' : 'Activate task'}
+        aria-label={task.enabled ? 'Deactivate task' : 'Activate task'}
       />
 
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap">
           <span className={cn(
             'text-sm font-body text-deep',
-            !task.is_active && 'line-through text-soft'
+            !task.enabled && 'line-through text-soft'
           )}>
-            {task.name}
+            {task.task}
           </span>
 
           {task.condition && (

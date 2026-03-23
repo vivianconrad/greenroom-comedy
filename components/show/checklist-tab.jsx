@@ -48,7 +48,7 @@ export function ChecklistTab({ show }) {
 
   const [activeCategory, setActiveCategory] = useState(null)
   const [editMode, setEditMode] = useState(false)
-  // { [itemId]: boolean } — overrides for is_active in edit mode
+  // { [itemId]: boolean } — overrides for enabled in edit mode
   const [activeOverrides, setActiveOverrides] = useState({})
   const [saveModalOpen, setSaveModalOpen] = useState(false)
   const [saveOption, setSaveOption] = useState('show_only')
@@ -61,7 +61,7 @@ export function ChecklistTab({ show }) {
   const categories = [...new Set(show.checklistItems.map((i) => i.category).filter(Boolean))].sort()
 
   function getIsActive(item) {
-    return activeOverrides[item.id] ?? (item.is_active !== false)
+    return activeOverrides[item.id] ?? (item.enabled !== false)
   }
 
   const filteredItems = activeCategory
@@ -76,7 +76,7 @@ export function ChecklistTab({ show }) {
     }
     // Check for changes before exiting
     const hasChanges = show.checklistItems.some(
-      (item) => activeOverrides[item.id] !== undefined && activeOverrides[item.id] !== (item.is_active !== false)
+      (item) => activeOverrides[item.id] !== undefined && activeOverrides[item.id] !== (item.enabled !== false)
     )
     if (!hasChanges) {
       setEditMode(false)
@@ -90,7 +90,7 @@ export function ChecklistTab({ show }) {
     setSaving(true)
     const items = show.checklistItems.map((item) => ({
       id: item.id,
-      is_active: getIsActive(item),
+      enabled: getIsActive(item),
       template_id: item.template_id ?? null,
     }))
 
@@ -180,7 +180,7 @@ export function ChecklistTab({ show }) {
       {STAGES.map((stage) => {
         const stageItems = filteredItems.filter((i) => (i.stage ?? 'pre') === stage.key)
         // In edit mode show inactive tasks (greyed); in normal mode hide them
-        const visibleItems = editMode ? stageItems : stageItems.filter((i) => i.is_active !== false)
+        const visibleItems = editMode ? stageItems : stageItems.filter((i) => i.enabled !== false)
         if (visibleItems.length === 0) return null
 
         return (
@@ -221,7 +221,7 @@ export function ChecklistTab({ show }) {
                         item.done && !editMode && 'line-through text-soft'
                       )}
                     >
-                      {item.name}
+                      {item.task}
                     </span>
 
                     <div className="flex items-center gap-2 shrink-0">

@@ -48,7 +48,7 @@ function DaysAwayPill({ date }) {
 // ─── Upcoming show card ───────────────────────────────────────────────────────
 
 function UpcomingShowCard({ show, seriesVenue }) {
-  const venue = show.venue_name ?? seriesVenue
+  const venue = show.venue ?? seriesVenue
   return (
     <Link
       href={`/dashboard/shows/${show.id}`}
@@ -94,9 +94,9 @@ function UpcomingShowCard({ show, seriesVenue }) {
             <span className="text-soft"> confirmed</span>
           </span>
         )}
-        {show.ticket_count != null && (
+        {show.tickets_sold != null && (
           <span>
-            <span className="font-semibold text-deep">{show.ticket_count}</span>
+            <span className="font-semibold text-deep">{show.tickets_sold}</span>
             <span className="text-soft"> tickets</span>
           </span>
         )}
@@ -129,8 +129,8 @@ function PastShowRow({ show }) {
         {show.totalPerformers > 0 && (
           <span>{show.totalPerformers} performers</span>
         )}
-        {show.ticket_count != null && (
-          <span>{show.ticket_count} tickets</span>
+        {show.tickets_sold != null && (
+          <span>{show.tickets_sold} tickets</span>
         )}
         <Pill variant="success">Done</Pill>
       </div>
@@ -151,7 +151,7 @@ function SectionHeader({ children }) {
 // ─── Main export ──────────────────────────────────────────────────────────────
 
 export function ShowsTab({ series, seriesId }) {
-  const { upcomingShows, pastShows, venue_name } = series
+  const { upcomingShows, pastShows, venue } = series
 
   const hasAny = upcomingShows.length > 0 || pastShows.length > 0
 
@@ -173,7 +173,7 @@ export function ShowsTab({ series, seriesId }) {
           <SectionHeader>Upcoming</SectionHeader>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {upcomingShows.map((show) => (
-              <UpcomingShowCard key={show.id} show={show} seriesVenue={venue_name} />
+              <UpcomingShowCard key={show.id} show={show} seriesVenue={venue} />
             ))}
           </div>
         </section>

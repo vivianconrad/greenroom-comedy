@@ -60,7 +60,7 @@ export default async function SeriesDetailPage({ params, searchParams }) {
     : 'shows'
 
   const showDefaults = {
-    venue_name: series.venue_name,
+    venue: series.venue,
     call_time: series.default_call_time,
     doors_time: series.default_doors_time,
     show_time: series.default_show_time,
@@ -90,8 +90,8 @@ export default async function SeriesDetailPage({ params, searchParams }) {
           </div>
 
           <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2 text-sm font-body text-soft">
-            {series.venue_name && (
-              <span>{series.venue_name}</span>
+            {series.venue && (
+              <span>{series.venue}</span>
             )}
             {series.performerCount > 0 && (
               <span>

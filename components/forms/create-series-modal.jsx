@@ -173,7 +173,7 @@ export function CreateSeriesModal({ open, onClose }) {
         {/* Default venue */}
         <Input
           label="Default venue"
-          name="venue_name"
+          name="venue"
           placeholder="e.g. The Comedy Store"
         />
 

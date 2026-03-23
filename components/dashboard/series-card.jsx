@@ -68,10 +68,10 @@ export function SeriesCard({ series }) {
 
         {/* Venue + performer count */}
         <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-3 text-xs font-body text-soft">
-          {series.venue_name && (
+          {series.venue && (
             <span className="flex items-center gap-1.5">
               <MapPinIcon />
-              {series.venue_name}
+              {series.venue}
             </span>
           )}
           <span className="flex items-center gap-1.5">

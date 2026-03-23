@@ -225,20 +225,20 @@ function DutyRow({ duty, showId, nameOptions, onDragStart, onDragOver, onDrop, i
           onClick={handleToggle}
           className={cn(
             'w-5 h-5 rounded border-2 shrink-0 flex items-center justify-center transition-all',
-            duty.done
+            duty.completed
               ? 'bg-sage border-sage'
               : 'border-mid/50 hover:border-mid'
           )}
-          aria-label={duty.done ? 'Mark incomplete' : 'Mark complete'}
+          aria-label={duty.completed ? 'Mark incomplete' : 'Mark complete'}
         >
-          {duty.done && <span className="text-white text-xs font-bold leading-none">✓</span>}
+          {duty.completed && <span className="text-white text-xs font-bold leading-none">✓</span>}
         </button>
 
         {/* Duty text + time note */}
         <div className="flex-1 min-w-0">
           <span className={cn(
             'text-sm font-body text-deep',
-            duty.done && 'line-through text-soft'
+            duty.completed && 'line-through text-soft'
           )}>
             {duty.duty}
           </span>
@@ -299,7 +299,7 @@ function PersonGroup({ group, showId, nameOptions, onDragStart, dragOverId, onDr
       <div className="px-4 py-2 bg-cream/60 border-b border-peach">
         <span className="text-sm font-semibold font-body text-deep">{group.assignedTo}</span>
         <span className="ml-2 text-xs text-soft font-body">
-          {group.duties.filter((d) => d.done).length}/{group.duties.length} done
+          {group.duties.filter((d) => d.completed).length}/{group.duties.length} done
         </span>
       </div>
       <ul className="divide-y divide-peach">
@@ -375,7 +375,7 @@ export function DutiesTab({ show, duties: initialDuties }) {
     })
   }
 
-  const totalDone = localDuties.reduce((sum, g) => sum + g.duties.filter((d) => d.done).length, 0)
+  const totalDone = localDuties.reduce((sum, g) => sum + g.duties.filter((d) => d.completed).length, 0)
   const totalCount = localDuties.reduce((sum, g) => sum + g.duties.length, 0)
 
   return (

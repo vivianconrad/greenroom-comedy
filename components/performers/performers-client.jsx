@@ -116,7 +116,7 @@ function EditPerformerModal({ open, onClose, performer }) {
             <Input
               label="Act type"
               name="act_type"
-              defaultValue={performer.performer_type ?? ''}
+              defaultValue={performer.act_type ?? ''}
             />
           </div>
           <div className="col-span-2 sm:col-span-1">
@@ -225,10 +225,10 @@ function DetailPanel({ performer, allSeries, onEdit }) {
         </div>
 
         <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm font-body">
-          {performer.performer_type && (
+          {performer.act_type && (
             <>
               <span className="text-soft">Act type</span>
-              <span className="text-deep">{performer.performer_type}</span>
+              <span className="text-deep">{performer.act_type}</span>
             </>
           )}
           {performer.instagram && (
@@ -459,8 +459,8 @@ export function PerformersClient({ performers, allSeries }) {
                       </div>
                     </Td>
                     <Td>
-                      {p.performer_type ? (
-                        <Pill variant="neutral">{p.performer_type}</Pill>
+                      {p.act_type ? (
+                        <Pill variant="neutral">{p.act_type}</Pill>
                       ) : (
                         <span className="text-soft/40">—</span>
                       )}
@@ -502,10 +502,10 @@ export function PerformersClient({ performers, allSeries }) {
                       )}
                     </Td>
                     <Td className="text-center">
-                      <BoolIcon value={p.is_book_again} />
+                      <BoolIcon value={p.book_again} />
                     </Td>
                     <Td className="text-center">
-                      <AudienceFav value={p.is_audience_fav} />
+                      <AudienceFav value={p.audience_favourite} />
                     </Td>
                   </tr>
 

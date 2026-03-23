@@ -16,7 +16,7 @@ const PREVIEW_SHOW = {
   call_time: '18:00:00',
   doors_time: '19:00:00',
   show_time: '19:30:00',
-  venue_name: 'The Comedy Store',
+  venue: 'The Comedy Store',
   performers: [
     { name: 'Jane Smith', set_length: 5 },
     { name: 'Mark Lee', set_length: 8 },
