@@ -35,6 +35,7 @@ export function NotesTab({ show }) {
   const timerRef = useRef(null)
   const dataRef = useRef(null)
   const [saved, setSaved] = useState(true)
+  const [saveError, setSaveError] = useState(null)
 
   const [localData, setLocalData] = useState({
     notes_attendance: show.notes_attendance ?? '',
@@ -50,11 +51,16 @@ export function NotesTab({ show }) {
 
   function triggerAutoSave() {
     setSaved(false)
+    setSaveError(null)
     clearTimeout(timerRef.current)
     timerRef.current = setTimeout(() => {
       startTransition(async () => {
-        await updateShowNotes(show.id, dataRef.current)
-        setSaved(true)
+        const result = await updateShowNotes(show.id, dataRef.current)
+        if (result?.error) {
+          setSaveError(result.error)
+        } else {
+          setSaved(true)
+        }
       })
     }, 800)
   }
@@ -66,9 +72,14 @@ export function NotesTab({ show }) {
 
   function handleManualSave() {
     clearTimeout(timerRef.current)
+    setSaveError(null)
     startTransition(async () => {
-      await updateShowNotes(show.id, localData)
-      setSaved(true)
+      const result = await updateShowNotes(show.id, localData)
+      if (result?.error) {
+        setSaveError(result.error)
+      } else {
+        setSaved(true)
+      }
     })
   }
 
@@ -77,7 +88,10 @@ export function NotesTab({ show }) {
       <div className="flex justify-between items-center">
         <h3 className="font-display text-lg text-deep">Post-show notes</h3>
         <div className="flex items-center gap-3">
-          <span className="text-xs text-soft">{saved ? 'Saved' : 'Saving…'}</span>
+          {saveError
+            ? <span className="text-xs text-red font-body">{saveError}</span>
+            : <span className="text-xs text-soft">{saved ? 'Saved' : 'Saving…'}</span>
+          }
           <Button variant="secondary" size="sm" onClick={handleManualSave}>
             Save
           </Button>

@@ -42,7 +42,9 @@ export default function SignupPage() {
     const email = formData.get('email')
     const password = formData.get('password')
 
+    const displayName = formData.get('display_name')
     const nextErrors = {}
+    if (!displayName?.trim()) nextErrors.display_name = 'Name is required.'
     if (!isValidEmail(email)) nextErrors.email = 'Please enter a valid email address.'
     if (!password || password.length < 8) nextErrors.password = 'Password must be at least 8 characters.'
 
@@ -113,6 +115,7 @@ export default function SignupPage() {
           type="text"
           placeholder="Your name"
           autoComplete="name"
+          error={errors.display_name}
           required
         />
         <Input

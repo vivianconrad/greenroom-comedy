@@ -34,6 +34,10 @@ export default function LoginPage() {
       setErrors({ email: 'Please enter a valid email address.' })
       return
     }
+    if (!formData.get('password')) {
+      setErrors({ password: 'Password is required.' })
+      return
+    }
 
     setErrors({})
     startTransition(async () => {
@@ -120,6 +124,7 @@ export default function LoginPage() {
           type="password"
           placeholder="••••••••"
           autoComplete="current-password"
+          error={errors.password}
           required
         />
 

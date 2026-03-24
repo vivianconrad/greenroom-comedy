@@ -22,6 +22,11 @@ export function EditShowModal({ open, onClose, show }) {
   function handleSubmit(e) {
     e.preventDefault()
     const formData = new FormData(e.currentTarget)
+
+    if (!formData.get('date')?.toString()) {
+      setErrors({ date: 'Show date is required.' })
+      return
+    }
     setErrors({})
 
     startTransition(async () => {
@@ -44,6 +49,7 @@ export function EditShowModal({ open, onClose, show }) {
           name="date"
           type="date"
           defaultValue={show.date ?? ''}
+          error={errors.date}
           required
           autoFocus
         />
