@@ -1,5 +1,6 @@
--- Atomically pushes is_active changes from a checklist edit to all upcoming
--- shows in the same series, excluding the show being edited.
+-- Creates the RPC used by saveChecklistToTemplateAndPush to atomically push
+-- `enabled` changes from one show's checklist to all upcoming shows in the
+-- same series, excluding the show being edited.
 --
 -- Called by: lib/actions/checklist.js → saveChecklistToTemplateAndPush
 --
@@ -7,30 +8,33 @@
 --   Option A — Supabase CLI:  supabase db push
 --   Option B — SQL editor:    paste this file into the Supabase dashboard SQL editor
 
-CREATE OR REPLACE FUNCTION push_checklist_is_active_to_upcoming_shows(
+-- Drop old name if it was previously applied with the wrong name.
+drop function if exists push_checklist_is_active_to_upcoming_shows(uuid, uuid, jsonb);
+
+create or replace function push_checklist_enabled_to_upcoming_shows(
   p_series_id       uuid,
   p_exclude_show_id uuid,
-  p_updates         jsonb   -- [{ "template_id": "<uuid>", "is_active": true|false }, ...]
+  p_updates         jsonb   -- [{ "template_id": "<uuid>", "enabled": true|false }, ...]
 )
-RETURNS void
-LANGUAGE plpgsql
-AS $$
-DECLARE
+returns void
+language plpgsql
+as $$
+declare
   upd jsonb;
-BEGIN
+begin
   -- One UPDATE per template_id entry; each covers all matching rows across
   -- every upcoming show in the series, making the whole push a single
   -- transaction instead of a JS loop of N × M queries.
-  FOR upd IN SELECT value FROM jsonb_array_elements(p_updates)
-  LOOP
-    UPDATE checklist_items ci
-    SET    is_active = (upd->>'is_active')::boolean
-    FROM   shows s
-    WHERE  ci.show_id     = s.id
-      AND  s.series_id    = p_series_id
-      AND  s.id          != p_exclude_show_id
-      AND  s.status      != 'completed'
-      AND  ci.template_id = (upd->>'template_id')::uuid;
-  END LOOP;
-END;
+  for upd in select value from jsonb_array_elements(p_updates)
+  loop
+    update checklist_items ci
+    set    enabled = (upd->>'enabled')::boolean
+    from   shows s
+    where  ci.show_id     = s.id
+      and  s.series_id    = p_series_id
+      and  s.id          != p_exclude_show_id
+      and  s.status      != 'completed'
+      and  ci.template_id = (upd->>'template_id')::uuid;
+  end loop;
+end;
 $$;
