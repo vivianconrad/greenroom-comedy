@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { login, loginAsDemo } from '@/lib/actions/auth'
 // import { createClient } from '@/lib/supabase/client'
@@ -32,6 +33,8 @@ function GoogleIcon() {
 }
 
 export default function LoginPage() {
+  const searchParams = useSearchParams()
+  const message = searchParams.get('message')
   const [errors, setErrors] = useState({})
   const [isPending, startTransition] = useTransition()
     // const [oauthPending, setOauthPending] = useState(false)
@@ -88,6 +91,12 @@ export default function LoginPage() {
           Sign in to your Greenroom account
         </p>
       </div>
+
+      {message === 'check-email' && (
+        <p className="mb-5 text-sm text-green font-body bg-green/10 rounded-md px-4 py-3">
+          Account created! Check your email to confirm your address, then sign in.
+        </p>
+      )}
 
       {/* TODO: Re-enable Google OAuth once the provider is configured in Supabase */}
       {/* <Button

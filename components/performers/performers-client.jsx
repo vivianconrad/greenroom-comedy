@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input'
 import { Modal } from '@/components/ui/modal'
 import { Textarea } from '@/components/ui/textarea'
 import { AddPerformerModal } from '@/components/performers/add-performer-modal'
+import { ImportPerformersModal } from '@/components/performers/import-performers-modal'
 import { updatePerformer, addPerformerToSeries, removePerformerFromSeries } from '@/lib/actions/performers'
 import { formatShortDate, cn } from '@/lib/utils'
 
@@ -354,6 +355,7 @@ export function PerformersClient({ performers, allSeries }) {
   const [activeFilter, setActiveFilter] = useState('all')
   const [expandedId, setExpandedId] = useState(null)
   const [addOpen, setAddOpen] = useState(false)
+  const [importOpen, setImportOpen] = useState(false)
   const [editPerformer, setEditPerformer] = useState(null)
 
   // Derive filter pills: "All" + one per series
@@ -527,14 +529,18 @@ export function PerformersClient({ performers, allSeries }) {
         </div>
       )}
 
-      {/* ── Add performer button ── */}
-      <div className="flex justify-end">
+      {/* ── Add / Import buttons ── */}
+      <div className="flex justify-end gap-2">
+        <Button variant="secondary" size="md" onClick={() => setImportOpen(true)}>
+          Import
+        </Button>
         <Button variant="primary" size="md" onClick={() => setAddOpen(true)}>
           + Add performer
         </Button>
       </div>
 
       <AddPerformerModal open={addOpen} onClose={() => setAddOpen(false)} />
+      <ImportPerformersModal open={importOpen} onClose={() => setImportOpen(false)} />
       <EditPerformerModal
         open={!!editPerformer}
         onClose={() => setEditPerformer(null)}
