@@ -178,7 +178,7 @@ export function ImportPerformersModal({ open, onClose }) {
       if (res.error) { setError(res.error); return }
       proceedWithRows(await parseCSVToRows(res.csv))
     } catch (err) {
-      setError("Couldn't fetch the sheet. Make sure it's shared as "Anyone with the link".")
+      setError("Couldn't fetch the sheet. Make sure it's shared as \"Anyone with the link\".")
     } finally {
       setLoading(false)
     }
