@@ -30,7 +30,9 @@ export function FinancialsTab({ show }) {
 
   const revenue = (show.tickets_sold ?? 0) * (show.ticket_price ?? 0)
 
-  const venueExpenses = []
+  const venueExpenses = show.venue_cost
+    ? [{ key: 'venue', label: 'Venue', amount: show.venue_cost, type: 'venue' }]
+    : []
 
   const performerExpenses = show.performers.map((p) => ({
     key: p.showPerformerId,

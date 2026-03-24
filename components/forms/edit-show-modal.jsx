@@ -75,6 +75,16 @@ export function EditShowModal({ open, onClose, show }) {
           <Input label="Show time" name="show_time" type="time" defaultValue={show.show_time ?? ''} />
         </div>
 
+        <Input
+          label="Venue cost"
+          name="venue_cost"
+          type="number"
+          step="0.01"
+          min="0"
+          defaultValue={show.venue_cost ?? ''}
+          placeholder="0.00"
+        />
+
         <Select label="Status" name="status" defaultValue={show.status ?? 'draft'}>
           <option value="draft">Draft</option>
           <option value="confirmed">Confirmed</option>

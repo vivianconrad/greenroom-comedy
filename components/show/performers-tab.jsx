@@ -4,6 +4,7 @@ import { useState, useTransition } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { cn, formatTime } from '@/lib/utils'
+import { useCopyToClipboard } from '@/lib/hooks'
 import {
   togglePerformerPaid,
   updatePerformerRole,
@@ -337,6 +338,7 @@ export function PerformersTab({ show }) {
   const [, startTransition] = useTransition()
   const [selectedId, setSelectedId] = useState(null)
   const [addingCrew, setAddingCrew] = useState(false)
+  const [copiedIntake, copyIntake] = useCopyToClipboard()
 
   const selected = show.performers.find((p) => p.showPerformerId === selectedId)
   const crew = show.crew ?? []
@@ -462,6 +464,30 @@ export function PerformersTab({ show }) {
                   ))}
                 </select>
               </div>
+
+              {/* Intake link */}
+              {selected.performerId && (
+                <div className="mb-4">
+                  <label className="text-xs text-soft uppercase tracking-wide block mb-1">
+                    Intake form
+                  </label>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="w-full text-xs"
+                    onClick={() =>
+                      copyIntake(
+                        `${window.location.origin}/intake/${selected.showPerformerId}`
+                      )
+                    }
+                  >
+                    {copiedIntake ? '✓ Link copied!' : 'Copy intake link'}
+                  </Button>
+                  {selected.form_complete && (
+                    <p className="text-xs text-green mt-1 text-center">Form submitted ✓</p>
+                  )}
+                </div>
+              )}
 
               <dl className="space-y-3 mb-4">
                 <DetailSection label="Bio" value={selected.bio} />

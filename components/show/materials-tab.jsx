@@ -1,9 +1,29 @@
 'use client'
 
-import { cn } from '@/lib/utils'
+import { cn, formatDate } from '@/lib/utils'
+import { useCopyToClipboard } from '@/lib/hooks'
 import { Pill } from '@/components/ui/pill'
+import { Button } from '@/components/ui/button'
+
+function buildSoundSheet(show) {
+  const lines = [
+    `Walk-up Music — ${show.series?.name ?? 'Show'}${show.date ? ` (${formatDate(show.date)})` : ''}`,
+    '',
+  ]
+  const relevant = show.performers.filter((p) => !p.isVirtual)
+  if (relevant.length === 0) {
+    lines.push('No performers added yet.')
+  } else {
+    relevant.forEach((p, i) => {
+      const song = p.walk_up_song ? p.walk_up_song : '[no song yet]'
+      lines.push(`${i + 1}. ${p.name} — ${song}`)
+    })
+  }
+  return lines.join('\n')
+}
 
 export function MaterialsTab({ show }) {
+  const [copiedSound, copySound] = useCopyToClipboard()
   const confirmed = show.performers.filter((p) => p.status === 'confirmed')
   const all = show.performers
 
@@ -11,7 +31,16 @@ export function MaterialsTab({ show }) {
     <div className="space-y-8 max-w-2xl">
       {/* Walk-up music */}
       <section>
-        <h3 className="font-display text-lg text-deep mb-3">Walk-up Music</h3>
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="font-display text-lg text-deep">Walk-up Music</h3>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => copySound(buildSoundSheet(show))}
+          >
+            {copiedSound ? '✓ Copied!' : 'Copy sound sheet'}
+          </Button>
+        </div>
         <div className="bg-white rounded-card border border-peach divide-y divide-peach">
           {confirmed.length === 0 ? (
             <p className="px-4 py-6 text-sm text-soft text-center">
@@ -59,7 +88,7 @@ export function MaterialsTab({ show }) {
                   </span>
                 </div>
                 <div className="text-xs font-medium text-deep truncate mb-1">{p.name}</div>
-                {p.photo_received ? (
+                {p.photo_url ? (
                   <Pill variant="success" className="text-xs">
                     Received
                   </Pill>

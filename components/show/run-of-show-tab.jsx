@@ -1,6 +1,10 @@
 'use client'
 
-import { cn, timeToMinutes, minutesToTime } from '@/lib/utils'
+import { useState, useTransition } from 'react'
+import { useRouter } from 'next/navigation'
+import { cn, timeToMinutes, minutesToTime, formatDate } from '@/lib/utils'
+import { useCopyToClipboard } from '@/lib/hooks'
+import { reorderPerformers } from '@/lib/actions/show'
 import { Button } from '@/components/ui/button'
 import { EmptyState } from '@/components/ui/empty-state'
 
@@ -15,23 +19,10 @@ const ROLE_STYLES = {
 
 const FALLBACK_STYLES = { bar: 'bg-cream', badge: 'bg-cream text-soft' }
 
-function buildRunOfShow(performers, showTime, hostsStr) {
-  // Inject virtual host opening slot if hosts are set
-  const hostNames = hostsStr ? hostsStr.split(',').map((h) => h.trim()).filter(Boolean) : []
-  const slots = hostNames.length > 0
-    ? [
-        {
-          showPerformerId: '__hosts__',
-          name: hostNames.join(' & '),
-          role: 'host',
-          act_type: 'host',
-          set_length: null,
-          isVirtual: true,
-        },
-        ...performers,
-      ]
-    : performers
+// Role sort priority for auto-generate (lower = earlier in show)
+const ROLE_PRIORITY = { host: 0, opener: 1, performer: 2, other: 3, headliner: 4 }
 
+function addStartTimes(slots, showTime) {
   if (!showTime) return slots.map((p) => ({ ...p, startTime: null }))
   let cursor = timeToMinutes(showTime)
   return slots.map((p) => {
@@ -41,57 +32,162 @@ function buildRunOfShow(performers, showTime, hostsStr) {
   })
 }
 
-export function RunOfShowTab({ show }) {
-  const ros = buildRunOfShow(show.performers, show.show_time, show.hosts)
+function buildCopyText(slots, show) {
+  const header = [
+    show.series?.name ?? 'Run of Show',
+    show.date ? formatDate(show.date) : '',
+    show.theme ? `· ${show.theme}` : '',
+  ].filter(Boolean).join(' ')
 
-  if (ros.length === 0) {
+  const lines = slots
+    .filter((p) => !p.isVirtual)
+    .map((p, i) => {
+      const time = p.startTime ? `${p.startTime}  ` : ''
+      const duration = p.set_length ? ` (${p.set_length}m)` : ''
+      return `${i + 1}. ${time}${p.name}${duration}`
+    })
+
+  return [header, '', ...lines].join('\n')
+}
+
+export function RunOfShowTab({ show }) {
+  const router = useRouter()
+  const [, startTransition] = useTransition()
+  const [copied, copy] = useCopyToClipboard()
+
+  // Local ordered list of real (non-virtual) performers
+  const [order, setOrder] = useState(() =>
+    [...show.performers].sort((a, b) => (a.slot_order ?? 999) - (b.slot_order ?? 999))
+  )
+  const [dirty, setDirty] = useState(false)
+  const [saving, setSaving] = useState(false)
+
+  // Build display slots: inject virtual host row at top if hosts set
+  const hostNames = show.hosts
+    ? show.hosts.split(',').map((h) => h.trim()).filter(Boolean)
+    : []
+  const displaySlots = addStartTimes(
+    hostNames.length > 0
+      ? [
+          {
+            showPerformerId: '__hosts__',
+            name: hostNames.join(' & '),
+            role: 'host',
+            act_type: 'host',
+            set_length: null,
+            isVirtual: true,
+          },
+          ...order,
+        ]
+      : order,
+    show.show_time
+  )
+
+  function move(index, direction) {
+    // index is into displaySlots; adjust for the virtual host row
+    const offset = hostNames.length > 0 ? 1 : 0
+    const realIndex = index - offset
+    if (realIndex < 0) return // can't move the virtual host row
+    const newOrder = [...order]
+    const target = realIndex + direction
+    if (target < 0 || target >= newOrder.length) return
+    ;[newOrder[realIndex], newOrder[target]] = [newOrder[target], newOrder[realIndex]]
+    setOrder(newOrder)
+    setDirty(true)
+  }
+
+  function handleAutoGenerate() {
+    const sorted = [...show.performers].sort((a, b) => {
+      const pa = ROLE_PRIORITY[a.role] ?? 2
+      const pb = ROLE_PRIORITY[b.role] ?? 2
+      if (pa !== pb) return pa - pb
+      // within same role, stable sort by current slot_order
+      return (a.slot_order ?? 999) - (b.slot_order ?? 999)
+    })
+    setOrder(sorted)
+    setDirty(true)
+  }
+
+  function handleSave() {
+    setSaving(true)
+    startTransition(async () => {
+      await reorderPerformers(show.id, order.map((p) => p.showPerformerId))
+      setDirty(false)
+      setSaving(false)
+      router.refresh()
+    })
+  }
+
+  if (displaySlots.length === 0) {
     return (
       <EmptyState
         title="No run of show yet"
-        description="Add performers to the show and assign slot positions to build your running order."
-        action={
-          <Button variant="secondary" size="sm" onClick={() => alert('Add slot coming soon')}>
-            + Add slot
-          </Button>
-        }
+        description="Add performers to the show, then use Auto-generate to build your running order."
       />
     )
   }
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-4">
+      <div className="flex justify-between items-center mb-4 gap-2 flex-wrap">
         <p className="text-sm text-soft">
-          {ros.length} slot{ros.length !== 1 ? 's' : ''}
+          {displaySlots.length} slot{displaySlots.length !== 1 ? 's' : ''}
           {show.show_time ? ` · starting ${minutesToTime(timeToMinutes(show.show_time))}` : ''}
         </p>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
+          {dirty && (
+            <Button variant="primary" size="sm" loading={saving} onClick={handleSave}>
+              Save order
+            </Button>
+          )}
+          <Button variant="ghost" size="sm" onClick={handleAutoGenerate}>
+            Auto-generate order
+          </Button>
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => alert('Auto-generate coming soon')}
+            onClick={() => copy(buildCopyText(displaySlots, show))}
           >
-            Auto-generate from lineup
-          </Button>
-          <Button variant="secondary" size="sm" onClick={() => alert('Add slot coming soon')}>
-            + Add slot
+            {copied ? '✓ Copied!' : 'Copy as text'}
           </Button>
         </div>
       </div>
 
       <div className="bg-white rounded-card border border-peach divide-y divide-peach">
-        {ros.map((p) => {
+        {displaySlots.map((p, index) => {
           const styles = ROLE_STYLES[p.role] ?? FALLBACK_STYLES
+          const offset = hostNames.length > 0 ? 1 : 0
+          const realIndex = index - offset
+          const isFirst = realIndex === 0
+          const isLast = realIndex === order.length - 1
 
           return (
             <div key={p.showPerformerId} className="flex items-center gap-3 px-4 py-3">
-              {/* Drag handle — visual only */}
-              <span
-                className="text-soft/30 cursor-grab select-none text-lg shrink-0"
-                title="Drag to reorder (coming soon)"
-              >
-                ⠿
-              </span>
+              {/* Up/down reorder buttons (hidden for virtual host row) */}
+              <div className="flex flex-col gap-0.5 shrink-0">
+                {!p.isVirtual ? (
+                  <>
+                    <button
+                      onClick={() => move(index, -1)}
+                      disabled={isFirst}
+                      className="text-soft/50 hover:text-mid disabled:opacity-20 leading-none text-xs px-0.5"
+                      aria-label="Move up"
+                    >
+                      ▲
+                    </button>
+                    <button
+                      onClick={() => move(index, 1)}
+                      disabled={isLast}
+                      className="text-soft/50 hover:text-mid disabled:opacity-20 leading-none text-xs px-0.5"
+                      aria-label="Move down"
+                    >
+                      ▼
+                    </button>
+                  </>
+                ) : (
+                  <span className="w-4" />
+                )}
+              </div>
 
               {/* Start time */}
               <span className="w-16 text-sm font-mono text-soft shrink-0 tabular-nums">
@@ -130,7 +226,12 @@ export function RunOfShowTab({ show }) {
 
       {!show.show_time && (
         <p className="text-xs text-soft mt-3 text-center">
-          Set a show time on this show to see calculated start times.
+          Set a show time to see calculated start times.
+        </p>
+      )}
+      {dirty && (
+        <p className="text-xs text-amber mt-3 text-center">
+          You have unsaved changes to the running order.
         </p>
       )}
     </div>

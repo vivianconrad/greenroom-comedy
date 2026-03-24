@@ -84,8 +84,8 @@ export default function SignupPage() {
         </p>
       </div>
 
-      {/* Google OAuth */}
-      <Button
+      {/* TODO: Re-enable Google OAuth once the provider is configured in Supabase */}
+      {/* <Button
         type="button"
         variant="secondary"
         size="md"
@@ -104,7 +104,7 @@ export default function SignupPage() {
         <div className="relative flex justify-center">
           <span className="bg-white px-3 text-xs text-soft font-body">or</span>
         </div>
-      </div>
+      </div> */}
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-4" noValidate>
         <Input

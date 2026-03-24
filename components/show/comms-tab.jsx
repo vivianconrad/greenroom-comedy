@@ -4,7 +4,7 @@ import { useState, useEffect, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { cn, fillTemplate } from '@/lib/utils'
 import { useCopyToClipboard } from '@/lib/hooks'
-import { logMessageSent } from '@/lib/actions/comms'
+import { logMessageSent, sendEmailComm } from '@/lib/actions/comms'
 import { Button } from '@/components/ui/button'
 import { EmptyState } from '@/components/ui/empty-state'
 
@@ -115,7 +115,9 @@ export function CommsTab({ show, commLog = [], recipientGroups = {}, preset = nu
   const [body, setBody] = useState('')
   const [copied, copy] = useCopyToClipboard()
   const [sending, startSend] = useTransition()
+  const [emailing, startEmail] = useTransition()
   const [sentError, setSentError] = useState(null)
+  const [sentNotice, setSentNotice] = useState(null)
 
   const allPeople = [
     ...(recipientGroups.performers ?? []),
@@ -141,6 +143,40 @@ export function CommsTab({ show, commLog = [], recipientGroups = {}, preset = nu
       if (next.has(id)) next.delete(id)
       else next.add(id)
       return next
+    })
+  }
+
+  function handleSendEmail() {
+    if (!body.trim()) return
+    setSentError(null)
+    setSentNotice(null)
+    const tmpl = templateId
+      ? (show.commTemplates ?? []).find((t) => t.id === templateId)
+      : null
+    const groupLabel =
+      group === 'custom'
+        ? `Custom (${recipients.length})`
+        : GROUPS.find((g) => g.key === group)?.label ?? group
+    const emailRecipients = recipients
+      .filter((r) => r.email)
+      .map((r) => ({ name: r.name, email: r.email }))
+
+    startEmail(async () => {
+      const result = await sendEmailComm(show.id, emailRecipients, {
+        subject: tmpl?.name ?? '',
+        body: body.trim(),
+        recipient_group: groupLabel,
+      })
+      if (result?.error) {
+        setSentError(result.error)
+        return
+      }
+      setSentNotice(
+        result.warning ?? `Sent to ${result.sent} recipient${result.sent !== 1 ? 's' : ''}.`
+      )
+      setBody('')
+      setTemplateId('')
+      router.refresh()
     })
   }
 
@@ -278,6 +314,9 @@ export function CommsTab({ show, commLog = [], recipientGroups = {}, preset = nu
             {sentError}
           </p>
         )}
+        {sentNotice && (
+          <p className="text-sm text-green font-body mb-3">{sentNotice}</p>
+        )}
 
         <div className="flex gap-3 flex-wrap">
           <Button
@@ -288,8 +327,24 @@ export function CommsTab({ show, commLog = [], recipientGroups = {}, preset = nu
           >
             {copied ? '✓ Copied!' : 'Copy to clipboard'}
           </Button>
+          {recipients.some((r) => r.email) && (
+            <Button
+              variant="secondary"
+              size="md"
+              loading={emailing}
+              onClick={handleSendEmail}
+              disabled={!body.trim() || emailing}
+            >
+              Send email
+              {recipients.filter((r) => r.email).length < recipients.length && (
+                <span className="ml-1 opacity-60 text-xs">
+                  ({recipients.filter((r) => r.email).length}/{recipients.length})
+                </span>
+              )}
+            </Button>
+          )}
           <Button
-            variant="secondary"
+            variant="ghost"
             size="md"
             loading={sending}
             onClick={handleMarkSent}
@@ -299,7 +354,9 @@ export function CommsTab({ show, commLog = [], recipientGroups = {}, preset = nu
           </Button>
         </div>
         <p className="text-xs text-soft font-body mt-2">
-          Copy the message, paste into your DMs or group chat, then hit "Mark as sent" to log it.
+          {recipients.some((r) => r.email)
+            ? 'Send email delivers directly and logs automatically. Or copy and paste manually.'
+            : 'Copy the message, paste into your DMs or group chat, then hit "Mark as sent" to log it.'}
         </p>
       </section>
 
