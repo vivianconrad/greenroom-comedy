@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from 'react'
 import Link from 'next/link'
-import { signup } from '@/lib/actions/auth'
+import { signup, loginAsDemo } from '@/lib/actions/auth'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/atoms/button'
 import { Input } from '@/components/atoms/input'
@@ -35,6 +35,7 @@ export default function SignupPage() {
   const [errors, setErrors] = useState({})
   const [isPending, startTransition] = useTransition()
   const [oauthPending, setOauthPending] = useState(false)
+  const [demoPending, setDemoPending] = useState(false)
 
   function handleSubmit(e) {
     e.preventDefault()
@@ -58,6 +59,15 @@ export default function SignupPage() {
       const result = await signup(formData)
       if (result?.error) setErrors({ form: result.error })
     })
+  }
+
+  async function handleDemo() {
+    setDemoPending(true)
+    const result = await loginAsDemo()
+    if (result?.error) {
+      setErrors({ form: result.error })
+      setDemoPending(false)
+    }
   }
 
   async function handleGoogle() {
@@ -160,6 +170,32 @@ export default function SignupPage() {
           Log in
         </Link>
       </p>
+
+      {/* Demo mode */}
+      <div className="relative mt-6">
+        <div className="absolute inset-0 flex items-center">
+          <div className="w-full border-t border-peach" />
+        </div>
+        <div className="relative flex justify-center">
+          <span className="bg-white px-3 text-xs text-soft font-body">or</span>
+        </div>
+      </div>
+
+      <div className="mt-5 text-center">
+        <Button
+          type="button"
+          variant="secondary"
+          size="md"
+          className="w-full"
+          loading={demoPending}
+          onClick={handleDemo}
+        >
+          Try Demo Mode
+        </Button>
+        <p className="mt-2 text-xs text-soft font-body">
+          Explore with sample data — no signup needed
+        </p>
+      </div>
     </div>
   )
 }
