@@ -35,6 +35,7 @@ Last updated: March 2026
 - Post-show debrief banner on show dashboard (surfaces missing notes + unpaid performers, links to notes tab)
 - "Mark as done" action on shows (moves show into the Past Shows list)
 - Bulk move past shows to trash from the series shows tab
+- Series Info tab: regular contacts (venue manager, sound engineer, etc.), account logins with copy buttons, series notes
 
 ---
 
@@ -234,6 +235,16 @@ Last updated: March 2026
 - Per-performer payment history
 - Venue cost tracking over time
 - Profit/loss per show and per series
+
+### Series Social & Web Links
+- Structured fields on the Info tab: Instagram handle, Facebook page, website URL, TikTok
+- Quick reference for the producer + foundation for Phase 5 public pages
+- Pre-fills Open Graph / schema.org data when public pages are built
+
+### Series Budget Targets
+- Lightweight section on the Info tab: target ticket revenue per show, max performer budget, expected venue cost
+- Gives the Financials tab context to compare actuals against without needing full analytics
+- Per-series settings so different shows have different financial goals
 
 ### Venue Database
 - Reusable venue records: name, address, capacity, load-in time, tech specs, parking notes, contact person

@@ -6,6 +6,51 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { updateSeriesInfo } from '@/lib/actions/series'
 
+// ─── Copy button ──────────────────────────────────────────────────────────────
+
+function CopyButton({ value }) {
+  const [copied, setCopied] = useState(false)
+
+  function handleCopy() {
+    if (!value) return
+    navigator.clipboard.writeText(value).then(() => {
+      setCopied(true)
+      setTimeout(() => setCopied(false), 1500)
+    })
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={handleCopy}
+      disabled={!value}
+      className="text-xs text-soft hover:text-coral font-body transition-colors disabled:opacity-0"
+    >
+      {copied ? '✓ Copied' : 'Copy'}
+    </button>
+  )
+}
+
+// ─── Field with label + copy button ──────────────────────────────────────────
+
+function CopyField({ label, value, onChange, placeholder, type = 'text' }) {
+  return (
+    <div className="flex flex-col gap-1.5">
+      <div className="flex items-center justify-between">
+        <label className="text-sm font-medium text-soft font-body">{label}</label>
+        <CopyButton value={value} />
+      </div>
+      <input
+        type={type}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        className="w-full rounded-card border border-peach bg-white px-3 py-2 text-sm font-body text-deep focus:outline-none focus:ring-2 focus:ring-coral/30"
+      />
+    </div>
+  )
+}
+
 // ─── Login card ───────────────────────────────────────────────────────────────
 
 function LoginCard({ entry, onChange, onRemove }) {
@@ -20,36 +65,39 @@ function LoginCard({ entry, onChange, onRemove }) {
           onChange={(e) => onChange('service', e.target.value)}
           placeholder="e.g. Instagram, Eventbrite, Canva"
         />
-        <Input
+        <CopyField
           label="Username / Email"
           value={entry.username}
-          onChange={(e) => onChange('username', e.target.value)}
+          onChange={(v) => onChange('username', v)}
           placeholder="username or email"
         />
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        {/* Password with show/hide toggle */}
+        {/* Password with show/hide + copy */}
         <div className="flex flex-col gap-1.5">
-          <label className="text-sm font-medium text-soft font-body">Password</label>
-          <div className="relative">
-            <input
-              type={showPassword ? 'text' : 'password'}
-              value={entry.password}
-              onChange={(e) => onChange('password', e.target.value)}
-              placeholder="••••••••"
-              className="w-full rounded-card border border-peach bg-white px-3 py-2 text-sm font-body text-deep focus:outline-none focus:ring-2 focus:ring-coral/30 pr-14"
-            />
-            {entry.password && (
-              <button
-                type="button"
-                onClick={() => setShowPassword((v) => !v)}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-soft hover:text-mid font-body transition-colors"
-              >
-                {showPassword ? 'Hide' : 'Show'}
-              </button>
-            )}
+          <div className="flex items-center justify-between">
+            <label className="text-sm font-medium text-soft font-body">Password</label>
+            <div className="flex items-center gap-2">
+              <CopyButton value={entry.password} />
+              {entry.password && (
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((v) => !v)}
+                  className="text-xs text-soft hover:text-mid font-body transition-colors"
+                >
+                  {showPassword ? 'Hide' : 'Show'}
+                </button>
+              )}
+            </div>
           </div>
+          <input
+            type={showPassword ? 'text' : 'password'}
+            value={entry.password}
+            onChange={(e) => onChange('password', e.target.value)}
+            placeholder="••••••••"
+            className="w-full rounded-card border border-peach bg-white px-3 py-2 text-sm font-body text-deep focus:outline-none focus:ring-2 focus:ring-coral/30"
+          />
         </div>
 
         <Input
@@ -82,6 +130,64 @@ function LoginCard({ entry, onChange, onRemove }) {
   )
 }
 
+// ─── Contact card ─────────────────────────────────────────────────────────────
+
+function ContactCard({ entry, onChange, onRemove }) {
+  return (
+    <div className="rounded-card border border-peach bg-white p-4 flex flex-col gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <Input
+          label="Name"
+          value={entry.name}
+          onChange={(e) => onChange('name', e.target.value)}
+          placeholder="e.g. Jamie"
+        />
+        <Input
+          label="Role"
+          value={entry.role}
+          onChange={(e) => onChange('role', e.target.value)}
+          placeholder="e.g. Venue Manager, Sound Engineer"
+        />
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <CopyField
+          label="Phone"
+          value={entry.phone}
+          onChange={(v) => onChange('phone', v)}
+          placeholder="+1 555 000 0000"
+          type="tel"
+        />
+        <CopyField
+          label="Email"
+          value={entry.email}
+          onChange={(v) => onChange('email', v)}
+          placeholder="email@example.com"
+          type="email"
+        />
+      </div>
+
+      <div className="flex items-end gap-3">
+        <div className="flex-1">
+          <Input
+            label="Notes"
+            value={entry.notes}
+            onChange={(e) => onChange('notes', e.target.value)}
+            placeholder="e.g. text don't call, usually replies same day"
+          />
+        </div>
+        <button
+          type="button"
+          onClick={onRemove}
+          className="mb-0.5 text-xs text-soft hover:text-red font-body transition-colors px-1.5 py-2 shrink-0"
+        >
+          Remove
+        </button>
+      </div>
+    </div>
+  )
+}
+
 // ─── Main export ──────────────────────────────────────────────────────────────
 
 export function InfoTab({ series, seriesId }) {
@@ -93,17 +199,15 @@ export function InfoTab({ series, seriesId }) {
 
   const [localData, setLocalData] = useState({
     logins: series.logins ?? [],
+    contacts: series.contacts ?? [],
     internal_notes: series.internal_notes ?? '',
   })
 
   dataRef.current = localData
 
   function applySaveResult(result) {
-    if (result?.error) {
-      setSaveError(result.error)
-    } else {
-      setSaved(true)
-    }
+    if (result?.error) setSaveError(result.error)
+    else setSaved(true)
   }
 
   function triggerAutoSave() {
@@ -117,10 +221,15 @@ export function InfoTab({ series, seriesId }) {
     }, 800)
   }
 
-  function handleNotesChange(value) {
-    setLocalData((prev) => ({ ...prev, internal_notes: value }))
-    triggerAutoSave()
+  function handleManualSave() {
+    clearTimeout(timerRef.current)
+    setSaveError(null)
+    startTransition(async () => {
+      applySaveResult(await updateSeriesInfo(seriesId, localData))
+    })
   }
+
+  // ── Login handlers ──────────────────────────────────────────────────────────
 
   function updateLogin(id, field, value) {
     setLocalData((prev) => ({
@@ -142,37 +251,84 @@ export function InfoTab({ series, seriesId }) {
   }
 
   function removeLogin(id) {
+    setLocalData((prev) => ({ ...prev, logins: prev.logins.filter((l) => l.id !== id) }))
+    triggerAutoSave()
+  }
+
+  // ── Contact handlers ────────────────────────────────────────────────────────
+
+  function updateContact(id, field, value) {
     setLocalData((prev) => ({
       ...prev,
-      logins: prev.logins.filter((l) => l.id !== id),
+      contacts: prev.contacts.map((c) => (c.id === id ? { ...c, [field]: value } : c)),
     }))
     triggerAutoSave()
   }
 
-  function handleManualSave() {
-    clearTimeout(timerRef.current)
-    setSaveError(null)
-    startTransition(async () => {
-      applySaveResult(await updateSeriesInfo(seriesId, localData))
-    })
+  function addContact() {
+    setLocalData((prev) => ({
+      ...prev,
+      contacts: [
+        ...prev.contacts,
+        { id: crypto.randomUUID(), name: '', role: '', phone: '', email: '', notes: '' },
+      ],
+    }))
+    triggerAutoSave()
+  }
+
+  function removeContact(id) {
+    setLocalData((prev) => ({ ...prev, contacts: prev.contacts.filter((c) => c.id !== id) }))
+    triggerAutoSave()
   }
 
   return (
     <div className="pt-6 max-w-2xl space-y-10">
 
       {/* ── Save status ── */}
-      <div className="flex items-center justify-between">
-        <div />
-        <div className="flex items-center gap-3">
-          {saveError
-            ? <span className="text-xs text-red font-body">{saveError}</span>
-            : <span className="text-xs text-soft font-body">{saved ? 'Saved' : 'Saving…'}</span>
-          }
-          <Button variant="secondary" size="sm" onClick={handleManualSave}>
-            Save
-          </Button>
-        </div>
+      <div className="flex items-center justify-end gap-3">
+        {saveError
+          ? <span className="text-xs text-red font-body">{saveError}</span>
+          : <span className="text-xs text-soft font-body">{saved ? 'Saved' : 'Saving…'}</span>
+        }
+        <Button variant="secondary" size="sm" onClick={handleManualSave}>Save</Button>
       </div>
+
+      {/* ── Regular contacts ── */}
+      <section>
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h3 className="font-display text-lg text-deep">Regular contacts</h3>
+            <p className="text-xs text-soft font-body mt-0.5">
+              Venue manager, sound engineer, photographer — people you work with every show cycle. Separate from your performer database.
+            </p>
+          </div>
+          <Button variant="secondary" size="sm" onClick={addContact}>+ Add contact</Button>
+        </div>
+
+        {localData.contacts.length === 0 ? (
+          <div className="rounded-card border border-dashed border-peach px-6 py-8 text-center">
+            <p className="text-sm text-soft font-body">No contacts saved yet.</p>
+            <button
+              type="button"
+              onClick={addContact}
+              className="mt-2 text-sm text-coral hover:underline font-body"
+            >
+              Add your first contact
+            </button>
+          </div>
+        ) : (
+          <div className="flex flex-col gap-3">
+            {localData.contacts.map((entry) => (
+              <ContactCard
+                key={entry.id}
+                entry={entry}
+                onChange={(field, value) => updateContact(entry.id, field, value)}
+                onRemove={() => removeContact(entry.id)}
+              />
+            ))}
+          </div>
+        )}
+      </section>
 
       {/* ── Account logins ── */}
       <section>
@@ -183,9 +339,7 @@ export function InfoTab({ series, seriesId }) {
               Instagram, Eventbrite, Canva, ticketing platforms, etc.
             </p>
           </div>
-          <Button variant="secondary" size="sm" onClick={addLogin}>
-            + Add login
-          </Button>
+          <Button variant="secondary" size="sm" onClick={addLogin}>+ Add login</Button>
         </div>
 
         {localData.logins.length === 0 ? (
@@ -217,7 +371,7 @@ export function InfoTab({ series, seriesId }) {
         </p>
       </section>
 
-      {/* ── Internal notes ── */}
+      {/* ── Series notes ── */}
       <section>
         <h3 className="font-display text-lg text-deep mb-1">Series notes</h3>
         <p className="text-xs text-soft font-body mb-4">
@@ -225,7 +379,10 @@ export function InfoTab({ series, seriesId }) {
         </p>
         <Textarea
           value={localData.internal_notes}
-          onChange={(e) => handleNotesChange(e.target.value)}
+          onChange={(e) => {
+            setLocalData((prev) => ({ ...prev, internal_notes: e.target.value }))
+            triggerAutoSave()
+          }}
           placeholder="Venue load-in notes, recurring sponsor contacts, things that always come up…"
           rows={8}
         />
