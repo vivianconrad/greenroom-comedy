@@ -491,6 +491,9 @@ export function PerformersTab({ show }) {
 
               <dl className="space-y-3 mb-4">
                 <DetailSection label="Bio" value={selected.bio} />
+                <DetailSection label="Name pronunciation" value={selected.name_pronunciation} />
+                <DetailSection label="Plugs" value={selected.plugs} />
+                <DetailSection label="Special needs" value={selected.special_needs} />
                 <DetailSection label="Walk-up song" value={selected.walk_up_song} />
                 {selected.instagram && (
                   <div>
@@ -507,10 +510,6 @@ export function PerformersTab({ show }) {
                     </dd>
                   </div>
                 )}
-                <DetailSection
-                  label="Superlatives"
-                  value={selected.superlative_suggestions}
-                />
               </dl>
 
               <div className="flex flex-wrap gap-2 mb-4">

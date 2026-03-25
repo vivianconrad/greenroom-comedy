@@ -118,10 +118,12 @@ const CHECKLIST_PRESETS = [
   { task: 'Create event on social media', category: 'marketing', stage: 'pre', weeks_out: 4 },
   { task: 'Design poster / promotional flyer', category: 'marketing', stage: 'pre', weeks_out: 3 },
   { task: 'Send performer confirmations', category: 'booking', stage: 'pre', weeks_out: 1 },
+  { task: 'Collect performer info (pronunciation, plugs, special needs)', category: 'booking', stage: 'pre', weeks_out: 1 },
   { task: 'Write running order', category: 'production', stage: 'pre', weeks_out: 0 },
   { task: 'Sound check', category: 'production', stage: 'day', weeks_out: 0 },
   { task: 'Post show photos to social media', category: 'marketing', stage: 'post', weeks_out: 0 },
   { task: 'Send thank yous to performers', category: 'admin', stage: 'post', weeks_out: 0 },
+  { task: 'Send post-show recap to performers', category: 'admin', stage: 'post', weeks_out: 0 },
 ]
 
 const CATEGORY_LABEL = {
@@ -551,6 +553,9 @@ export function CreateSeriesModal({ open, onClose }) {
     return getCollectionPresets(type)
   }
 
+  // Step 1: Upcoming dates (recurring only)
+  const [upcomingDates, setUpcomingDates] = useState([])
+
   // Step 2: Collections
   const [selectedCollections, setSelectedCollections] = useState(new Set())
   const [customCollections, setCustomCollections] = useState([])
@@ -574,6 +579,7 @@ export function CreateSeriesModal({ open, onClose }) {
     setFrequency('monthly')
     setShowType('')
     setErrors({})
+    setUpcomingDates([])
     setSelectedCollections(new Set())
     setCustomCollections([])
     setSelectedChecklist(new Set())
@@ -620,6 +626,9 @@ export function CreateSeriesModal({ open, onClose }) {
     const formData = new FormData(formRef.current)
     formData.set('frequency', frequency)
     formData.set('show_type', showType)
+
+    const validDates = upcomingDates.filter(Boolean)
+    if (validDates.length) formData.set('show_dates', JSON.stringify(validDates))
 
     formData.set('collections', JSON.stringify([
       ...getCollPresetsForType(showType).filter((p) => selectedCollections.has(p.name)),
@@ -684,6 +693,42 @@ export function CreateSeriesModal({ open, onClose }) {
             </div>
 
             {isOneOff && <Input label="Show date" name="date" type="date" error={errors.date} required />}
+
+            {!isOneOff && (
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center justify-between">
+                  <FieldLabel>Upcoming show dates</FieldLabel>
+                  <span className="text-xs text-soft font-body">Optional</span>
+                </div>
+                <p className="text-xs text-soft/80 font-body -mt-1">Add any scheduled dates now, or add them later from the series page.</p>
+                {upcomingDates.map((d, i) => (
+                  <div key={i} className="flex items-center gap-2">
+                    <input
+                      type="date"
+                      value={d}
+                      onChange={(e) => setUpcomingDates((prev) => prev.map((x, j) => j === i ? e.target.value : x))}
+                      className="flex-1 px-3 py-2 text-sm border border-peach rounded-lg bg-cream font-body focus:outline-none focus:ring-2 focus:ring-coral/30"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setUpcomingDates((prev) => prev.filter((_, j) => j !== i))}
+                      className="text-soft hover:text-red transition-colors text-lg leading-none px-1"
+                      aria-label="Remove date"
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))}
+                <button
+                  type="button"
+                  onClick={() => setUpcomingDates((prev) => [...prev, ''])}
+                  className="flex items-center gap-1.5 text-sm text-soft hover:text-dark font-body transition-colors w-fit mt-1"
+                >
+                  <span className="text-base leading-none">+</span>
+                  <span>Add date</span>
+                </button>
+              </div>
+            )}
 
             <Input label="Default venue" name="venue" placeholder="e.g. The Comedy Store" />
 

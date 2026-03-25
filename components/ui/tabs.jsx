@@ -2,6 +2,7 @@
 
 import { useRef } from 'react'
 import { cn } from '@/lib/utils'
+import { InfoTooltip } from '@/components/ui/tooltip'
 
 function Tabs({ tabs = [], activeTab, onChange, className }) {
   const listRef = useRef(null)
@@ -17,7 +18,7 @@ function Tabs({ tabs = [], activeTab, onChange, className }) {
         className
       )}
     >
-      {tabs.map(({ key, label }) => {
+      {tabs.map(({ key, label, tooltip }) => {
         const isActive = key === activeTab
         return (
           <button
@@ -27,6 +28,7 @@ function Tabs({ tabs = [], activeTab, onChange, className }) {
             onClick={() => onChange?.(key)}
             className={cn(
               'relative shrink-0 px-4 py-3 text-sm font-medium font-body',
+              'inline-flex items-center gap-1.5',
               'transition-colors duration-150 cursor-pointer',
               'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-coral focus-visible:ring-inset',
               isActive
@@ -35,6 +37,11 @@ function Tabs({ tabs = [], activeTab, onChange, className }) {
             )}
           >
             {label}
+            {tooltip && (
+              <span onClick={(e) => e.stopPropagation()}>
+                <InfoTooltip content={tooltip} side="bottom" />
+              </span>
+            )}
             {/* active indicator */}
             {isActive && (
               <span

@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button'
 import { EmptyState } from '@/components/ui/empty-state'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faClipboardList, faEnvelope } from '@fortawesome/free-solid-svg-icons'
+import { InfoTooltip } from '@/components/ui/tooltip'
 import {
   createDutyTemplate,
   updateDutyTemplate,
@@ -136,6 +137,7 @@ function CommLinkSelect({ task, commTemplates }) {
           <option key={t.id} value={t.id}>{t.name}</option>
         ))}
       </select>
+      <InfoTooltip content="Link a comm template to add a quick-send shortcut next to this duty on every show's duties tab." side="left" />
     </div>
   )
 }

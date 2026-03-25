@@ -3,7 +3,6 @@
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { cn } from '@/lib/utils'
-import { Toggle } from '@/components/ui/toggle'
 import { Modal } from '@/components/ui/modal'
 import { Input } from '@/components/ui/input'
 import { Select } from '@/components/ui/select'
@@ -17,6 +16,7 @@ import {
   updateChecklistTemplateActive,
   updateChecklistTemplateLink,
 } from '@/lib/actions/checklist-templates'
+import { InfoTooltip } from '@/components/ui/tooltip'
 
 // ─── Add task modal ───────────────────────────────────────────────────────────
 
@@ -95,7 +95,12 @@ function AddTaskModal({ seriesId, open, onClose }) {
             ))}
           </Select>
           <Input
-            label="Weeks out"
+            label={
+              <span className="inline-flex items-center gap-1">
+                Weeks out
+                <InfoTooltip content="How many weeks before the show date this task should ideally be done. Used to flag overdue or due-soon tasks on the show checklist." />
+              </span>
+            }
             name="weeks_out"
             type="number"
             min="0"
@@ -105,7 +110,16 @@ function AddTaskModal({ seriesId, open, onClose }) {
         </div>
 
         <div className="grid grid-cols-2 gap-3">
-          <Input label="Condition (optional)" name="condition" placeholder="e.g. if: superlatives" />
+          <Input
+            label={
+              <span className="inline-flex items-center gap-1">
+                Condition
+                <InfoTooltip content="Only add this task to shows that match a condition. e.g. 'superlatives' means the task only appears on shows with that theme or tag." />
+              </span>
+            }
+            name="condition"
+            placeholder="e.g. superlatives"
+          />
           <Input label="Default owner (optional)" name="default_owner" placeholder="e.g. MC" />
         </div>
 
@@ -177,6 +191,7 @@ function CommLinkSelect({ task, commTemplates }) {
           <option key={t.id} value={t.id}>{t.name}</option>
         ))}
       </select>
+      <InfoTooltip content="Link a comm template to add a quick-send shortcut next to this task on every show's checklist." side="left" />
     </div>
   )
 }
@@ -199,11 +214,13 @@ function TaskRow({ task, commTemplates }) {
       'flex items-center gap-3 py-3 px-4 group hover:bg-cream/50 transition-colors',
       !task.enabled && 'opacity-50'
     )}>
-      <Toggle
+      <input
+        type="checkbox"
         checked={task.enabled}
-        onChange={handleToggle}
+        onChange={(e) => handleToggle(e.target.checked)}
         disabled={isPending}
         aria-label={task.enabled ? 'Deactivate task' : 'Activate task'}
+        className="h-4 w-4 shrink-0 rounded border-peach text-coral accent-coral cursor-pointer disabled:cursor-wait"
       />
 
       <div className="flex-1 min-w-0">
@@ -259,7 +276,7 @@ export function ChecklistTemplateTab({ tasks, seriesId, commTemplates = [] }) {
       {/* Info banner */}
       <div className="rounded-lg bg-butter/60 border border-butter px-4 py-3 text-sm font-body text-mid">
         <span className="font-semibold">Default checklist: </span>
-        These tasks are added automatically to every new show in this series. Toggle off any tasks you don't always need.
+        These tasks are added automatically to every new show in this series. Uncheck any tasks you don't always need.
         {commTemplates.length > 0 && (
           <span> Link a comm template to a task to get a quick-send shortcut on every show's checklist.</span>
         )}
