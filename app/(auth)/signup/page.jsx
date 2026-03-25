@@ -35,7 +35,7 @@ export default function SignupPage() {
   const [errors, setErrors] = useState({})
   const [isPending, startTransition] = useTransition()
   const [oauthPending, setOauthPending] = useState(false)
-  const [demoPending, setDemoPending] = useState(false)
+  const [demoPending, setDemoPending] = useState(null) // 'populated' | 'empty' | null
 
   function handleSubmit(e) {
     e.preventDefault()
@@ -61,12 +61,12 @@ export default function SignupPage() {
     })
   }
 
-  async function handleDemo() {
-    setDemoPending(true)
-    const result = await loginAsDemo()
+  async function handleDemo(mode) {
+    setDemoPending(mode)
+    const result = await loginAsDemo(mode)
     if (result?.error) {
       setErrors({ form: result.error })
-      setDemoPending(false)
+      setDemoPending(null)
     }
   }
 
@@ -177,24 +177,43 @@ export default function SignupPage() {
           <div className="w-full border-t border-peach" />
         </div>
         <div className="relative flex justify-center">
-          <span className="bg-white px-3 text-xs text-soft font-body">or</span>
+          <span className="bg-white px-3 text-xs text-soft font-body">or try a demo</span>
         </div>
       </div>
 
-      <div className="mt-5 text-center">
-        <Button
-          type="button"
-          variant="secondary"
-          size="md"
-          className="w-full"
-          loading={demoPending}
-          onClick={handleDemo}
-        >
-          Try Demo Mode
-        </Button>
-        <p className="mt-2 text-xs text-soft font-body">
-          Explore with sample data — no signup needed
-        </p>
+      <div className="mt-5 grid grid-cols-2 gap-3">
+        <div className="flex flex-col items-center gap-1.5">
+          <Button
+            type="button"
+            variant="secondary"
+            size="md"
+            className="w-full"
+            loading={demoPending === 'populated'}
+            disabled={demoPending !== null && demoPending !== 'populated'}
+            onClick={() => handleDemo('populated')}
+          >
+            Demo — sample data
+          </Button>
+          <p className="text-xs text-soft font-body text-center">
+            Pre-loaded with shows &amp; performers
+          </p>
+        </div>
+        <div className="flex flex-col items-center gap-1.5">
+          <Button
+            type="button"
+            variant="secondary"
+            size="md"
+            className="w-full"
+            loading={demoPending === 'empty'}
+            disabled={demoPending !== null && demoPending !== 'empty'}
+            onClick={() => handleDemo('empty')}
+          >
+            Demo — blank slate
+          </Button>
+          <p className="text-xs text-soft font-body text-center">
+            Start from scratch, no data
+          </p>
+        </div>
       </div>
     </div>
   )
