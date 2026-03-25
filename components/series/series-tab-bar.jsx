@@ -4,6 +4,7 @@ import { useRouter, usePathname } from 'next/navigation'
 import { Tabs } from '@/components/ui/tabs'
 
 const TABS = [
+  { key: 'overview', label: 'Overview' },
   { key: 'shows', label: 'Shows' },
   { key: 'performers', label: 'Performers' },
   {

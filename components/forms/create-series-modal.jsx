@@ -89,22 +89,22 @@ const SHOW_TYPE_OPTIONS = [
 
 // Collections
 const BASE_COLLECTION_PRESETS = [
-  { name: 'Themes', description: 'Possible themes for upcoming shows', icon: '🎭' },
-  { name: 'Bits & Ideas', description: 'Running gag ideas or recurring bits', icon: '💡' },
-  { name: 'Prize Ideas', description: 'Prizes or giveaways for the audience', icon: '🎁' },
+  { name: 'Themes',       description: 'Possible themes for upcoming shows',   icon: '🎭', default_selected: true  },
+  { name: 'Bits & Ideas', description: 'Running gag ideas or recurring bits',  icon: '💡', default_selected: false },
+  { name: 'Prize Ideas',  description: 'Prizes or giveaways for the audience', icon: '🎁', default_selected: false },
 ]
 const TYPE_COLLECTION_PRESETS = {
   variety: [
-    { name: 'Guest Acts', description: 'Potential guest performers to invite', icon: '🌟' },
-    { name: 'Segments', description: 'Recurring or one-off segment formats', icon: '📋' },
+    { name: 'Guest Acts', description: 'Potential guest performers to invite', icon: '🌟', default_selected: true  },
+    { name: 'Segments',   description: 'Recurring or one-off segment formats', icon: '📋', default_selected: false },
   ],
   standup: [
-    { name: 'Headliners', description: 'Potential headlining acts', icon: '🎤' },
-    { name: 'Openers', description: 'Potential opening acts', icon: '🎙️' },
+    { name: 'Headliners', description: 'Potential headlining acts',  icon: '🎤', default_selected: true  },
+    { name: 'Openers',    description: 'Potential opening acts',     icon: '🎙️', default_selected: false },
   ],
   sketch: [
-    { name: 'Games', description: 'Improv games to feature', icon: '🎮' },
-    { name: 'Formats', description: 'Long-form formats to try', icon: '🎯' },
+    { name: 'Games',   description: 'Improv games to feature',  icon: '🎮', default_selected: true  },
+    { name: 'Formats', description: 'Long-form formats to try', icon: '🎯', default_selected: false },
   ],
 }
 function getCollectionPresets(showType) {
@@ -612,7 +612,7 @@ export function CreateSeriesModal({ open, onClose }) {
       if (Object.keys(errs).length > 0) { setErrors(errs); return }
       setErrors({})
       // Set defaults for all remaining steps (use DB presets if loaded, else hardcoded)
-      setSelectedCollections(new Set(getCollPresetsForType(showType).map((p) => p.name)))
+      setSelectedCollections(new Set(getCollPresetsForType(showType).filter((p) => p.default_selected !== false).map((p) => p.name)))
       setSelectedChecklist(new Set(checklistPresets.map((p) => p.task)))
       setSelectedDuties(new Set(dutyPresets.map((p) => p.duty)))
       setSelectedComms(new Set(commsPresets.slice(0, 1).map((p) => p.name)))

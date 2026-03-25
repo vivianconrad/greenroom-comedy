@@ -9,6 +9,7 @@ import { ChecklistTemplateTab } from '@/components/series/checklist-template-tab
 import { DutyTemplatesTab } from '@/components/series/duty-templates-tab'
 import { CommsTab } from '@/components/series/comms-tab'
 import { InfoTab } from '@/components/series/info-tab'
+import { SeriesOverviewTab } from '@/components/series/overview-tab'
 import { NewShowTrigger } from '@/components/series/new-show-trigger'
 import { EditSeriesTrigger } from '@/components/series/edit-series-trigger'
 import { SeriesActionsMenu } from '@/components/series/series-actions-menu'
@@ -35,7 +36,7 @@ const FREQUENCY_LABELS = {
 
 export default async function SeriesDetailPage({ params, searchParams }) {
   const { id } = await params
-  const { tab = 'shows' } = await searchParams
+  const { tab = 'overview' } = await searchParams
 
   // Parallel data fetch — only load what's needed for active tab, but series
   // detail is always needed for the header. Fetch everything in parallel to
@@ -58,9 +59,9 @@ export default async function SeriesDetailPage({ params, searchParams }) {
     if (show) redirect(`/dashboard/shows/${show.id}`)
   }
 
-  const activeTab = ['shows', 'performers', 'checklist', 'collections', 'duties', 'comms', 'info'].includes(tab)
+  const activeTab = ['overview', 'shows', 'performers', 'checklist', 'collections', 'duties', 'comms', 'info'].includes(tab)
     ? tab
-    : 'shows'
+    : 'overview'
 
   const showDefaults = {
     venue: series.venue,
@@ -153,6 +154,9 @@ export default async function SeriesDetailPage({ params, searchParams }) {
       <SeriesTabBar activeTab={activeTab} />
 
       {/* ── Tab content ── */}
+      {activeTab === 'overview' && (
+        <SeriesOverviewTab series={series} seriesId={id} />
+      )}
       {activeTab === 'shows' && (
         <ShowsTab series={series} seriesId={id} />
       )}
