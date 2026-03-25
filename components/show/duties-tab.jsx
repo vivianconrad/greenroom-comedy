@@ -1,7 +1,8 @@
 'use client'
 
 import { useState, useTransition, useRef } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
+import Link from 'next/link'
 import { cn } from '@/lib/utils'
 import {
   createDuty,
@@ -14,6 +15,8 @@ import { Modal } from '@/components/ui/modal'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { EmptyState } from '@/components/ui/empty-state'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faClipboardList, faEnvelope } from '@fortawesome/free-solid-svg-icons'
 
 // ─── Add / Edit duty modal ────────────────────────────────────────────────────
 
@@ -184,7 +187,7 @@ function ReassignModal({ showId, duty, nameOptions, open, onClose }) {
 
 // ─── Duty row ─────────────────────────────────────────────────────────────────
 
-function DutyRow({ duty, showId, nameOptions, onDragStart, onDragOver, onDrop, isDraggingOver }) {
+function DutyRow({ duty, showId, nameOptions, pathname, onDragStart, onDragOver, onDrop, isDraggingOver }) {
   const router = useRouter()
   const [, startTransition] = useTransition()
   const [editOpen, setEditOpen] = useState(false)
@@ -247,6 +250,17 @@ function DutyRow({ duty, showId, nameOptions, onDragStart, onDragOver, onDrop, i
           )}
         </div>
 
+        {/* Comm link */}
+        {duty.comm_template_id && (
+          <Link
+            href={`${pathname}?tab=comms&template=${duty.comm_template_id}`}
+            title="Open linked comm template"
+            className="text-lav hover:text-lav/70 transition-colors leading-none shrink-0"
+          >
+            <FontAwesomeIcon icon={faEnvelope} className="h-3.5 w-3.5" />
+          </Link>
+        )}
+
         {/* Actions — visible on hover */}
         <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
           <button
@@ -293,7 +307,7 @@ function DutyRow({ duty, showId, nameOptions, onDragStart, onDragOver, onDrop, i
 
 // ─── Person group ─────────────────────────────────────────────────────────────
 
-function PersonGroup({ group, showId, nameOptions, onDragStart, dragOverId, onDragOver, onDrop }) {
+function PersonGroup({ group, showId, nameOptions, pathname, onDragStart, dragOverId, onDragOver, onDrop }) {
   return (
     <div className="rounded-card border border-peach bg-white overflow-hidden">
       <div className="px-4 py-2 bg-cream/60 border-b border-peach">
@@ -309,6 +323,7 @@ function PersonGroup({ group, showId, nameOptions, onDragStart, dragOverId, onDr
             duty={duty}
             showId={showId}
             nameOptions={nameOptions}
+            pathname={pathname}
             onDragStart={onDragStart}
             onDragOver={onDragOver}
             onDrop={(targetId) => onDrop(group.assignedTo, targetId)}
@@ -324,6 +339,7 @@ function PersonGroup({ group, showId, nameOptions, onDragStart, dragOverId, onDr
 
 export function DutiesTab({ show, duties: initialDuties }) {
   const router = useRouter()
+  const pathname = usePathname()
   const [, startTransition] = useTransition()
   const [addOpen, setAddOpen] = useState(false)
   const [localDuties, setLocalDuties] = useState(initialDuties)
@@ -400,7 +416,7 @@ export function DutiesTab({ show, duties: initialDuties }) {
 
       {localDuties.length === 0 ? (
         <EmptyState
-          icon="📋"
+          icon={<FontAwesomeIcon icon={faClipboardList} className="h-8 w-8 text-soft/40" />}
           title="No duties yet"
           description="Add day-of duties and assign them to people to keep the show running smoothly."
           action={
@@ -417,6 +433,7 @@ export function DutiesTab({ show, duties: initialDuties }) {
               group={group}
               showId={show.id}
               nameOptions={nameOptions}
+              pathname={pathname}
               onDragStart={handleDragStart}
               dragOverId={dragOverId}
               onDragOver={handleDragOver}

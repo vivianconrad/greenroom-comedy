@@ -32,17 +32,41 @@ const CATEGORY_OPTIONS = [
 function AddTaskModal({ seriesId, open, onClose }) {
   const router = useRouter()
   const [error, setError] = useState(null)
+  const [tags, setTags] = useState([])
+  const [tagInput, setTagInput] = useState('')
   const [isPending, startTransition] = useTransition()
 
   function handleClose() {
     if (isPending) return
     setError(null)
+    setTags([])
+    setTagInput('')
     onClose()
+  }
+
+  function addTagsFromInput() {
+    const newTags = tagInput.split(',').map((t) => t.trim()).filter((t) => t && !tags.includes(t))
+    if (newTags.length) setTags((prev) => [...prev, ...newTags])
+    setTagInput('')
+  }
+
+  function handleTagKeyDown(e) {
+    if (e.key === 'Enter' || e.key === ',') {
+      e.preventDefault()
+      addTagsFromInput()
+    }
+    if (e.key === 'Backspace' && !tagInput && tags.length) {
+      setTags((prev) => prev.slice(0, -1))
+    }
   }
 
   function handleSubmit(e) {
     e.preventDefault()
     const fd = new FormData(e.currentTarget)
+    // Flush any pending tag input
+    const finalTags = tagInput.trim()
+      ? [...tags, ...tagInput.split(',').map((t) => t.trim()).filter(Boolean)]
+      : tags
     setError(null)
     startTransition(async () => {
       const result = await createChecklistTemplate(seriesId, {
@@ -51,6 +75,7 @@ function AddTaskModal({ seriesId, open, onClose }) {
         condition: fd.get('condition') || null,
         default_owner: fd.get('default_owner') || null,
         weeks_out: fd.get('weeks_out') ? parseInt(fd.get('weeks_out'), 10) : null,
+        tags: finalTags,
       })
       if (result?.error) { setError(result.error); return }
       router.refresh()
@@ -82,6 +107,28 @@ function AddTaskModal({ seriesId, open, onClose }) {
         <div className="grid grid-cols-2 gap-3">
           <Input label="Condition (optional)" name="condition" placeholder="e.g. if: superlatives" />
           <Input label="Default owner (optional)" name="default_owner" placeholder="e.g. MC" />
+        </div>
+
+        {/* Tags */}
+        <div className="flex flex-col gap-1.5">
+          <label className="text-sm font-medium text-soft font-body">Tags <span className="font-normal text-soft/70">(optional)</span></label>
+          <div className="flex flex-wrap items-center gap-1.5 min-h-9 px-3 py-1.5 rounded-lg border border-peach bg-white focus-within:ring-2 focus-within:ring-coral/30 focus-within:border-coral/60">
+            {tags.map((tag) => (
+              <span key={tag} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-lav-bg text-lav text-xs font-body font-medium border border-lav/20">
+                {tag}
+                <button type="button" onClick={() => setTags((prev) => prev.filter((t) => t !== tag))} className="leading-none hover:text-deep transition-colors" aria-label={`Remove ${tag}`}>×</button>
+              </span>
+            ))}
+            <input
+              type="text"
+              value={tagInput}
+              onChange={(e) => setTagInput(e.target.value)}
+              onKeyDown={handleTagKeyDown}
+              onBlur={addTagsFromInput}
+              placeholder={tags.length ? '' : 'Type a tag, press Enter or comma'}
+              className="flex-1 min-w-24 text-sm font-body text-deep bg-transparent outline-none placeholder:text-soft/50"
+            />
+          </div>
         </div>
 
         {error && <p role="alert" className="text-sm text-red font-body">{error}</p>}
@@ -177,6 +224,12 @@ function TaskRow({ task, commTemplates }) {
           {task.category && (
             <Pill variant="neutral">{task.category}</Pill>
           )}
+
+          {(task.tags ?? []).map((tag) => (
+            <span key={tag} className="inline-flex items-center px-2 py-0.5 rounded-full bg-lav-bg text-lav text-xs font-body font-medium border border-lav/20">
+              {tag}
+            </span>
+          ))}
         </div>
 
         <div className="flex items-center gap-3 mt-0.5 text-xs font-body text-soft">

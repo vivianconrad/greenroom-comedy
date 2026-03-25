@@ -10,6 +10,7 @@ import {
   saveChecklistToTemplate,
   saveChecklistToTemplateAndPush,
   addChecklistItem,
+  updateChecklistItemOwner,
 } from '@/lib/actions/checklist'
 import { Modal } from '@/components/ui/modal'
 import { Button } from '@/components/ui/button'
@@ -51,6 +52,7 @@ export function ChecklistTab({ show }) {
   const [, startTransition] = useTransition()
 
   const [activeCategory, setActiveCategory] = useState(null)
+  const [activeTag, setActiveTag] = useState(null)
   const [editMode, setEditMode] = useState(false)
   // { [itemId]: boolean } — overrides for enabled in edit mode
   const [activeOverrides, setActiveOverrides] = useState({})
@@ -62,15 +64,22 @@ export function ChecklistTab({ show }) {
   const [addForm, setAddForm] = useState({ name: '', stage: 'pre', category: '', owner: '', weeksOut: '' })
   const [adding, setAdding] = useState(false)
 
+  const [ownerEditId, setOwnerEditId] = useState(null)
+  const [ownerEditValue, setOwnerEditValue] = useState('')
+
+  // Inline comm prompt: { itemId, templateId, templateName } after checking a linked item
+  const [commPrompt, setCommPrompt] = useState(null)
+
   const categories = [...new Set(show.checklistItems.map((i) => i.category).filter(Boolean))].sort()
+  const allTags = [...new Set(show.checklistItems.flatMap((i) => i.tags ?? []))].sort()
 
   function getIsActive(item) {
     return activeOverrides[item.id] ?? (item.enabled !== false)
   }
 
-  const filteredItems = activeCategory
-    ? show.checklistItems.filter((i) => i.category === activeCategory)
-    : show.checklistItems
+  const filteredItems = show.checklistItems
+    .filter((i) => !activeCategory || i.category === activeCategory)
+    .filter((i) => !activeTag || (i.tags ?? []).includes(activeTag))
 
   function handleToggleEditMode() {
     if (!editMode) {
@@ -129,7 +138,22 @@ export function ChecklistTab({ show }) {
     router.refresh()
   }
 
+  async function handleOwnerSave(itemId) {
+    const trimmed = ownerEditValue.trim()
+    setOwnerEditId(null)
+    await updateChecklistItemOwner(itemId, trimmed || null)
+    router.refresh()
+  }
+
   function handleToggleDone(itemId) {
+    const item = show.checklistItems.find((i) => i.id === itemId)
+    // If we're marking done and item has a linked comm, show prompt
+    if (item && !item.done && item.comm_template_id) {
+      const tmpl = (show.commTemplates ?? []).find((t) => t.id === item.comm_template_id)
+      setCommPrompt({ itemId, templateId: item.comm_template_id, templateName: tmpl?.name ?? 'comm template' })
+    } else if (commPrompt?.itemId === itemId) {
+      setCommPrompt(null)
+    }
     startTransition(async () => {
       await toggleChecklistItem(itemId)
       router.refresh()
@@ -172,6 +196,33 @@ export function ChecklistTab({ show }) {
           </Button>
         </div>
       </div>
+
+      {/* Tag filter bar */}
+      {allTags.length > 0 && (
+        <div className="flex flex-wrap gap-1.5 mb-4">
+          <button
+            onClick={() => setActiveTag(null)}
+            className={cn(
+              'px-2.5 py-0.5 rounded-full text-xs font-medium transition-colors',
+              !activeTag ? 'bg-lav text-white' : 'bg-lav-bg text-lav border border-lav/20 hover:bg-lav/15'
+            )}
+          >
+            All tags
+          </button>
+          {allTags.map((tag) => (
+            <button
+              key={tag}
+              onClick={() => setActiveTag(activeTag === tag ? null : tag)}
+              className={cn(
+                'px-2.5 py-0.5 rounded-full text-xs font-medium transition-colors',
+                activeTag === tag ? 'bg-lav text-white' : 'bg-lav-bg text-lav border border-lav/20 hover:bg-lav/15'
+              )}
+            >
+              {tag}
+            </button>
+          ))}
+        </div>
+      )}
 
       {editMode && (
         <div className="mb-4 px-4 py-3 bg-lav-bg border border-lav/20 rounded-card text-sm text-deep">
@@ -228,14 +279,50 @@ export function ChecklistTab({ show }) {
                       {item.task}
                     </span>
 
-                    <div className="flex items-center gap-2 shrink-0">
+                    <div className="flex items-center gap-2 shrink-0 flex-wrap justify-end">
                       {item.category && (
                         <Pill variant="neutral" className="text-xs">
                           {item.category}
                         </Pill>
                       )}
-                      {item.default_owner && (
-                        <span className="text-xs text-soft hidden sm:block">{item.default_owner}</span>
+                      {(item.tags ?? []).map((tag) => (
+                        <span key={tag} className="inline-flex items-center px-2 py-0.5 rounded-full bg-lav-bg text-lav text-xs font-body font-medium border border-lav/20 hidden sm:inline-flex">
+                          {tag}
+                        </span>
+                      ))}
+                      {!editMode && (
+                        ownerEditId === item.id ? (
+                          <input
+                            type="text"
+                            autoFocus
+                            value={ownerEditValue}
+                            onChange={(e) => setOwnerEditValue(e.target.value)}
+                            onBlur={() => handleOwnerSave(item.id)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') handleOwnerSave(item.id)
+                              if (e.key === 'Escape') setOwnerEditId(null)
+                            }}
+                            placeholder="Add owner…"
+                            className="text-xs border border-peach rounded px-1.5 py-0.5 w-24 focus:outline-none focus:border-coral bg-white"
+                          />
+                        ) : (
+                          <button
+                            onClick={() => {
+                              setOwnerEditId(item.id)
+                              setOwnerEditValue(item.owner ?? '')
+                            }}
+                            className={cn(
+                              'text-xs transition-colors hidden sm:block',
+                              item.owner ? 'text-soft hover:text-deep' : 'text-soft/40 hover:text-soft'
+                            )}
+                            title={item.owner ? 'Edit owner' : 'Add owner'}
+                          >
+                            {item.owner ?? '+ owner'}
+                          </button>
+                        )
+                      )}
+                      {editMode && item.owner && (
+                        <span className="text-xs text-soft hidden sm:block">{item.owner}</span>
                       )}
                       {item.weeks_out != null && (
                         <span className="text-xs text-soft hidden sm:block">{item.weeks_out}w</span>
@@ -251,6 +338,31 @@ export function ChecklistTab({ show }) {
                       )}
                     </div>
                   </div>
+
+                  {/* Comm prompt — appears inline when item is just checked */}
+                  {commPrompt?.itemId === item.id && !editMode && (
+                    <div className="flex items-center justify-between gap-3 px-4 py-2 bg-lav-bg border-t border-lav/20 text-xs font-body">
+                      <span className="text-lav">
+                        Ready to send &ldquo;{commPrompt.templateName}&rdquo;?
+                      </span>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <Link
+                          href={`${pathname}?tab=comms&template=${commPrompt.templateId}`}
+                          className="text-lav font-medium hover:underline"
+                          onClick={() => setCommPrompt(null)}
+                        >
+                          Open comms
+                        </Link>
+                        <button
+                          onClick={() => setCommPrompt(null)}
+                          className="text-soft hover:text-mid transition-colors"
+                          aria-label="Dismiss"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 )
               })}
             </div>

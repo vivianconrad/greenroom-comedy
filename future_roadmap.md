@@ -92,6 +92,18 @@ Last updated: March 2026
 - "Send call time + RO to all performers" one-click flow
 - "Send details to tech/camera crew" one-click flow
 
+### Staged / Grouped Comm Templates
+- Group comm templates by stage or purpose (e.g. "Pre-show", "Day-of", "Post-show", "Booking") to make the template selector easier to scan
+- Stage groups could mirror the checklist stage system (pre / day / post) so linked templates surface in context
+- Could display as optgroup labels in the `<select>` or as collapsible sections in the series Comms tab
+- A `stage` field on `comm_templates` (nullable text) would be sufficient; series-level grouping handles the UI
+
+### Copy Templates Between Series
+- One-click "Copy to series…" button on each comm template card in the series Comms tab
+- Lets producers reuse a well-crafted template (e.g. "Performer Confirmation") across all their series without re-writing it
+- Same pattern useful for checklist templates: "Copy this task to another series"
+- Implementation: modal with a series picker, then a server action that inserts a duplicate row with the target `series_id`
+
 ### Producer Reminders & Show Countdown
 - Dashboard widget showing days until next show with open checklist items
 - Email reminders to the producer (via Resend) for upcoming deadlines (e.g. "show in 5 days, 3 checklist items still open")
@@ -189,7 +201,7 @@ Last updated: March 2026
 ### Team Accounts
 - Invite other producers to a series (Vi, Emma, Maddie each have their own login)
 - Role-based permissions: owner, editor, viewer
-- Task assignments tied to real user accounts (not just text names)
+- Task assignments tied to real user accounts (not just text names) — groundwork done: checklist items already have a free-text `owner` field; next step is a person-picker once team accounts exist
 - Activity log: who did what and when
 
 ### Shared Performer Database

@@ -7,10 +7,13 @@ import { Modal } from '@/components/ui/modal'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { EmptyState } from '@/components/ui/empty-state'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faClipboardList, faEnvelope } from '@fortawesome/free-solid-svg-icons'
 import {
   createDutyTemplate,
   updateDutyTemplate,
   deleteDutyTemplate,
+  updateDutyTemplateLink,
 } from '@/lib/actions/duties'
 
 // ─── Add / Edit template modal ────────────────────────────────────────────────
@@ -100,9 +103,46 @@ function DutyTemplateModal({ seriesId, template, open, onClose }) {
   )
 }
 
+// ─── Comm link select ─────────────────────────────────────────────────────────
+
+function CommLinkSelect({ task, commTemplates }) {
+  const router = useRouter()
+  const [isPending, startTransition] = useTransition()
+
+  function handleChange(e) {
+    const newId = e.target.value || null
+    startTransition(async () => {
+      await updateDutyTemplateLink(task.id, newId)
+      router.refresh()
+    })
+  }
+
+  return (
+    <div className="flex items-center gap-1.5 shrink-0">
+      <FontAwesomeIcon icon={faEnvelope} className="h-3 w-3 text-soft/50" />
+      <select
+        value={task.comm_template_id ?? ''}
+        onChange={handleChange}
+        disabled={isPending}
+        className={cn(
+          'text-xs font-body rounded border px-2 py-0.5 transition-colors focus:outline-none focus:ring-1 focus:ring-lav/50',
+          task.comm_template_id
+            ? 'border-lav/30 bg-lav-bg text-lav'
+            : 'border-peach bg-cream text-soft hover:border-soft'
+        )}
+      >
+        <option value="">Link comm…</option>
+        {commTemplates.map((t) => (
+          <option key={t.id} value={t.id}>{t.name}</option>
+        ))}
+      </select>
+    </div>
+  )
+}
+
 // ─── Template row ──────────────────────────────────────────────────────────────
 
-function TemplateRow({ template }) {
+function TemplateRow({ template, commTemplates }) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [editOpen, setEditOpen] = useState(false)
@@ -132,6 +172,10 @@ function TemplateRow({ template }) {
             <p className="text-xs text-soft font-body mt-0.5">{template.time_note}</p>
           )}
         </div>
+
+        {commTemplates.length > 0 && (
+          <CommLinkSelect task={template} commTemplates={commTemplates} />
+        )}
 
         <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
           <button
@@ -163,7 +207,7 @@ function TemplateRow({ template }) {
 
 // ─── Main export ──────────────────────────────────────────────────────────────
 
-export function DutyTemplatesTab({ templates, seriesId }) {
+export function DutyTemplatesTab({ templates, seriesId, commTemplates = [] }) {
   const [addOpen, setAddOpen] = useState(false)
 
   return (
@@ -172,6 +216,9 @@ export function DutyTemplatesTab({ templates, seriesId }) {
       <div className="rounded-lg bg-butter/60 border border-butter px-4 py-3 text-sm font-body text-mid">
         <span className="font-semibold">Default duties: </span>
         These are copied to every new show in this series. Toggle off any duties that don't apply to every show.
+        {commTemplates.length > 0 && (
+          <span> Link a comm template to a duty to get a quick-send shortcut on every show's duties tab.</span>
+        )}
       </div>
 
       {/* Top action bar */}
@@ -183,7 +230,7 @@ export function DutyTemplatesTab({ templates, seriesId }) {
 
       {templates.length === 0 ? (
         <EmptyState
-          icon="📋"
+          icon={<FontAwesomeIcon icon={faClipboardList} className="h-8 w-8 text-soft/40" />}
           title="No duty templates yet"
           description="Add default duties to auto-populate new shows with day-of assignments."
           className="py-16"
@@ -192,7 +239,11 @@ export function DutyTemplatesTab({ templates, seriesId }) {
         <div className="rounded-card border border-peach bg-white overflow-hidden">
           <ul className="divide-y divide-peach">
             {templates.map((t) => (
-              <TemplateRow key={t.id} template={{ ...t, series_id: seriesId }} />
+              <TemplateRow
+                key={t.id}
+                template={{ ...t, series_id: seriesId }}
+                commTemplates={commTemplates}
+              />
             ))}
           </ul>
         </div>

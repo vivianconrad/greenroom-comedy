@@ -112,6 +112,7 @@ export function CommsTab({ show, commLog = [], recipientGroups = {}, preset = nu
   const [group, setGroup] = useState(preset?.group ?? 'performers')
   const [customSelected, setCustomSelected] = useState(new Set())
   const [templateId, setTemplateId] = useState(preset?.template ?? '')
+  const [activeTag, setActiveTag] = useState(null)
   const [body, setBody] = useState('')
   const [copied, copy] = useCopyToClipboard()
   const [sending, startSend] = useTransition()
@@ -124,6 +125,12 @@ export function CommsTab({ show, commLog = [], recipientGroups = {}, preset = nu
     ...(recipientGroups.crew ?? []),
   ]
   const recipients = computeRecipients(group, customSelected, recipientGroups)
+
+  // Tag filter state for template selector
+  const allTags = [...new Set((show.commTemplates ?? []).flatMap((t) => t.tags ?? []))].sort()
+  const visibleTemplates = activeTag
+    ? (show.commTemplates ?? []).filter((t) => t.tags?.includes(activeTag))
+    : (show.commTemplates ?? [])
 
   // Fill body when template is selected
   useEffect(() => {
@@ -276,13 +283,41 @@ export function CommsTab({ show, commLog = [], recipientGroups = {}, preset = nu
           <label className="text-sm font-medium text-soft font-body block mb-2">
             Template
           </label>
+
+          {/* Tag filter */}
+          {allTags.length > 0 && (
+            <div className="flex flex-wrap gap-1.5 mb-2">
+              <button
+                onClick={() => setActiveTag(null)}
+                className={cn(
+                  'px-2.5 py-0.5 rounded-full text-xs font-body font-medium transition-colors',
+                  !activeTag ? 'bg-lav text-white' : 'bg-lav-bg text-lav border border-lav/20 hover:bg-lav/15'
+                )}
+              >
+                All
+              </button>
+              {allTags.map((tag) => (
+                <button
+                  key={tag}
+                  onClick={() => setActiveTag(activeTag === tag ? null : tag)}
+                  className={cn(
+                    'px-2.5 py-0.5 rounded-full text-xs font-body font-medium transition-colors',
+                    activeTag === tag ? 'bg-lav text-white' : 'bg-lav-bg text-lav border border-lav/20 hover:bg-lav/15'
+                  )}
+                >
+                  {tag}
+                </button>
+              ))}
+            </div>
+          )}
+
           <select
             value={templateId}
             onChange={(e) => setTemplateId(e.target.value)}
             className="w-full h-10 rounded-lg border border-peach bg-white px-3 text-sm font-body text-deep focus:outline-none focus:ring-2 focus:ring-coral/30"
           >
             <option value="">— Write from scratch —</option>
-            {(show.commTemplates ?? []).map((t) => (
+            {visibleTemplates.map((t) => (
               <option key={t.id} value={t.id}>
                 {t.name}
               </option>
