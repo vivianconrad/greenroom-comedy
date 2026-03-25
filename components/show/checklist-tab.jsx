@@ -1,7 +1,8 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
+import Link from 'next/link'
 import { cn } from '@/lib/utils'
 import { toggleChecklistItem } from '@/lib/actions/show'
 import {
@@ -16,6 +17,8 @@ import { Pill } from '@/components/ui/pill'
 import { Toggle } from '@/components/ui/toggle'
 import { Input } from '@/components/ui/input'
 import { Select } from '@/components/ui/select'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faEnvelope } from '@fortawesome/free-solid-svg-icons'
 
 const STAGES = [
   { key: 'pre', label: 'Pre-show' },
@@ -44,6 +47,7 @@ const SAVE_OPTIONS = [
 
 export function ChecklistTab({ show }) {
   const router = useRouter()
+  const pathname = usePathname()
   const [, startTransition] = useTransition()
 
   const [activeCategory, setActiveCategory] = useState(null)
@@ -235,6 +239,15 @@ export function ChecklistTab({ show }) {
                       )}
                       {item.weeks_out != null && (
                         <span className="text-xs text-soft hidden sm:block">{item.weeks_out}w</span>
+                      )}
+                      {item.comm_template_id && !editMode && (
+                        <Link
+                          href={`${pathname}?tab=comms&template=${item.comm_template_id}`}
+                          title="Open linked comm template"
+                          className="text-lav hover:text-lav/70 transition-colors leading-none"
+                        >
+                          <FontAwesomeIcon icon={faEnvelope} className="h-3.5 w-3.5" />
+                        </Link>
                       )}
                     </div>
                   </div>

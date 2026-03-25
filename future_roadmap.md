@@ -48,6 +48,7 @@ Last updated: March 2026
 - Application review queue in the app: accept, decline, or save for later
 - Accepted performers auto-tagged to the series
 - Configurable per series (each series can have its own form with different questions)
+- DB needed: `performers.stage_name` (text) — stage name is a distinct field from legal name
 
 ### Pre-Show Performer Form
 - Sent automatically when a performer is booked for a show
@@ -56,6 +57,7 @@ Last updated: March 2026
 - Responses auto-populate show_performers fields (bio, walk_up_song, photo_url, tags_ok, payment_method)
 - Form status tracked: sent, opened, completed
 - Automatic reminder if not filled out X days before show
+- DB needed: `show_performers.form_token` (text, unique), `form_sent_at` (timestamptz), `form_opened_at` (timestamptz) — `form_complete` already exists
 
 ### File Uploads
 - Performer promo photos (stored in Supabase Storage, linked to show_performers.photo_url)
@@ -240,6 +242,7 @@ Last updated: March 2026
 - Structured fields on the Info tab: Instagram handle, Facebook page, website URL, TikTok
 - Quick reference for the producer + foundation for Phase 5 public pages
 - Pre-fills Open Graph / schema.org data when public pages are built
+- DB needed: `series.social_links` (jsonb)
 
 ### Series Budget Targets
 - Lightweight section on the Info tab: target ticket revenue per show, max performer budget, expected venue cost

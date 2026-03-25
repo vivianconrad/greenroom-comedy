@@ -163,7 +163,7 @@ export default async function SeriesDetailPage({ params, searchParams }) {
         <CollectionsTab collections={collections} seriesId={id} />
       )}
       {activeTab === 'checklist' && (
-        <ChecklistTemplateTab tasks={checklistTasks} seriesId={id} />
+        <ChecklistTemplateTab tasks={checklistTasks} seriesId={id} commTemplates={commTemplates} />
       )}
       {activeTab === 'duties' && (
         <DutyTemplatesTab templates={dutyTemplates} seriesId={id} />

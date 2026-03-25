@@ -9,6 +9,7 @@ import { Modal } from '@/components/ui/modal'
 import { Textarea } from '@/components/ui/textarea'
 import { AddPerformerModal } from '@/components/performers/add-performer-modal'
 import { ImportPerformersModal } from '@/components/performers/import-performers-modal'
+import { SheetSyncSection } from '@/components/performers/sheet-sync-section'
 import { updatePerformer, addPerformerToSeries, removePerformerFromSeries } from '@/lib/actions/performers'
 import { formatShortDate, cn } from '@/lib/utils'
 
@@ -350,7 +351,7 @@ function DetailPanel({ performer, allSeries, onEdit }) {
 
 // ─── Main client component ─────────────────────────────────────────────────────
 
-export function PerformersClient({ performers, allSeries }) {
+export function PerformersClient({ performers, allSeries, sheetSync = null }) {
   const [search, setSearch] = useState('')
   const [activeFilter, setActiveFilter] = useState('all')
   const [expandedId, setExpandedId] = useState(null)
@@ -394,6 +395,9 @@ export function PerformersClient({ performers, allSeries }) {
           Review
         </Button>
       </div>
+
+      {/* ── Google Sheet sync ── */}
+      <SheetSyncSection initialSync={sheetSync} entityType="performers" />
 
       {/* ── Search + filter row ── */}
       <div className="flex flex-col sm:flex-row gap-3">

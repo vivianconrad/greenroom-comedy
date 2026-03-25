@@ -8,6 +8,8 @@ import { Modal } from '@/components/ui/modal'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { EmptyState } from '@/components/ui/empty-state'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faEnvelope } from '@fortawesome/free-solid-svg-icons'
 
 // ─── Sample show data for template preview ────────────────────────────────────
 
@@ -17,6 +19,9 @@ const PREVIEW_SHOW = {
   doors_time: '19:00:00',
   show_time: '19:30:00',
   venue: 'The Comedy Store',
+  theme: 'Spooky Season',
+  ticket_url: 'https://tickets.example.com',
+  promo_code: 'GREENROOM20',
   performers: [
     { name: 'Jane Smith', set_length: 5 },
     { name: 'Mark Lee', set_length: 8 },
@@ -44,6 +49,87 @@ function HighlightedBody({ body }) {
   )
 }
 
+// ─── Tag pill ─────────────────────────────────────────────────────────────────
+
+function TagPill({ tag, active, onClick, onRemove }) {
+  if (onRemove) {
+    return (
+      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-lav-bg text-lav text-xs font-body font-medium border border-lav/20">
+        {tag}
+        <button
+          type="button"
+          onClick={onRemove}
+          className="leading-none hover:text-deep transition-colors"
+          aria-label={`Remove tag ${tag}`}
+        >
+          ×
+        </button>
+      </span>
+    )
+  }
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={cn(
+        'px-2.5 py-1 rounded-full text-xs font-body font-medium transition-colors',
+        active
+          ? 'bg-lav text-white'
+          : 'bg-lav-bg text-lav border border-lav/20 hover:bg-lav/15'
+      )}
+    >
+      {tag}
+    </button>
+  )
+}
+
+// ─── Tag input ────────────────────────────────────────────────────────────────
+
+function TagInput({ tags, onChange }) {
+  const [input, setInput] = useState('')
+
+  function addFromInput() {
+    const newTags = input.split(',').map(t => t.trim()).filter(t => t && !tags.includes(t))
+    if (newTags.length) onChange([...tags, ...newTags])
+    setInput('')
+  }
+
+  function handleKeyDown(e) {
+    if (e.key === 'Enter' || e.key === ',') {
+      e.preventDefault()
+      addFromInput()
+    }
+    if (e.key === 'Backspace' && !input && tags.length) {
+      onChange(tags.slice(0, -1))
+    }
+  }
+
+  return (
+    <div className="flex flex-col gap-1.5">
+      <label className="text-sm font-medium text-soft font-body">Tags <span className="font-normal text-soft/70">(optional)</span></label>
+      <div className="flex flex-wrap items-center gap-1.5 min-h-9 px-3 py-1.5 rounded-lg border border-peach bg-white focus-within:ring-2 focus-within:ring-coral/30 focus-within:border-coral/60">
+        {tags.map((tag) => (
+          <TagPill
+            key={tag}
+            tag={tag}
+            onRemove={() => onChange(tags.filter(t => t !== tag))}
+          />
+        ))}
+        <input
+          type="text"
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={handleKeyDown}
+          onBlur={addFromInput}
+          placeholder={tags.length ? '' : 'Type a tag, press Enter or comma'}
+          className="flex-1 min-w-24 text-sm font-body text-deep bg-transparent outline-none placeholder:text-soft/50"
+        />
+      </div>
+      <p className="text-xs text-soft font-body">Link this template to checklist items or steps by using a shared tag.</p>
+    </div>
+  )
+}
+
 // ─── Template create / edit modal ─────────────────────────────────────────────
 
 function CommTemplateModal({ open, onClose, seriesId, template }) {
@@ -51,6 +137,7 @@ function CommTemplateModal({ open, onClose, seriesId, template }) {
   const isEdit = !!template
   const [name, setName] = useState(template?.name ?? '')
   const [body, setBody] = useState(template?.body ?? '')
+  const [tags, setTags] = useState(template?.tags ?? [])
   const [error, setError] = useState(null)
   const [saving, startSave] = useTransition()
 
@@ -66,8 +153,8 @@ function CommTemplateModal({ open, onClose, seriesId, template }) {
     setError(null)
     startSave(async () => {
       const result = isEdit
-        ? await updateCommTemplate(template.id, seriesId, { name, body })
-        : await createCommTemplate(seriesId, { name, body })
+        ? await updateCommTemplate(template.id, seriesId, { name, body, tags })
+        : await createCommTemplate(seriesId, { name, body, tags })
       if (result?.error) { setError(result.error); return }
       router.refresh()
       onClose()
@@ -100,6 +187,8 @@ function CommTemplateModal({ open, onClose, seriesId, template }) {
             Variables: [name] [date] [callTime] [doors] [showTime] [venue] [theme] [runningOrder] [ticketUrl] [promoCode]
           </p>
         </div>
+
+        <TagInput tags={tags} onChange={setTags} />
 
         {error && <p role="alert" className="text-sm text-red font-body">{error}</p>}
 
@@ -138,7 +227,16 @@ function CommTemplateCard({ template, seriesId }) {
     <div className="rounded-card border border-peach bg-white p-5 flex flex-col gap-3">
       {/* Header */}
       <div className="flex items-start justify-between gap-3">
-        <h3 className="text-sm font-semibold text-deep font-body">{template.name}</h3>
+        <div className="flex flex-col gap-1.5 min-w-0">
+          <h3 className="text-sm font-semibold text-deep font-body">{template.name}</h3>
+          {template.tags?.length > 0 && (
+            <div className="flex flex-wrap gap-1">
+              {template.tags.map((tag) => (
+                <TagPill key={tag} tag={tag} />
+              ))}
+            </div>
+          )}
+        </div>
         <div className="flex items-center gap-1 shrink-0">
           <button
             onClick={() => setPreviewOpen((v) => !v)}
@@ -214,10 +312,18 @@ function CommTemplateCard({ template, seriesId }) {
 
 export function CommsTab({ templates, seriesId }) {
   const [createOpen, setCreateOpen] = useState(false)
+  const [activeTag, setActiveTag] = useState(null)
+
+  // Collect all unique tags across templates
+  const allTags = [...new Set(templates.flatMap(t => t.tags ?? []))].sort()
+
+  const visible = activeTag
+    ? templates.filter(t => t.tags?.includes(activeTag))
+    : templates
 
   return (
     <div className="pt-6">
-      <div className="flex items-center justify-between mb-5">
+      <div className="flex items-center justify-between mb-4">
         <p className="text-sm text-soft font-body">
           {templates.length > 0
             ? `${templates.length} template${templates.length !== 1 ? 's' : ''} — used across all shows in this series`
@@ -228,16 +334,41 @@ export function CommsTab({ templates, seriesId }) {
         </Button>
       </div>
 
+      {/* Tag filter bar */}
+      {allTags.length > 0 && (
+        <div className="flex flex-wrap gap-1.5 mb-5">
+          <button
+            onClick={() => setActiveTag(null)}
+            className={cn(
+              'px-2.5 py-1 rounded-full text-xs font-body font-medium transition-colors',
+              !activeTag ? 'bg-lav text-white' : 'bg-lav-bg text-lav border border-lav/20 hover:bg-lav/15'
+            )}
+          >
+            All
+          </button>
+          {allTags.map((tag) => (
+            <TagPill
+              key={tag}
+              tag={tag}
+              active={activeTag === tag}
+              onClick={() => setActiveTag(activeTag === tag ? null : tag)}
+            />
+          ))}
+        </div>
+      )}
+
       {templates.length === 0 ? (
         <EmptyState
-          icon="✉️"
+          icon={<FontAwesomeIcon icon={faEnvelope} className="h-8 w-8 text-soft/40" />}
           title="No comms templates yet"
           description="Add message templates for performer confirmations, reminders, and show-night comms."
           className="py-16"
         />
+      ) : visible.length === 0 ? (
+        <p className="text-sm text-soft font-body py-8 text-center">No templates tagged "{activeTag}".</p>
       ) : (
         <div className="flex flex-col gap-4">
-          {templates.map((t) => (
+          {visible.map((t) => (
             <CommTemplateCard key={t.id} template={t} seriesId={seriesId} />
           ))}
         </div>

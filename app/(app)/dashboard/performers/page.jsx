@@ -15,7 +15,7 @@ export default async function PerformersPage() {
 
   if (!user) redirect('/login')
 
-  const [performers, seriesRows] = await Promise.all([
+  const [performers, seriesRows, sheetSync] = await Promise.all([
     getAllPerformers(user.id),
     supabase
       .from('series')
@@ -23,6 +23,14 @@ export default async function PerformersPage() {
       .eq('owner_id', user.id)
       .order('name', { ascending: true })
       .then(({ data }) => data ?? []),
+    supabase
+      .from('sheet_syncs')
+      .select('id, sheet_url, column_mapping, last_synced_at, sync_count')
+      .eq('owner_id', user.id)
+      .eq('entity_type', 'performers')
+      .is('series_id', null)
+      .maybeSingle()
+      .then(({ data }) => data ?? null),
   ])
 
   return (
@@ -42,7 +50,7 @@ export default async function PerformersPage() {
 
       {/* ── Interactive client section ── */}
       <div className="flex flex-col gap-5">
-        <PerformersClient performers={performers} allSeries={seriesRows} />
+        <PerformersClient performers={performers} allSeries={seriesRows} sheetSync={sheetSync} />
       </div>
     </div>
   )

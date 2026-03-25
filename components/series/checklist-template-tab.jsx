@@ -10,9 +10,12 @@ import { Select } from '@/components/ui/select'
 import { Button } from '@/components/ui/button'
 import { Pill } from '@/components/ui/pill'
 import { EmptyState } from '@/components/ui/empty-state'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faEnvelope, faCircleCheck } from '@fortawesome/free-solid-svg-icons'
 import {
   createChecklistTemplate,
   updateChecklistTemplateActive,
+  updateChecklistTemplateLink,
 } from '@/lib/actions/checklist-templates'
 
 // ─── Add task modal ───────────────────────────────────────────────────────────
@@ -92,9 +95,48 @@ function AddTaskModal({ seriesId, open, onClose }) {
   )
 }
 
+// ─── Comm link select ─────────────────────────────────────────────────────────
+
+function CommLinkSelect({ task, commTemplates }) {
+  const router = useRouter()
+  const [isPending, startTransition] = useTransition()
+
+  const linked = commTemplates.find(t => t.id === task.comm_template_id)
+
+  function handleChange(e) {
+    const newId = e.target.value || null
+    startTransition(async () => {
+      await updateChecklistTemplateLink(task.id, newId)
+      router.refresh()
+    })
+  }
+
+  return (
+    <div className="flex items-center gap-1.5 shrink-0">
+      <FontAwesomeIcon icon={faEnvelope} className="h-3 w-3 text-soft/50" />
+      <select
+        value={task.comm_template_id ?? ''}
+        onChange={handleChange}
+        disabled={isPending}
+        className={cn(
+          'text-xs font-body rounded border px-2 py-0.5 transition-colors focus:outline-none focus:ring-1 focus:ring-lav/50',
+          task.comm_template_id
+            ? 'border-lav/30 bg-lav-bg text-lav'
+            : 'border-peach bg-cream text-soft hover:border-soft'
+        )}
+      >
+        <option value="">Link comm…</option>
+        {commTemplates.map(t => (
+          <option key={t.id} value={t.id}>{t.name}</option>
+        ))}
+      </select>
+    </div>
+  )
+}
+
 // ─── Task row ─────────────────────────────────────────────────────────────────
 
-function TaskRow({ task }) {
+function TaskRow({ task, commTemplates }) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
 
@@ -146,13 +188,17 @@ function TaskRow({ task }) {
           )}
         </div>
       </div>
+
+      {commTemplates.length > 0 && (
+        <CommLinkSelect task={task} commTemplates={commTemplates} />
+      )}
     </li>
   )
 }
 
 // ─── Main export ──────────────────────────────────────────────────────────────
 
-export function ChecklistTemplateTab({ tasks, seriesId }) {
+export function ChecklistTemplateTab({ tasks, seriesId, commTemplates = [] }) {
   const [addTaskOpen, setAddTaskOpen] = useState(false)
 
   return (
@@ -161,6 +207,9 @@ export function ChecklistTemplateTab({ tasks, seriesId }) {
       <div className="rounded-lg bg-butter/60 border border-butter px-4 py-3 text-sm font-body text-mid">
         <span className="font-semibold">Default checklist: </span>
         These tasks are added automatically to every new show in this series. Toggle off any tasks you don't always need.
+        {commTemplates.length > 0 && (
+          <span> Link a comm template to a task to get a quick-send shortcut on every show's checklist.</span>
+        )}
       </div>
 
       {/* Top action bar */}
@@ -172,7 +221,7 @@ export function ChecklistTemplateTab({ tasks, seriesId }) {
 
       {tasks.length === 0 ? (
         <EmptyState
-          icon="✅"
+          icon={<FontAwesomeIcon icon={faCircleCheck} className="h-8 w-8 text-soft/40" />}
           title="No tasks yet"
           description="Add tasks to build your default show checklist."
           className="py-16"
@@ -181,7 +230,7 @@ export function ChecklistTemplateTab({ tasks, seriesId }) {
         <div className="rounded-card border border-peach bg-white overflow-hidden">
           <ul className="divide-y divide-peach">
             {tasks.map((task) => (
-              <TaskRow key={task.id} task={task} />
+              <TaskRow key={task.id} task={task} commTemplates={commTemplates} />
             ))}
           </ul>
         </div>
