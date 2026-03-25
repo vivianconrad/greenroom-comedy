@@ -243,12 +243,12 @@ export function ChecklistTab({ show }) {
             <h3 className="text-xs font-semibold uppercase tracking-wider text-soft mb-2 px-1">
               {stage.label}
             </h3>
-            <div className="bg-white rounded-card border border-peach divide-y divide-peach">
+            <div className="bg-white rounded-card border border-peach overflow-hidden">
               {visibleItems.map((item) => {
                 const isActive = getIsActive(item)
                 return (
+                  <div key={item.id} className="border-b border-peach last:border-b-0">
                   <div
-                    key={item.id}
                     className={cn(
                       'flex items-center gap-3 px-4 py-3 transition-opacity',
                       editMode && !isActive && 'opacity-40'
@@ -363,6 +363,7 @@ export function ChecklistTab({ show }) {
                       </div>
                     </div>
                   )}
+                  </div>
                 )
               })}
             </div>

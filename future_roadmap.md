@@ -218,6 +218,22 @@ Last updated: March 2026
 
 ## Phase 8: Advanced Features
 
+### Lineup Structure Templates
+
+- Series-level template defining the *shape* of a typical show: roles + default set lengths (e.g., Host ∞, Opener 5m × 2, Performer 8m × 3, Headliner 15m)
+- Applied when creating a new show — seeds the run-of-show with empty slots at the right durations and roles
+- Works with the existing auto-generate button, which would fill those slots when performers are confirmed
+- Useful for shows with a rigid format (open mics, variety nights with a fixed structure)
+- DB needed: `lineup_templates` (series_id, name) + `lineup_template_slots` (template_id, role, set_length, sort_order)
+
+### Promo / Social Caption Templates
+
+- Public-facing caption templates separate from the performer-facing comm templates
+- Different audience (social media, event pages), different placeholders: `[lineup]`, `[hashtags]`, `[ticketUrl]`, `[venue]`, `[date]`, `[doors]`, `[showTime]`
+- Lives on the series Comms tab (or its own Promo tab once Phase 8's Promo Tab is built) alongside performer comm templates
+- Foundation for the Promo tab's social caption generator feature
+- DB needed: `promo_templates` (series_id, name, platform, body, tags, sort_order) — `platform` field (instagram, facebook, email, other) for filtering
+
 ### Show Duplication
 - One-click "Duplicate this show" to clone a show's structure (checklist, run of show template, crew, settings) into a new show
 - Option to include or exclude performers when duplicating
