@@ -1,6 +1,6 @@
 'use client'
 
-import { forwardRef, useId } from 'react'
+import { forwardRef, useId, useState } from 'react'
 import { cn } from '@/lib/utils'
 
 const Textarea = forwardRef(function Textarea(
@@ -9,6 +9,8 @@ const Textarea = forwardRef(function Textarea(
     error,
     maxLength,
     value,
+    defaultValue,
+    onChange,
     placeholder,
     className,
     id: idProp,
@@ -18,7 +20,17 @@ const Textarea = forwardRef(function Textarea(
 ) {
   const generatedId = useId()
   const id = idProp ?? generatedId
-  const charCount = typeof value === 'string' ? value.length : 0
+
+  const [internalLength, setInternalLength] = useState(
+    () => (value ?? defaultValue ?? '').length
+  )
+
+  function handleChange(e) {
+    setInternalLength(e.target.value.length)
+    onChange?.(e)
+  }
+
+  const charCount = typeof value === 'string' ? value.length : internalLength
 
   return (
     <div className="flex flex-col gap-1.5">
@@ -31,8 +43,10 @@ const Textarea = forwardRef(function Textarea(
         ref={ref}
         id={id}
         value={value}
+        defaultValue={defaultValue}
         maxLength={maxLength}
         placeholder={placeholder}
+        onChange={handleChange}
         className={cn(
           'w-full rounded-lg border bg-cream px-3.5 py-2.5 text-sm text-deep font-body',
           'placeholder:text-soft/60 resize-y min-h-24',
