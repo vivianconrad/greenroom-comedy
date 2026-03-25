@@ -8,9 +8,11 @@ import { CollectionsTab } from '@/components/series/collections-tab'
 import { ChecklistTemplateTab } from '@/components/series/checklist-template-tab'
 import { DutyTemplatesTab } from '@/components/series/duty-templates-tab'
 import { CommsTab } from '@/components/series/comms-tab'
+import { InfoTab } from '@/components/series/info-tab'
 import { NewShowTrigger } from '@/components/series/new-show-trigger'
 import { EditSeriesTrigger } from '@/components/series/edit-series-trigger'
 import { SeriesActionsMenu } from '@/components/series/series-actions-menu'
+import { CopyBadge } from '@/components/ui/copy-badge'
 import {
   getSeriesDetail,
   getCollectionsForSeries,
@@ -56,7 +58,7 @@ export default async function SeriesDetailPage({ params, searchParams }) {
     if (show) redirect(`/dashboard/shows/${show.id}`)
   }
 
-  const activeTab = ['shows', 'performers', 'collections', 'checklist', 'duties', 'comms'].includes(tab)
+  const activeTab = ['shows', 'performers', 'collections', 'checklist', 'duties', 'comms', 'info'].includes(tab)
     ? tab
     : 'shows'
 
@@ -120,9 +122,7 @@ export default async function SeriesDetailPage({ params, searchParams }) {
                 </a>
               )}
               {series.promo_code && (
-                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-peach bg-cream text-sm font-body text-mid">
-                  Promo: <span className="font-semibold text-deep tracking-wide ml-1">{series.promo_code}</span>
-                </span>
+                <CopyBadge label="Promo:" value={series.promo_code} />
               )}
             </div>
           )}
@@ -170,6 +170,9 @@ export default async function SeriesDetailPage({ params, searchParams }) {
       )}
       {activeTab === 'comms' && (
         <CommsTab templates={commTemplates} seriesId={id} />
+      )}
+      {activeTab === 'info' && (
+        <InfoTab series={series} seriesId={id} />
       )}
     </div>
   )

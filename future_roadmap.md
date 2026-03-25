@@ -241,6 +241,27 @@ Last updated: March 2026
 - Venue cost history across shows for financial planning
 - Multi-venue support per series for touring shows
 
+### Ticket QR Code
+- QR code button on the Tickets tab that opens a modal showing a printable/displayable QR code for the ticket URL
+- Useful for door signage, on-screen display, or inclusion in promo materials
+- `qrcode` npm package makes this trivial to implement
+- Also display in Show Day Mode's sticky header when a ticket URL is set
+
+### Ticket Info in Show Day Mode
+
+- Show the ticket URL (as a tappable link) and promo code in the Show Day Mode sticky header or as a collapsible section
+- Means the door person has everything in one screen without switching tabs
+- Promo code should be large and tappable-to-copy, same pattern as the CopyBadge component
+
+### Ticketing Platform API Sync
+
+- Connect an Eventbrite (or Humanitix/Dice) account to auto-update `tickets_sold` and `capacity` from the platform
+- The existing `ticket_platform` field is the hook to determine which API to call
+- Real-time ticket count updates, eliminating manual entry
+- Phase 1: webhook endpoint that receives sales events and updates the show record
+- Phase 2: pull-based sync triggered from the Tickets tab ("Refresh from Eventbrite" button)
+- Phase 3: OAuth connection flow in series settings
+
 ### Promo Tab (Show-Level)
 - Social caption generator: auto-draft Instagram/Facebook post copy from show details and performer bios
 - Asset checklist: track which promo materials are done (poster, IG story, event page, etc.)

@@ -6,6 +6,7 @@ import { updateTicketInfo } from '@/lib/actions/show'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card } from '@/components/ui/card'
+import { CopyBadge } from '@/components/ui/copy-badge'
 
 function StatCard({ label, value }) {
   return (
@@ -72,9 +73,7 @@ export function TicketsTab({ show }) {
             </a>
           )}
           {hasPromoCode && (
-            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-peach bg-cream text-sm font-body text-mid">
-              Promo: <span className="font-semibold text-deep tracking-wide">{form.promo_code}</span>
-            </span>
+            <CopyBadge label="Promo:" value={form.promo_code} />
           )}
         </div>
       )}

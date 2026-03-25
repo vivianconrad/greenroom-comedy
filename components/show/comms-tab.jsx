@@ -303,7 +303,7 @@ export function CommsTab({ show, commLog = [], recipientGroups = {}, preset = nu
           <textarea
             value={body}
             onChange={(e) => setBody(e.target.value)}
-            placeholder="Write your message, or pick a template above…&#10;&#10;Tip: [name] in your message will be a reminder to personalise each copy."
+            placeholder="Write your message, or pick a template above…&#10;&#10;Variables: [date] [venue] [showTime] [doors] [callTime] [theme] [runningOrder] [ticketUrl] [promoCode]&#10;[name] is left as-is — a reminder to personalise each copy."
             rows={9}
             className="w-full rounded-card border border-peach bg-white px-4 py-3 text-sm font-body text-deep leading-relaxed resize-y focus:outline-none focus:ring-2 focus:ring-coral/30"
           />

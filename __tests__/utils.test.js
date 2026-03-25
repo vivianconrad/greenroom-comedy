@@ -190,6 +190,15 @@ describe('fillTemplate', () => {
     expect(fillTemplate('[venue]', data)).toBe('Fallback Venue')
   })
 
+  it('replaces [theme] with the show theme', () => {
+    const data = { ...showData, theme: 'Spooky Season' }
+    expect(fillTemplate('[theme]', data)).toBe('Spooky Season')
+  })
+
+  it('leaves [theme] intact when theme is absent', () => {
+    expect(fillTemplate('[theme]', showData)).toBe('[theme]')
+  })
+
   it('leaves [name] intact', () => {
     expect(fillTemplate('Hi [name]', showData)).toBe('Hi [name]')
   })

@@ -97,7 +97,7 @@ function CommTemplateModal({ open, onClose, seriesId, template }) {
             className="w-full rounded-card border border-peach bg-white px-4 py-3 text-sm font-body text-deep leading-relaxed resize-y focus:outline-none focus:ring-2 focus:ring-coral/30"
           />
           <p className="text-xs text-soft font-body">
-            Variables: [name] [date] [callTime] [doors] [showTime] [venue] [runningOrder]
+            Variables: [name] [date] [callTime] [doors] [showTime] [venue] [theme] [runningOrder] [ticketUrl] [promoCode]
           </p>
         </div>
 

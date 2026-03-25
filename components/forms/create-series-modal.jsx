@@ -1,12 +1,13 @@
 'use client'
 
-import { useState, useTransition, useId, useRef } from 'react'
+import { useState, useTransition, useId, useRef, useEffect } from 'react'
 import { Modal } from '@/components/ui/modal'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { createSeries } from '@/lib/actions/series'
+import { getSystemTemplates } from '@/lib/actions/system-templates'
 
 // ─── Shared UI ────────────────────────────────────────────────────────────────
 
@@ -169,6 +170,10 @@ const COMMS_PRESETS = [
     name: 'Running Order',
     body: 'Hi [name],\n\nHere\'s the running order for [date]:\n\n[runningOrder]\n\nSee you at call time ([callTime])!',
   },
+  {
+    name: 'Important Info',
+    body: 'Important info for [date]!\n\nSHOW DETAILS\nShow time: [showTime]\nCall time: [callTime]\nTheme: [theme]\n\nHOW IT WORKS:\nThis is a talent show-themed variety show! Audience judges will give out silly superlatives throughout the night. After the headliner, we\'ll play an audience game while judges deliberate, then all performers come back on stage for our awards ceremony.\n\nTICKETS & COMPS\nYou get 1 comp ticket (groups get 3)\nEmail me your comp requests by FRIDAY NIGHT\nFor other guests: coupon code [promoCode]\n[ticketUrl]\n\nPLEASE PROMOTE THE SHOW! Tag us and share the link 💖\n\nMUSIC/TECH\nSend any music to @ at @gmail.com - he\'s our tech guy\n\nDAY-OF LOGISTICS\nYou can hang in the green room before your set (or sit in back of house if there\'s space)\nThere\'s a door next to the stage connecting green room ↔ house, please only use it when going on/off stage\nWe\'re doing a group photo at the end! Let me know if you need to leave early so we can plan accordingly\nThe stage is a little small, so please keep that in mind for choreography/movement\nWe\'ll be taking photos and videos during your set\nIf your set includes going into the audience or you want to start off stage (for a dramatic entrance), let us know here!\n\nRunning Order:\n[runningOrder]',
+  },
 ]
 
 // ─── Step components ──────────────────────────────────────────────────────────
@@ -224,8 +229,7 @@ function CustomChip({ label, onRemove }) {
 
 // ── Collections step ──────────────────────────────────────────────────────────
 
-function CollectionsStep({ showType, selected, onToggle, custom, onAddCustom, onRemoveCustom }) {
-  const presets = getCollectionPresets(showType)
+function CollectionsStep({ presets, selected, onToggle, custom, onAddCustom, onRemoveCustom }) {
   const [showForm, setShowForm] = useState(false)
   const [newIcon, setNewIcon] = useState('')
   const [newName, setNewName] = useState('')
@@ -296,7 +300,7 @@ function CollectionsStep({ showType, selected, onToggle, custom, onAddCustom, on
 
 // ── Checklist step ────────────────────────────────────────────────────────────
 
-function ChecklistStep({ selected, onToggle, custom, onAddCustom, onRemoveCustom }) {
+function ChecklistStep({ presets, selected, onToggle, custom, onAddCustom, onRemoveCustom }) {
   const [showForm, setShowForm] = useState(false)
   const [newTask, setNewTask] = useState('')
   const [newCategory, setNewCategory] = useState('')
@@ -316,7 +320,7 @@ function ChecklistStep({ selected, onToggle, custom, onAddCustom, onRemoveCustom
         These tasks will be added to every show's checklist. You can enable/disable per show later.
       </p>
       <div className="flex flex-col gap-2">
-        {CHECKLIST_PRESETS.map((p) => (
+        {presets.map((p) => (
           <ToggleCard key={p.task} selected={selected.has(p.task)} onToggle={() => onToggle(p.task)}>
             <span className="flex-1 min-w-0">
               <span className="block">{p.task}</span>
@@ -368,7 +372,7 @@ function ChecklistStep({ selected, onToggle, custom, onAddCustom, onRemoveCustom
 
 // ── Duties step ───────────────────────────────────────────────────────────────
 
-function DutiesStep({ selected, onToggle, custom, onAddCustom, onRemoveCustom }) {
+function DutiesStep({ presets, selected, onToggle, custom, onAddCustom, onRemoveCustom }) {
   const [showForm, setShowForm] = useState(false)
   const [newDuty, setNewDuty] = useState('')
   const [newTimeNote, setNewTimeNote] = useState('')
@@ -388,7 +392,7 @@ function DutiesStep({ selected, onToggle, custom, onAddCustom, onRemoveCustom })
         Duties are assigned to team members for each show. You can set names on the series page.
       </p>
       <div className="flex flex-col gap-2">
-        {DUTY_PRESETS.map((p) => (
+        {presets.map((p) => (
           <ToggleCard key={p.duty} selected={selected.has(p.duty)} onToggle={() => onToggle(p.duty)}>
             <span className="flex-1 min-w-0">
               <span className="block">{p.duty}</span>
@@ -436,7 +440,7 @@ function DutiesStep({ selected, onToggle, custom, onAddCustom, onRemoveCustom })
 
 // ── Comms step ────────────────────────────────────────────────────────────────
 
-function CommsStep({ selected, onToggle, custom, onAddCustom, onRemoveCustom }) {
+function CommsStep({ presets, selected, onToggle, custom, onAddCustom, onRemoveCustom }) {
   const [showForm, setShowForm] = useState(false)
   const [newName, setNewName] = useState('')
   const [newBody, setNewBody] = useState('')
@@ -459,7 +463,7 @@ function CommsStep({ selected, onToggle, custom, onAddCustom, onRemoveCustom }) 
         <span className="font-mono text-xs bg-peach px-1 py-0.5 rounded">[venue]</span> and more as placeholders.
       </p>
       <div className="flex flex-col gap-2">
-        {COMMS_PRESETS.map((p) => (
+        {presets.map((p) => (
           <ToggleCard key={p.name} selected={selected.has(p.name)} onToggle={() => onToggle(p.name)}>
             <span className="flex-1 min-w-0">
               <span className="block">{p.name}</span>
@@ -515,11 +519,37 @@ const STEP_TITLES = {
 
 export function CreateSeriesModal({ open, onClose }) {
   const formRef = useRef(null)
+  const fetchedRef = useRef(false)
   const [step, setStep] = useState(1)
   const [frequency, setFrequency] = useState('monthly')
   const [showType, setShowType] = useState('')
   const [errors, setErrors] = useState({})
   const [isPending, startTransition] = useTransition()
+
+  // Preset data — initialized with hardcoded fallbacks, replaced by DB values on first open
+  const [checklistPresets, setChecklistPresets] = useState(CHECKLIST_PRESETS)
+  const [dutyPresets, setDutyPresets] = useState(DUTY_PRESETS)
+  const [commsPresets, setCommsPresets] = useState(COMMS_PRESETS)
+  const [collectionPresetsDB, setCollectionPresetsDB] = useState(null) // null = use hardcoded
+
+  // Fetch system templates from DB on first open (silently falls back to hardcoded on error)
+  useEffect(() => {
+    if (!open || fetchedRef.current) return
+    fetchedRef.current = true
+    getSystemTemplates().then((data) => {
+      if (data.checklist.length) setChecklistPresets(data.checklist)
+      if (data.duties.length) setDutyPresets(data.duties)
+      if (data.comms.length) setCommsPresets(data.comms)
+      if (data.collections.length) setCollectionPresetsDB(data.collections)
+    }).catch(() => {})
+  }, [open])
+
+  function getCollPresetsForType(type) {
+    if (collectionPresetsDB) {
+      return collectionPresetsDB.filter((p) => p.show_type === null || p.show_type === type)
+    }
+    return getCollectionPresets(type)
+  }
 
   // Step 2: Collections
   const [selectedCollections, setSelectedCollections] = useState(new Set())
@@ -575,10 +605,11 @@ export function CreateSeriesModal({ open, onClose }) {
       const errs = validateStep1(new FormData(e.currentTarget))
       if (Object.keys(errs).length > 0) { setErrors(errs); return }
       setErrors({})
-      // Set defaults for all remaining steps
-      setSelectedCollections(new Set(getCollectionPresets(showType).map((p) => p.name)))
-      setSelectedChecklist(new Set(CHECKLIST_PRESETS.map((p) => p.task)))
-      setSelectedComms(new Set(['Performer Confirmation']))
+      // Set defaults for all remaining steps (use DB presets if loaded, else hardcoded)
+      setSelectedCollections(new Set(getCollPresetsForType(showType).map((p) => p.name)))
+      setSelectedChecklist(new Set(checklistPresets.map((p) => p.task)))
+      setSelectedDuties(new Set(dutyPresets.map((p) => p.duty)))
+      setSelectedComms(new Set(commsPresets.slice(0, 1).map((p) => p.name)))
       setStep(2)
     } else if (step === TOTAL_STEPS) {
       doSubmit()
@@ -590,25 +621,24 @@ export function CreateSeriesModal({ open, onClose }) {
     formData.set('frequency', frequency)
     formData.set('show_type', showType)
 
-    const collPresets = getCollectionPresets(showType)
     formData.set('collections', JSON.stringify([
-      ...collPresets.filter((p) => selectedCollections.has(p.name)),
+      ...getCollPresetsForType(showType).filter((p) => selectedCollections.has(p.name)),
       ...customCollections,
     ]))
 
     formData.set('checklist_templates', JSON.stringify([
-      ...CHECKLIST_PRESETS.filter((p) => selectedChecklist.has(p.task)),
+      ...checklistPresets.filter((p) => selectedChecklist.has(p.task)),
       ...customChecklist,
     ]))
 
     formData.set('duty_templates', JSON.stringify([
-      ...DUTY_PRESETS.filter((p) => selectedDuties.has(p.duty)),
+      ...dutyPresets.filter((p) => selectedDuties.has(p.duty)),
       ...customDuties,
     ]))
 
     formData.set('comm_templates', JSON.stringify(
       skipComms ? [] : [
-        ...COMMS_PRESETS.filter((p) => selectedComms.has(p.name)),
+        ...commsPresets.filter((p) => selectedComms.has(p.name)),
         ...customComms,
       ]
     ))
@@ -676,7 +706,7 @@ export function CreateSeriesModal({ open, onClose }) {
         {/* ── Step 2: Collections ── */}
         {step === 2 && (
           <CollectionsStep
-            showType={showType}
+            presets={getCollPresetsForType(showType)}
             selected={selectedCollections}
             onToggle={(name) => setSelectedCollections((prev) => { const n = new Set(prev); n.has(name) ? n.delete(name) : n.add(name); return n })}
             custom={customCollections}
@@ -688,6 +718,7 @@ export function CreateSeriesModal({ open, onClose }) {
         {/* ── Step 3: Checklist ── */}
         {step === 3 && (
           <ChecklistStep
+            presets={checklistPresets}
             selected={selectedChecklist}
             onToggle={(task) => setSelectedChecklist((prev) => { const n = new Set(prev); n.has(task) ? n.delete(task) : n.add(task); return n })}
             custom={customChecklist}
@@ -699,6 +730,7 @@ export function CreateSeriesModal({ open, onClose }) {
         {/* ── Step 4: Duties ── */}
         {step === 4 && (
           <DutiesStep
+            presets={dutyPresets}
             selected={selectedDuties}
             onToggle={(duty) => setSelectedDuties((prev) => { const n = new Set(prev); n.has(duty) ? n.delete(duty) : n.add(duty); return n })}
             custom={customDuties}
@@ -710,6 +742,7 @@ export function CreateSeriesModal({ open, onClose }) {
         {/* ── Step 5: Comms ── */}
         {step === 5 && (
           <CommsStep
+            presets={commsPresets}
             selected={selectedComms}
             onToggle={(name) => setSelectedComms((prev) => { const n = new Set(prev); n.has(name) ? n.delete(name) : n.add(name); return n })}
             custom={customComms}

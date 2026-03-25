@@ -10,6 +10,7 @@ const TABS = [
   { key: 'checklist', label: 'Checklist Template' },
   { key: 'duties', label: 'Duty Templates' },
   { key: 'comms', label: 'Comms' },
+  { key: 'info', label: 'Info' },
 ]
 
 export function SeriesTabBar({ activeTab }) {
