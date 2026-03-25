@@ -62,9 +62,17 @@ export function DashboardTab({ show }) {
 
   const venue = show.venue ?? show.series?.venue
 
-  // 3-day comms prompt
+  // 3-day comms prompt + debrief prompt
   const daysToShow = daysUntil(show.date)
   const showingSoon = daysToShow >= 0 && daysToShow <= 3
+  const isPastShow = daysToShow < 0
+  const showDebriefBanner = isPastShow && show.status !== 'cancelled' && show.status !== 'completed'
+  const hasNotes = show.notes_rating != null || (show.notes_attendance != null && show.notes_attendance !== '')
+  const unpaidCount = show.performers.filter((p) => p.payment_amount > 0 && !p.paid).length
+  const debriefItems = [
+    !hasNotes && 'Notes not filled in',
+    unpaidCount > 0 && `${unpaidCount} performer${unpaidCount !== 1 ? 's' : ''} unpaid`,
+  ].filter(Boolean)
   const callTimeTemplate = (show.commTemplates ?? []).find((t) =>
     /call.?time|reminder|running.?order/i.test(t.name)
   )
@@ -90,6 +98,24 @@ export function DashboardTab({ show }) {
             className="shrink-0 text-sm font-medium text-coral hover:underline font-body"
           >
             Go to Comms →
+          </button>
+        </div>
+      )}
+
+      {/* ── Post-show debrief prompt ── */}
+      {showDebriefBanner && (
+        <div className="flex items-center justify-between gap-4 rounded-card border border-amber-200 bg-amber-50 px-4 py-3">
+          <div>
+            <p className="text-sm font-medium text-deep font-body">Post-show debrief</p>
+            <p className="text-xs text-mid font-body mt-0.5">
+              {debriefItems.length > 0 ? debriefItems.join(' · ') : 'Ready to mark as done?'}
+            </p>
+          </div>
+          <button
+            onClick={() => router.push(`${pathname}?tab=notes`)}
+            className="shrink-0 text-sm font-medium text-amber-700 hover:underline font-body whitespace-nowrap"
+          >
+            Go to Notes →
           </button>
         </div>
       )}

@@ -1,20 +1,11 @@
 import Link from 'next/link'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faChevronRight } from '@fortawesome/free-solid-svg-icons'
 import { cn } from '@/lib/utils'
 
 function ChevronSeparator() {
   return (
-    <svg
-      className="h-3.5 w-3.5 text-soft/50 shrink-0"
-      viewBox="0 0 16 16"
-      fill="currentColor"
-      aria-hidden="true"
-    >
-      <path
-        fillRule="evenodd"
-        d="M6.22 3.22a.75.75 0 011.06 0l4.25 4.25a.75.75 0 010 1.06l-4.25 4.25a.75.75 0 01-1.06-1.06L9.94 8 6.22 4.28a.75.75 0 010-1.06z"
-        clipRule="evenodd"
-      />
-    </svg>
+    <FontAwesomeIcon icon={faChevronRight} className="h-3 w-3 text-soft/50 shrink-0" aria-hidden="true" />
   )
 }
 

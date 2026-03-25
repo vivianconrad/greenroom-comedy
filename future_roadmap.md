@@ -31,6 +31,10 @@ Last updated: March 2026
 - Tagline and description fields on series
 - Responsive layout (desktop sidebar, mobile hamburger)
 - Slug fields on series and shows for future public pages
+- Soft delete / trash system for series and shows (restore or permanently delete)
+- Post-show debrief banner on show dashboard (surfaces missing notes + unpaid performers, links to notes tab)
+- "Mark as done" action on shows (moves show into the Past Shows list)
+- Bulk move past shows to trash from the series shows tab
 
 ---
 
@@ -64,6 +68,7 @@ Last updated: March 2026
 - "Last contacted" date
 - Availability tracking (dates they've said they're available or unavailable)
 - Performer merge (combine duplicate records)
+- Availability calendar view — visual "who's available when" before booking a lineup
 
 ---
 
@@ -83,6 +88,11 @@ Last updated: March 2026
 - Quick-send from multiple places: performer tab, show dashboard, show day mode
 - "Send call time + RO to all performers" one-click flow
 - "Send details to tech/camera crew" one-click flow
+
+### Producer Reminders & Show Countdown
+- Dashboard widget showing days until next show with open checklist items
+- Email reminders to the producer (via Resend) for upcoming deadlines (e.g. "show in 5 days, 3 checklist items still open")
+- Configurable reminder schedule per series
 
 ### Automated Sending (future)
 - Email sending via Resend integration
@@ -104,6 +114,11 @@ Last updated: March 2026
 - Quick contacts for all performers and crew
 - Floating quick-compose button for sending messages
 - Walk-up music playback controls (if files uploaded)
+
+### Door List
+- Generate a shareable door list for the door person (sorted alphabetically, includes +1s and payment status)
+- Export as PDF or shareable link
+- Quick-add comps and guests from show day mode
 
 ### Offline Support
 - PWA service worker for offline availability
@@ -188,6 +203,20 @@ Last updated: March 2026
 
 ## Phase 8: Advanced Features
 
+### Show Duplication
+- One-click "Duplicate this show" to clone a show's structure (checklist, run of show template, crew, settings) into a new show
+- Option to include or exclude performers when duplicating
+- Precursor to full recurring show automation
+
+### Post-Show Debrief Flow *(partially shipped)*
+- ~~Debrief banner on dashboard tab surfacing missing notes + unpaid performers~~ ✓
+- ~~Mark as done action (sets status = completed, moves show to Past Shows)~~ ✓
+- Still to do: one-click "send thank-yous" from debrief banner, "mark all paid" shortcut, close open comms prompt
+
+### Bulk Show Actions *(partially shipped)*
+- ~~Bulk move past shows to trash~~ ✓
+- Still to do: bulk archive (separate from trash), bulk tag/label
+
 ### Recurring Show Automation
 - Auto-create the next show instance X weeks before the next date in the series
 - Auto-send booking inquiries to "regulars" list
@@ -205,6 +234,19 @@ Last updated: March 2026
 - Per-performer payment history
 - Venue cost tracking over time
 - Profit/loss per show and per series
+
+### Venue Database
+- Reusable venue records: name, address, capacity, load-in time, tech specs, parking notes, contact person
+- "Select venue" when creating a show instead of re-entering details each time
+- Venue cost history across shows for financial planning
+- Multi-venue support per series for touring shows
+
+### Promo Tab (Show-Level)
+- Social caption generator: auto-draft Instagram/Facebook post copy from show details and performer bios
+- Asset checklist: track which promo materials are done (poster, IG story, event page, etc.)
+- Performer promo kit: collect approved performer headshots and bios for promo use
+- Show hashtags and tagging list (performer handles pre-filled from performer records)
+- Link to public show page once Phase 5 is live
 
 ### Integrations
 - Google Calendar sync (show dates, task due dates)

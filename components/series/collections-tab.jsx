@@ -2,6 +2,8 @@
 
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faChevronRight } from '@fortawesome/free-solid-svg-icons'
 import { cn } from '@/lib/utils'
 import { formatShortDate } from '@/lib/utils'
 import { Modal } from '@/components/ui/modal'
@@ -224,21 +226,11 @@ function CollectionCard({ collection, seriesId }) {
           aria-expanded={expanded}
         >
           {/* Chevron */}
-          <svg
-            className={cn(
-              'h-4 w-4 shrink-0 text-soft transition-transform duration-200',
-              expanded && 'rotate-90'
-            )}
-            viewBox="0 0 16 16"
-            fill="currentColor"
+          <FontAwesomeIcon
+            icon={faChevronRight}
+            className={cn('h-3.5 w-3.5 shrink-0 text-soft transition-transform duration-200', expanded && 'rotate-90')}
             aria-hidden="true"
-          >
-            <path
-              fillRule="evenodd"
-              d="M6.22 3.22a.75.75 0 011.06 0l4.25 4.25a.75.75 0 010 1.06l-4.25 4.25a.75.75 0 01-1.06-1.06L9.94 8 6.22 4.28a.75.75 0 010-1.06z"
-              clipRule="evenodd"
-            />
-          </svg>
+          />
 
           {/* Icon + name */}
           {collection.icon && (

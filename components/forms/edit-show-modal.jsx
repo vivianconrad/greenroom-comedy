@@ -23,7 +23,7 @@ export function EditShowModal({ open, onClose, show }) {
     e.preventDefault()
     const formData = new FormData(e.currentTarget)
 
-    if (!formData.get('date')?.toString()) {
+    if (!formData.get('date')?.trim()) {
       setErrors({ date: 'Show date is required.' })
       return
     }
@@ -91,12 +91,17 @@ export function EditShowModal({ open, onClose, show }) {
           placeholder="0.00"
         />
 
-        <Select label="Status" name="status" defaultValue={show.status ?? 'draft'}>
-          <option value="draft">Draft</option>
-          <option value="confirmed">Confirmed</option>
-          <option value="cancelled">Cancelled</option>
-          <option value="completed">Completed</option>
-        </Select>
+        <Select
+          label="Status"
+          name="status"
+          defaultValue={show.status ?? 'planning'}
+          options={[
+            { value: 'planning', label: 'Planning' },
+            { value: 'confirmed', label: 'Confirmed' },
+            { value: 'cancelled', label: 'Cancelled' },
+            { value: 'completed', label: 'Completed' },
+          ]}
+        />
 
         {errors.form && (
           <p role="alert" className="text-sm text-red font-body">

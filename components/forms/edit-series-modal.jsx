@@ -54,6 +54,7 @@ const FREQUENCY_OPTIONS = [
   { value: 'weekly', label: 'Weekly' },
   { value: 'biweekly', label: 'Biweekly' },
   { value: 'monthly', label: 'Monthly' },
+  { value: 'quarterly', label: 'Quarterly' },
   { value: 'custom', label: 'Custom' },
 ]
 
@@ -176,6 +177,20 @@ export function EditSeriesModal({ open, onClose, series }) {
           defaultValue={series.description_long ?? ''}
           placeholder="A paragraph about your show for longer descriptions"
           maxLength={1000}
+        />
+
+        <Input
+          label="Ticket link"
+          name="ticket_url"
+          defaultValue={series.ticket_url ?? ''}
+          placeholder="https://..."
+        />
+
+        <Input
+          label="Promo code"
+          name="promo_code"
+          defaultValue={series.promo_code ?? ''}
+          placeholder="e.g. GREENROOM20"
         />
 
         {errors.form && (

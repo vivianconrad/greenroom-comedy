@@ -1,5 +1,11 @@
 import { Fraunces, DM_Sans } from 'next/font/google'
+import { config } from '@fortawesome/fontawesome-svg-core'
+import '@fortawesome/fontawesome-svg-core/styles.css'
 import './globals.css'
+
+// Prevent Font Awesome from injecting its own <style> tags at runtime —
+// we import the CSS statically above instead (required for Next.js SSR).
+config.autoAddCss = false
 
 const fraunces = Fraunces({
   subsets: ['latin'],

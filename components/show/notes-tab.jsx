@@ -49,18 +49,21 @@ export function NotesTab({ show }) {
   // Keep ref in sync for debounced save closure
   dataRef.current = localData
 
+  function applySaveResult(result) {
+    if (result?.error) {
+      setSaveError(result.error)
+    } else {
+      setSaved(true)
+    }
+  }
+
   function triggerAutoSave() {
     setSaved(false)
     setSaveError(null)
     clearTimeout(timerRef.current)
     timerRef.current = setTimeout(() => {
       startTransition(async () => {
-        const result = await updateShowNotes(show.id, dataRef.current)
-        if (result?.error) {
-          setSaveError(result.error)
-        } else {
-          setSaved(true)
-        }
+        applySaveResult(await updateShowNotes(show.id, dataRef.current))
       })
     }, 800)
   }
@@ -74,12 +77,7 @@ export function NotesTab({ show }) {
     clearTimeout(timerRef.current)
     setSaveError(null)
     startTransition(async () => {
-      const result = await updateShowNotes(show.id, localData)
-      if (result?.error) {
-        setSaveError(result.error)
-      } else {
-        setSaved(true)
-      }
+      applySaveResult(await updateShowNotes(show.id, localData))
     })
   }
 

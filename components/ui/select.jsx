@@ -1,6 +1,8 @@
 'use client'
 
 import { forwardRef, useId } from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faChevronDown } from '@fortawesome/free-solid-svg-icons'
 import { cn } from '@/lib/utils'
 
 const Select = forwardRef(function Select(
@@ -56,18 +58,7 @@ const Select = forwardRef(function Select(
         </select>
         {/* chevron icon */}
         <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center">
-          <svg
-            className="h-4 w-4 text-soft"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-            aria-hidden="true"
-          >
-            <path
-              fillRule="evenodd"
-              d="M5.23 7.21a.75.75 0 011.06.02L10 11.17l3.71-3.94a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
-              clipRule="evenodd"
-            />
-          </svg>
+          <FontAwesomeIcon icon={faChevronDown} className="h-3.5 w-3.5 text-soft" aria-hidden="true" />
         </div>
       </div>
       {error && (

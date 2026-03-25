@@ -2,6 +2,8 @@
 
 import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faArrowUpFromBracket } from '@fortawesome/free-solid-svg-icons'
 import { Modal } from '@/components/ui/modal'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -222,9 +224,7 @@ export function ImportPerformersModal({ open, onClose }) {
                 'text-soft font-body text-sm cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed'
               )}
             >
-              <svg className="h-8 w-8 text-soft/40" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
-              </svg>
+              <FontAwesomeIcon icon={faArrowUpFromBracket} className="h-8 w-8 text-soft/40" aria-hidden="true" />
               <span>{loading ? 'Reading…' : 'Click to choose a file'}</span>
               <span className="text-xs text-soft/50">.xlsx · .xls · .csv</span>
             </button>

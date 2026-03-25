@@ -10,6 +10,7 @@ import { DutyTemplatesTab } from '@/components/series/duty-templates-tab'
 import { CommsTab } from '@/components/series/comms-tab'
 import { NewShowTrigger } from '@/components/series/new-show-trigger'
 import { EditSeriesTrigger } from '@/components/series/edit-series-trigger'
+import { SeriesActionsMenu } from '@/components/series/series-actions-menu'
 import {
   getSeriesDetail,
   getCollectionsForSeries,
@@ -106,6 +107,26 @@ export default async function SeriesDetailPage({ params, searchParams }) {
             )}
           </div>
 
+          {(series.ticket_url || series.promo_code) && (
+            <div className="flex flex-wrap items-center gap-3 mt-3">
+              {series.ticket_url && (
+                <a
+                  href={series.ticket_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-coral text-white text-sm font-body font-medium hover:bg-coral/90 transition-colors"
+                >
+                  Tickets ↗
+                </a>
+              )}
+              {series.promo_code && (
+                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-peach bg-cream text-sm font-body text-mid">
+                  Promo: <span className="font-semibold text-deep tracking-wide ml-1">{series.promo_code}</span>
+                </span>
+              )}
+            </div>
+          )}
+
           {series.description_long && (
             <details className="mt-3 group">
               <summary className="text-xs font-body text-soft cursor-pointer hover:text-mid select-none list-none flex items-center gap-1">
@@ -120,6 +141,11 @@ export default async function SeriesDetailPage({ params, searchParams }) {
         <div className="flex items-center gap-2 shrink-0">
           <EditSeriesTrigger series={series} />
           <NewShowTrigger seriesId={id} defaults={showDefaults} />
+          <SeriesActionsMenu
+            seriesId={id}
+            seriesName={series.name}
+            showCount={series.upcomingShows.length + series.pastShows.length}
+          />
         </div>
       </div>
 

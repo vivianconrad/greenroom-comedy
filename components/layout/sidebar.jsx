@@ -3,75 +3,18 @@
 import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import {
+  faChevronRight,
+  faUsers,
+  faGear,
+  faTrash,
+  faPlus,
+  faBars,
+  faXmark,
+} from '@fortawesome/free-solid-svg-icons'
 import { cn, formatShortDate } from '@/lib/utils'
 import { CreateSeriesModal } from '@/components/forms/create-series-modal'
-
-// ─── Icons ──────────────────────────────────────────────────────────────────
-
-function ChevronIcon({ open }) {
-  return (
-    <svg
-      className={cn('h-3.5 w-3.5 shrink-0 transition-transform duration-200 text-soft', open && 'rotate-90')}
-      viewBox="0 0 16 16"
-      fill="currentColor"
-      aria-hidden="true"
-    >
-      <path
-        fillRule="evenodd"
-        d="M6.22 3.22a.75.75 0 011.06 0l4.25 4.25a.75.75 0 010 1.06l-4.25 4.25a.75.75 0 01-1.06-1.06L9.94 8 6.22 4.28a.75.75 0 010-1.06z"
-        clipRule="evenodd"
-      />
-    </svg>
-  )
-}
-
-function UsersIcon() {
-  return (
-    <svg className="h-4 w-4 shrink-0" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-      <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
-    </svg>
-  )
-}
-
-function SettingsIcon() {
-  return (
-    <svg className="h-4 w-4 shrink-0" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-      <path
-        fillRule="evenodd"
-        d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z"
-        clipRule="evenodd"
-      />
-    </svg>
-  )
-}
-
-function PlusIcon() {
-  return (
-    <svg className="h-3.5 w-3.5 shrink-0" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
-      <path d="M8.75 3.75a.75.75 0 00-1.5 0v3.5h-3.5a.75.75 0 000 1.5h3.5v3.5a.75.75 0 001.5 0v-3.5h3.5a.75.75 0 000-1.5h-3.5v-3.5z" />
-    </svg>
-  )
-}
-
-function HamburgerIcon() {
-  return (
-    <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-      <path
-        fillRule="evenodd"
-        d="M2 4.75A.75.75 0 012.75 4h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 4.75zm0 10.5a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75a.75.75 0 01-.75-.75zM2 10a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 10z"
-        clipRule="evenodd"
-      />
-    </svg>
-  )
-}
-
-function CloseIcon() {
-  return (
-    <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-      <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" />
-    </svg>
-  )
-}
 
 // ─── Nav link helpers ────────────────────────────────────────────────────────
 
@@ -123,7 +66,11 @@ function SeriesItem({ series, defaultOpen = false }) {
             aria-expanded={open}
             aria-label={open ? 'Collapse series' : 'Expand series'}
           >
-            <ChevronIcon open={open} />
+            <FontAwesomeIcon
+              icon={faChevronRight}
+              className={cn('h-3 w-3 shrink-0 transition-transform duration-200', open && 'rotate-90')}
+              aria-hidden="true"
+            />
           </button>
         ) : (
           <span className="w-5 shrink-0" />
@@ -213,7 +160,7 @@ function SidebarContent({ series, isDemo, onClose }) {
             className="rounded-lg p-1.5 text-soft hover:bg-peach hover:text-deep transition-colors"
             aria-label="Close menu"
           >
-            <CloseIcon />
+            <FontAwesomeIcon icon={faXmark} className="h-5 w-5" aria-hidden="true" />
           </button>
         )}
       </div>
@@ -244,7 +191,7 @@ function SidebarContent({ series, isDemo, onClose }) {
             'text-soft hover:bg-peach hover:text-deep transition-colors'
           )}
         >
-          <PlusIcon />
+          <FontAwesomeIcon icon={faPlus} className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
           New series / show
         </button>
       </div>
@@ -259,11 +206,15 @@ function SidebarContent({ series, isDemo, onClose }) {
           </span>
         </div>
         <NavLink href="/dashboard/performers">
-          <UsersIcon />
+          <FontAwesomeIcon icon={faUsers} className="h-4 w-4 shrink-0" aria-hidden="true" />
           Performer Database
         </NavLink>
+        <NavLink href="/dashboard/trash">
+          <FontAwesomeIcon icon={faTrash} className="h-4 w-4 shrink-0" aria-hidden="true" />
+          Trash
+        </NavLink>
         <NavLink href="/dashboard/settings">
-          <SettingsIcon />
+          <FontAwesomeIcon icon={faGear} className="h-4 w-4 shrink-0" aria-hidden="true" />
           Settings
         </NavLink>
       </div>
@@ -318,7 +269,7 @@ export function Sidebar({ series, isDemo = false }) {
         aria-label="Open menu"
         aria-expanded={mobileOpen}
       >
-        <HamburgerIcon />
+        <FontAwesomeIcon icon={faBars} className="h-5 w-5" aria-hidden="true" />
       </button>
 
       {/* ── Mobile overlay backdrop ── */}

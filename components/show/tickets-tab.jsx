@@ -26,6 +26,7 @@ export function TicketsTab({ show }) {
     ticket_platform: show.ticket_platform ?? '',
     ticket_price: show.ticket_price ?? '',
     ticket_url: show.ticket_url ?? '',
+    promo_code: show.promo_code ?? '',
     capacity: show.capacity ?? '',
   })
 
@@ -44,6 +45,7 @@ export function TicketsTab({ show }) {
       ticket_price: form.ticket_price !== '' ? parseFloat(form.ticket_price) : null,
       ticket_platform: form.ticket_platform || null,
       ticket_url: form.ticket_url || null,
+      promo_code: form.promo_code || null,
       capacity: form.capacity !== '' ? parseInt(form.capacity) : null,
     })
     setSaving(false)
@@ -51,8 +53,32 @@ export function TicketsTab({ show }) {
     router.refresh()
   }
 
+  const hasTicketLink = !!form.ticket_url
+  const hasPromoCode = !!form.promo_code
+
   return (
     <div className="space-y-6 max-w-2xl">
+      {/* Quick links */}
+      {(hasTicketLink || hasPromoCode) && (
+        <div className="flex flex-wrap items-center gap-3">
+          {hasTicketLink && (
+            <a
+              href={form.ticket_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-coral text-white text-sm font-body font-medium hover:bg-coral/90 transition-colors"
+            >
+              Buy tickets ↗
+            </a>
+          )}
+          {hasPromoCode && (
+            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-peach bg-cream text-sm font-body text-mid">
+              Promo: <span className="font-semibold text-deep tracking-wide">{form.promo_code}</span>
+            </span>
+          )}
+        </div>
+      )}
+
       {/* Stat cards */}
       <div className="grid grid-cols-3 gap-3">
         <StatCard label="Tickets sold" value={sold} />
@@ -94,6 +120,12 @@ export function TicketsTab({ show }) {
             onChange={(e) => handleChange('ticket_url', e.target.value)}
             placeholder="https://..."
             className="sm:col-span-2"
+          />
+          <Input
+            label="Promo code"
+            value={form.promo_code}
+            onChange={(e) => handleChange('promo_code', e.target.value)}
+            placeholder="e.g. GREENROOM20"
           />
           <Input
             label="Capacity"

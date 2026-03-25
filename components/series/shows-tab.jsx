@@ -1,9 +1,16 @@
+'use client'
+
+import { useState, useTransition } from 'react'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Pill } from '@/components/ui/pill'
 import { ProgressBar } from '@/components/ui/progress-bar'
 import { EmptyState } from '@/components/ui/empty-state'
+import { Button } from '@/components/ui/button'
+import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 import { formatDate, formatShortDate, daysUntil } from '@/lib/utils'
 import { cn } from '@/lib/utils'
+import { bulkDeleteShows } from '@/lib/actions/show'
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -107,12 +114,9 @@ function UpcomingShowCard({ show, seriesVenue }) {
 
 // ─── Past show row ────────────────────────────────────────────────────────────
 
-function PastShowRow({ show }) {
-  return (
-    <Link
-      href={`/dashboard/shows/${show.id}`}
-      className="flex items-center gap-3 py-2.5 px-3 rounded-lg hover:bg-peach transition-colors group"
-    >
+function PastShowRow({ show, selectMode, selected, onToggle }) {
+  const rowContent = (
+    <>
       <span className="text-sm font-body text-mid shrink-0 w-24">
         {show.date ? formatShortDate(show.date) : '—'}
       </span>
@@ -134,17 +138,34 @@ function PastShowRow({ show }) {
         )}
         <Pill variant="success">Done</Pill>
       </div>
-    </Link>
+    </>
   )
-}
 
-// ─── Section header ───────────────────────────────────────────────────────────
+  if (selectMode) {
+    return (
+      <div
+        className="flex items-center gap-3 py-2.5 px-3 rounded-lg hover:bg-peach transition-colors cursor-pointer"
+        onClick={onToggle}
+      >
+        <input
+          type="checkbox"
+          checked={selected}
+          onChange={onToggle}
+          onClick={(e) => e.stopPropagation()}
+          className="accent-coral shrink-0"
+        />
+        {rowContent}
+      </div>
+    )
+  }
 
-function SectionHeader({ children }) {
   return (
-    <h2 className="text-xs font-semibold uppercase tracking-wider text-soft/70 font-body mb-3">
-      {children}
-    </h2>
+    <Link
+      href={`/dashboard/shows/${show.id}`}
+      className="flex items-center gap-3 py-2.5 px-3 rounded-lg hover:bg-peach transition-colors group"
+    >
+      {rowContent}
+    </Link>
   )
 }
 
@@ -152,8 +173,45 @@ function SectionHeader({ children }) {
 
 export function ShowsTab({ series, seriesId }) {
   const { upcomingShows, pastShows, venue } = series
+  const router = useRouter()
+  const [isPending, startTransition] = useTransition()
+  const [selectMode, setSelectMode] = useState(false)
+  const [selectedIds, setSelectedIds] = useState(new Set())
+  const [confirmOpen, setConfirmOpen] = useState(false)
 
   const hasAny = upcomingShows.length > 0 || pastShows.length > 0
+
+  function toggleSelect(id) {
+    setSelectedIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
+
+  function handleSelectAll() {
+    if (selectedIds.size === pastShows.length) {
+      setSelectedIds(new Set())
+    } else {
+      setSelectedIds(new Set(pastShows.map((s) => s.id)))
+    }
+  }
+
+  function exitSelectMode() {
+    setSelectMode(false)
+    setSelectedIds(new Set())
+  }
+
+  function handleBulkDelete() {
+    startTransition(async () => {
+      const result = await bulkDeleteShows([...selectedIds])
+      if (result?.error) { alert(result.error); return }
+      setConfirmOpen(false)
+      exitSelectMode()
+      router.refresh()
+    })
+  }
 
   if (!hasAny) {
     return (
@@ -170,7 +228,9 @@ export function ShowsTab({ series, seriesId }) {
     <div className="flex flex-col gap-8 pt-6">
       {upcomingShows.length > 0 && (
         <section>
-          <SectionHeader>Upcoming</SectionHeader>
+          <h2 className="text-xs font-semibold uppercase tracking-wider text-soft/70 font-body mb-3">
+            Upcoming
+          </h2>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {upcomingShows.map((show) => (
               <UpcomingShowCard key={show.id} show={show} seriesVenue={venue} />
@@ -181,14 +241,72 @@ export function ShowsTab({ series, seriesId }) {
 
       {pastShows.length > 0 && (
         <section>
-          <SectionHeader>Past Shows</SectionHeader>
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-xs font-semibold uppercase tracking-wider text-soft/70 font-body">
+              Past Shows
+            </h2>
+            {!selectMode ? (
+              <button
+                onClick={() => setSelectMode(true)}
+                className="text-xs font-body text-soft hover:text-mid transition-colors"
+              >
+                Select
+              </button>
+            ) : (
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={handleSelectAll}
+                  className="text-xs font-body text-soft hover:text-mid transition-colors"
+                >
+                  {selectedIds.size === pastShows.length ? 'Deselect all' : 'Select all'}
+                </button>
+                <button
+                  onClick={exitSelectMode}
+                  className="text-xs font-body text-soft hover:text-mid transition-colors"
+                >
+                  Cancel
+                </button>
+              </div>
+            )}
+          </div>
+
           <div className="rounded-card border border-peach bg-white divide-y divide-peach">
             {pastShows.map((show) => (
-              <PastShowRow key={show.id} show={show} />
+              <PastShowRow
+                key={show.id}
+                show={show}
+                selectMode={selectMode}
+                selected={selectedIds.has(show.id)}
+                onToggle={() => toggleSelect(show.id)}
+              />
             ))}
           </div>
+
+          {selectMode && selectedIds.size > 0 && (
+            <div className="mt-3 flex items-center justify-end gap-3">
+              <span className="text-sm font-body text-soft">{selectedIds.size} selected</span>
+              <Button
+                variant="danger"
+                size="sm"
+                onClick={() => setConfirmOpen(true)}
+              >
+                Move {selectedIds.size} to trash
+              </Button>
+            </div>
+          )}
         </section>
       )}
+
+      <ConfirmDialog
+        open={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+        onConfirm={handleBulkDelete}
+        title={`Move ${selectedIds.size} show${selectedIds.size !== 1 ? 's' : ''} to trash?`}
+        description="These shows will be moved to the trash and hidden from your dashboard."
+        warning="You have 30 days to restore them before they're permanently deleted."
+        confirmLabel="Move to trash"
+        isPending={isPending}
+      />
     </div>
   )
 }

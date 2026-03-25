@@ -20,6 +20,7 @@ import { FinancialsTab } from './financials-tab'
 import { NotesTab } from './notes-tab'
 import { ShowDayMode } from './show-day-mode'
 import { EditShowModal } from '@/components/forms/edit-show-modal'
+import { ShowActionsMenu } from './show-actions-menu'
 
 function DaysAwayPill({ date }) {
   const days = daysUntil(date)
@@ -82,13 +83,14 @@ export function ShowPageLayout({ show, duties = [], activeTab, commLog = [], rec
             </p>
           )}
         </div>
-        <div className="flex gap-2 shrink-0">
+        <div className="flex items-center gap-2 shrink-0">
           <Button variant="secondary" size="sm" onClick={() => setEditOpen(true)}>
             Edit
           </Button>
           <Button variant="primary" size="sm" onClick={enterShowDayMode}>
             Show Day Mode →
           </Button>
+          <ShowActionsMenu show={show} />
         </div>
         <EditShowModal open={editOpen} onClose={() => setEditOpen(false)} show={show} />
       </div>

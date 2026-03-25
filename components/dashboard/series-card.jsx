@@ -1,31 +1,9 @@
 import Link from 'next/link'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faUsers, faLocationDot } from '@fortawesome/free-solid-svg-icons'
 import { Card } from '@/components/ui/card'
 import { Pill } from '@/components/ui/pill'
 import { ShowMiniCard } from './show-mini-card'
-
-function VenueIcon() {
-  return (
-    <svg className="h-3.5 w-3.5 shrink-0 text-soft" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
-      <path fillRule="evenodd" d="M8 1.5a4.5 4.5 0 100 9 4.5 4.5 0 000-9zM2 6a6 6 0 1110.174 4.31l2.998 2.998a.75.75 0 01-1.06 1.06l-2.998-2.998A6 6 0 012 6z" clipRule="evenodd" />
-    </svg>
-  )
-}
-
-function UsersIcon() {
-  return (
-    <svg className="h-3.5 w-3.5 shrink-0 text-soft" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
-      <path d="M7 8a3 3 0 100-6 3 3 0 000 6zm-2 2a3.5 3.5 0 00-3.456 3h10.912A3.5 3.5 0 0010 10H5zM15 11.5a.5.5 0 00-.5-.5h-1v-1a.5.5 0 00-1 0v1h-1a.5.5 0 000 1h1v1a.5.5 0 001 0v-1h1a.5.5 0 00.5-.5z" />
-    </svg>
-  )
-}
-
-function MapPinIcon() {
-  return (
-    <svg className="h-3.5 w-3.5 shrink-0 text-soft" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
-      <path fillRule="evenodd" d="M8 1a5 5 0 00-5 5c0 3.5 5 9 5 9s5-5.5 5-9a5 5 0 00-5-5zm0 6.5a1.5 1.5 0 110-3 1.5 1.5 0 010 3z" clipRule="evenodd" />
-    </svg>
-  )
-}
 
 export function SeriesCard({ series }) {
   const seriesHref = `/dashboard/series/${series.id}`
@@ -74,12 +52,12 @@ export function SeriesCard({ series }) {
         <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-3 text-xs font-body text-soft">
           {series.venue && (
             <span className="flex items-center gap-1.5">
-              <MapPinIcon />
+              <FontAwesomeIcon icon={faLocationDot} className="h-3.5 w-3.5 shrink-0 text-soft" aria-hidden="true" />
               {series.venue}
             </span>
           )}
           <span className="flex items-center gap-1.5">
-            <UsersIcon />
+            <FontAwesomeIcon icon={faUsers} className="h-3.5 w-3.5 shrink-0 text-soft" aria-hidden="true" />
             {series.performerCount === 0
               ? 'No performers'
               : `${series.performerCount} performer${series.performerCount !== 1 ? 's' : ''}`}
