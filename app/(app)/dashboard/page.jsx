@@ -4,20 +4,12 @@ import { createClient } from '@/lib/supabase/server'
 import { getDashboardData } from '@/lib/queries/dashboard'
 import { Button } from '@/components/ui/button'
 import { EmptyState } from '@/components/ui/empty-state'
+import { StatBadge } from '@/components/ui/stat-badge'
 import { SeriesCard } from '@/components/dashboard/series-card'
 import { NewSeriesTrigger } from '@/components/dashboard/new-series-trigger'
 
 export const metadata = {
   title: 'All Shows — Greenroom',
-}
-
-function StatBadge({ value, label }) {
-  return (
-    <span className="text-sm font-body text-soft">
-      <span className="font-semibold text-deep">{value}</span>{' '}
-      {label}
-    </span>
-  )
 }
 
 export default async function DashboardPage() {

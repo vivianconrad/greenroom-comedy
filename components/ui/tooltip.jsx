@@ -1,18 +1,69 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import { cn } from '@/lib/utils'
 
+const GAP = 8 // px between anchor and tooltip
+
+function TooltipPortal({ anchorRef, visible, content, side, className }) {
+  const [coords, setCoords] = useState(null)
+
+  useEffect(() => {
+    if (!visible || !anchorRef.current) return
+    const r = anchorRef.current.getBoundingClientRect()
+    if (side === 'top')    setCoords({ top: r.top - GAP,    left: r.left + r.width / 2,  origin: 'bottom center' })
+    if (side === 'bottom') setCoords({ top: r.bottom + GAP, left: r.left + r.width / 2,  origin: 'top center'    })
+    if (side === 'left')   setCoords({ top: r.top + r.height / 2, left: r.left - GAP,   origin: 'right center'  })
+    if (side === 'right')  setCoords({ top: r.top + r.height / 2, left: r.right + GAP,  origin: 'left center'   })
+  }, [visible, side, anchorRef])
+
+  if (!visible || !coords) return null
+
+  const translateMap = {
+    top:    '-translate-x-1/2 -translate-y-full',
+    bottom: '-translate-x-1/2',
+    left:   '-translate-x-full -translate-y-1/2',
+    right:  '-translate-y-1/2',
+  }
+
+  const arrowMap = {
+    top:    'absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-deep',
+    bottom: 'absolute bottom-full left-1/2 -translate-x-1/2 border-4 border-transparent border-b-deep',
+    left:   'absolute left-full top-1/2 -translate-y-1/2 border-4 border-transparent border-l-deep',
+    right:  'absolute right-full top-1/2 -translate-y-1/2 border-4 border-transparent border-r-deep',
+  }
+
+  return createPortal(
+    <span
+      role="tooltip"
+      style={{ top: coords.top, left: coords.left, position: 'fixed' }}
+      className={cn(
+        'z-9999 w-max max-w-64 px-3 py-2 rounded-lg',
+        'bg-deep text-cream text-xs font-body leading-snug',
+        'shadow-lg pointer-events-none',
+        translateMap[side],
+        className
+      )}
+    >
+      {content}
+      <span aria-hidden="true" className={arrowMap[side]} />
+    </span>,
+    document.body
+  )
+}
+
 // ─── Tooltip wrapper ──────────────────────────────────────────────────────────
-// Wrap any element to give it a hover/focus tooltip.
 
 function Tooltip({ children, content, side = 'top', className }) {
   const [visible, setVisible] = useState(false)
+  const anchorRef = useRef(null)
 
   if (!content) return children
 
   return (
     <span
+      ref={anchorRef}
       className="relative inline-flex items-center"
       onMouseEnter={() => setVisible(true)}
       onMouseLeave={() => setVisible(false)}
@@ -20,42 +71,18 @@ function Tooltip({ children, content, side = 'top', className }) {
       onBlur={() => setVisible(false)}
     >
       {children}
-      {visible && (
-        <span
-          role="tooltip"
-          className={cn(
-            'absolute z-50 w-max max-w-64 px-3 py-2 rounded-lg',
-            'bg-deep text-cream text-xs font-body leading-snug',
-            'shadow-lg pointer-events-none',
-            side === 'top' && 'bottom-full left-1/2 -translate-x-1/2 mb-2',
-            side === 'bottom' && 'top-full left-1/2 -translate-x-1/2 mt-2',
-            side === 'left' && 'right-full top-1/2 -translate-y-1/2 mr-2',
-            side === 'right' && 'left-full top-1/2 -translate-y-1/2 ml-2',
-            className
-          )}
-        >
-          {content}
-          {/* Arrow */}
-          {side === 'top' && (
-            <span
-              aria-hidden="true"
-              className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-deep"
-            />
-          )}
-          {side === 'bottom' && (
-            <span
-              aria-hidden="true"
-              className="absolute bottom-full left-1/2 -translate-x-1/2 border-4 border-transparent border-b-deep"
-            />
-          )}
-        </span>
-      )}
+      <TooltipPortal
+        anchorRef={anchorRef}
+        visible={visible}
+        content={content}
+        side={side}
+        className={className}
+      />
     </span>
   )
 }
 
 // ─── Info icon tooltip ────────────────────────────────────────────────────────
-// A small ⓘ icon that shows a tooltip on hover/focus.
 
 function InfoTooltip({ content, side = 'top', className }) {
   return (
