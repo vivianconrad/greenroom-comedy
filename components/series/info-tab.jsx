@@ -3,7 +3,26 @@
 import { useState, useRef, useTransition } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Select } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
+
+const CONTACT_ROLES = [
+  { value: 'Venue Manager',      label: 'Venue Manager' },
+  { value: 'Box Office',         label: 'Box Office' },
+  { value: 'Bar Manager',        label: 'Bar Manager' },
+  { value: 'Sound Engineer',     label: 'Sound Engineer' },
+  { value: 'AV Tech',            label: 'AV Tech' },
+  { value: 'Lighting Tech',      label: 'Lighting Tech' },
+  { value: 'Stage Manager',      label: 'Stage Manager' },
+  { value: 'Photographer',       label: 'Photographer' },
+  { value: 'Videographer',       label: 'Videographer' },
+  { value: 'Graphic Designer',   label: 'Graphic Designer' },
+  { value: 'Producer',           label: 'Producer' },
+  { value: 'Publicist',          label: 'Publicist' },
+  { value: 'Sponsor Contact',    label: 'Sponsor Contact' },
+  { value: 'Ticketing Contact',  label: 'Ticketing Contact' },
+  { value: 'Other',              label: 'Other…' },
+]
 import { updateSeriesInfo } from '@/lib/actions/series'
 
 // ─── Copy button ──────────────────────────────────────────────────────────────
@@ -133,6 +152,15 @@ function LoginCard({ entry, onChange, onRemove }) {
 // ─── Contact card ─────────────────────────────────────────────────────────────
 
 function ContactCard({ entry, onChange, onRemove }) {
+  const isCustomRole = entry.role && !CONTACT_ROLES.some((r) => r.value === entry.role)
+  const selectValue = isCustomRole ? 'Other' : (entry.role ?? '')
+
+  function handleRoleSelect(e) {
+    const val = e.target.value
+    if (val !== 'Other') onChange('role', val)
+    else onChange('role', '')
+  }
+
   return (
     <div className="rounded-card border border-peach bg-white p-4 flex flex-col gap-3">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -142,13 +170,23 @@ function ContactCard({ entry, onChange, onRemove }) {
           onChange={(e) => onChange('name', e.target.value)}
           placeholder="e.g. Jamie"
         />
-        <Input
+        <Select
           label="Role"
-          value={entry.role}
-          onChange={(e) => onChange('role', e.target.value)}
-          placeholder="e.g. Venue Manager, Sound Engineer"
+          value={selectValue}
+          onChange={handleRoleSelect}
+          options={CONTACT_ROLES}
+          placeholder="Select a role…"
         />
       </div>
+
+      {(selectValue === 'Other' || isCustomRole) && (
+        <Input
+          label="Custom role"
+          value={isCustomRole ? entry.role : ''}
+          onChange={(e) => onChange('role', e.target.value)}
+          placeholder="e.g. Lighting Tech, Security"
+        />
+      )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <CopyField

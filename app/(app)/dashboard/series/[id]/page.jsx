@@ -58,7 +58,7 @@ export default async function SeriesDetailPage({ params, searchParams }) {
     if (show) redirect(`/dashboard/shows/${show.id}`)
   }
 
-  const activeTab = ['shows', 'performers', 'collections', 'checklist', 'duties', 'comms', 'info'].includes(tab)
+  const activeTab = ['shows', 'performers', 'checklist', 'collections', 'duties', 'comms', 'info'].includes(tab)
     ? tab
     : 'shows'
 

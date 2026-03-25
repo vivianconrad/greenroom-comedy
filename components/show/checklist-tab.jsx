@@ -46,10 +46,24 @@ const SAVE_OPTIONS = [
   },
 ]
 
+function getItemUrgency(item, showDate, today) {
+  if (!showDate || item.weeks_out == null || item.done || item.stage !== 'pre') return null
+  const deadline = new Date(showDate)
+  deadline.setDate(deadline.getDate() - item.weeks_out * 7)
+  const daysUntil = Math.ceil((deadline - today) / (1000 * 60 * 60 * 24))
+  if (daysUntil < 0) return 'overdue'
+  if (daysUntil <= 7) return 'due-soon'
+  return null
+}
+
 export function ChecklistTab({ show }) {
   const router = useRouter()
   const pathname = usePathname()
   const [, startTransition] = useTransition()
+
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  const showDate = show.date ? new Date(show.date) : null
 
   const [activeCategory, setActiveCategory] = useState(null)
   const [activeTag, setActiveTag] = useState(null)
@@ -324,9 +338,16 @@ export function ChecklistTab({ show }) {
                       {editMode && item.owner && (
                         <span className="text-xs text-soft hidden sm:block">{item.owner}</span>
                       )}
-                      {item.weeks_out != null && (
-                        <span className="text-xs text-soft hidden sm:block">{item.weeks_out}w</span>
-                      )}
+                      {item.weeks_out != null && (() => {
+                        const urgency = getItemUrgency(item, showDate, today)
+                        if (urgency === 'overdue') return (
+                          <span className="text-xs font-medium text-red hidden sm:block">Overdue</span>
+                        )
+                        if (urgency === 'due-soon') return (
+                          <span className="text-xs font-medium text-coral hidden sm:block">Due now</span>
+                        )
+                        return <span className="text-xs text-soft hidden sm:block">{item.weeks_out}w out</span>
+                      })()}
                       {item.comm_template_id && !editMode && (
                         <Link
                           href={`${pathname}?tab=comms&template=${item.comm_template_id}`}

@@ -6,8 +6,8 @@ import { Tabs } from '@/components/ui/tabs'
 const TABS = [
   { key: 'shows', label: 'Shows' },
   { key: 'performers', label: 'Performers' },
-  { key: 'collections', label: 'Collections' },
   { key: 'checklist', label: 'Checklist Template' },
+  { key: 'collections', label: 'Collections' },
   { key: 'duties', label: 'Duty Templates' },
   { key: 'comms', label: 'Comms' },
   { key: 'info', label: 'Info' },
