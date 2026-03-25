@@ -2,11 +2,11 @@ import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { getDashboardData } from '@/lib/queries/dashboard'
-import { Button } from '@/components/ui/button'
-import { EmptyState } from '@/components/ui/empty-state'
-import { StatBadge } from '@/components/ui/stat-badge'
-import { SeriesCard } from '@/components/dashboard/series-card'
-import { NewSeriesTrigger } from '@/components/dashboard/new-series-trigger'
+import { Button } from '@/components/atoms/button'
+import { EmptyState } from '@/components/atoms/empty-state'
+import { StatBadge } from '@/components/atoms/stat-badge'
+import { SeriesCard } from '@/components/organisms/dashboard/series-card'
+import { NewSeriesTrigger } from '@/components/organisms/dashboard/new-series-trigger'
 
 export const metadata = {
   title: 'All Shows — Greenroom',

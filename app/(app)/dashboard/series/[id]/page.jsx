@@ -1,25 +1,25 @@
 import { notFound, redirect } from 'next/navigation'
-import { Breadcrumb } from '@/components/layout/breadcrumb'
-import { Pill } from '@/components/ui/pill'
-import { SeriesTabBar } from '@/components/series/series-tab-bar'
-import { ShowsTab } from '@/components/series/shows-tab'
-import { PerformersTab } from '@/components/series/performers-tab'
-import { CollectionsTab } from '@/components/series/collections-tab'
-import { ChecklistTemplateTab } from '@/components/series/checklist-template-tab'
-import { DutyTemplatesTab } from '@/components/series/duty-templates-tab'
-import { CommsTab } from '@/components/series/comms-tab'
-import { InfoTab } from '@/components/series/info-tab'
-import { SeriesOverviewTab } from '@/components/series/overview-tab'
-import { NewShowTrigger } from '@/components/series/new-show-trigger'
-import { EditSeriesTrigger } from '@/components/series/edit-series-trigger'
-import { SeriesActionsMenu } from '@/components/series/series-actions-menu'
-import { CopyBadge } from '@/components/ui/copy-badge'
+import { Breadcrumb } from '@/components/molecules/breadcrumb'
+import { Pill } from '@/components/atoms/pill'
+import { SeriesTabBar } from '@/components/organisms/series/series-tab-bar'
+import { ShowsTab } from '@/components/organisms/series/shows-tab'
+import { PerformersTab } from '@/components/organisms/series/performers-tab'
+import { CollectionsTab } from '@/components/organisms/series/collections-tab'
+import { ChecklistTemplateTab } from '@/components/organisms/series/checklist-template-tab'
+import { DutyTemplatesTab } from '@/components/organisms/series/duty-templates-tab'
+import { CommsTab } from '@/components/organisms/series/comms-tab'
+import { SeriesOverviewTab } from '@/components/organisms/series/overview-tab'
+import { NewShowTrigger } from '@/components/organisms/series/new-show-trigger'
+import { EditSeriesTrigger } from '@/components/organisms/series/edit-series-trigger'
+import { SeriesActionsMenu } from '@/components/organisms/series/series-actions-menu'
+import { CopyBadge } from '@/components/atoms/copy-badge'
 import {
   getSeriesDetail,
   getCollectionsForSeries,
   getChecklistTemplate,
   getCommTemplates,
   getSeriesPerformers,
+  getAvailablePerformers,
   getDutyTemplates,
 } from '@/lib/queries/series-detail'
 
@@ -41,7 +41,7 @@ export default async function SeriesDetailPage({ params, searchParams }) {
   // Parallel data fetch — only load what's needed for active tab, but series
   // detail is always needed for the header. Fetch everything in parallel to
   // keep it simple; queries are fast and conditional fetching adds complexity.
-  const [series, collections, checklistTasks, dutyTemplates, commTemplates, performers] =
+  const [series, collections, checklistTasks, dutyTemplates, commTemplates, performers, availablePerformers] =
     await Promise.all([
       getSeriesDetail(id),
       getCollectionsForSeries(id),
@@ -49,6 +49,7 @@ export default async function SeriesDetailPage({ params, searchParams }) {
       getDutyTemplates(id),
       getCommTemplates(id),
       getSeriesPerformers(id),
+      getAvailablePerformers(id),
     ])
 
   if (!series) notFound()
@@ -59,7 +60,7 @@ export default async function SeriesDetailPage({ params, searchParams }) {
     if (show) redirect(`/dashboard/shows/${show.id}`)
   }
 
-  const activeTab = ['overview', 'shows', 'performers', 'checklist', 'collections', 'duties', 'comms', 'info'].includes(tab)
+  const activeTab = ['overview', 'shows', 'performers', 'checklist', 'comms', 'duties', 'collections'].includes(tab)
     ? tab
     : 'overview'
 
@@ -161,22 +162,19 @@ export default async function SeriesDetailPage({ params, searchParams }) {
         <ShowsTab series={series} seriesId={id} />
       )}
       {activeTab === 'performers' && (
-        <PerformersTab performers={performers} seriesId={id} />
+        <PerformersTab performers={performers} seriesId={id} availablePerformers={availablePerformers} />
       )}
-      {activeTab === 'collections' && (
+{activeTab === 'collections' && (
         <CollectionsTab collections={collections} seriesId={id} />
       )}
       {activeTab === 'checklist' && (
-        <ChecklistTemplateTab tasks={checklistTasks} seriesId={id} commTemplates={commTemplates} />
+        <ChecklistTemplateTab tasks={checklistTasks} seriesId={id} commTemplates={commTemplates} contacts={series.contacts ?? []} />
       )}
       {activeTab === 'duties' && (
-        <DutyTemplatesTab templates={dutyTemplates} seriesId={id} commTemplates={commTemplates} />
+        <DutyTemplatesTab templates={dutyTemplates} seriesId={id} commTemplates={commTemplates} contacts={series.contacts ?? []} />
       )}
       {activeTab === 'comms' && (
         <CommsTab templates={commTemplates} seriesId={id} />
-      )}
-      {activeTab === 'info' && (
-        <InfoTab series={series} seriesId={id} />
       )}
     </div>
   )

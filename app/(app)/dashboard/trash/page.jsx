@@ -2,8 +2,8 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { getDeletedItems } from '@/lib/queries/trash'
-import { Breadcrumb } from '@/components/layout/breadcrumb'
-import { TrashList } from '@/components/trash/trash-list'
+import { Breadcrumb } from '@/components/molecules/breadcrumb'
+import { TrashList } from '@/components/organisms/trash/trash-list'
 
 export const metadata = {
   title: 'Trash — Greenroom',

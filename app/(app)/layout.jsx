@@ -1,8 +1,8 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { getSeriesWithShows } from '@/lib/queries/series'
-import { Sidebar } from '@/components/layout/sidebar'
-import { DemoBanner } from '@/components/layout/demo-banner'
+import { Sidebar } from '@/components/templates/sidebar'
+import { DemoBanner } from '@/components/molecules/demo-banner'
 
 const DEMO_EMAIL = 'demo@greenroom.app'
 

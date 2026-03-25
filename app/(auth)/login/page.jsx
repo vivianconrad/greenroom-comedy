@@ -5,8 +5,8 @@ import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { login, loginAsDemo } from '@/lib/actions/auth'
 // import { createClient } from '@/lib/supabase/client'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
+import { Button } from '@/components/atoms/button'
+import { Input } from '@/components/atoms/input'
 import { isValidEmail } from '@/lib/utils'
 
 function CheckEmailMessage() {

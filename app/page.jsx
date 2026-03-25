@@ -1,11 +1,11 @@
 import { createClient } from '@/lib/supabase/server'
-import { Navbar } from '@/components/landing/navbar'
-import { HeroSection } from '@/components/landing/hero-section'
-import { SocialProofBar } from '@/components/landing/social-proof-bar'
-import { FeaturesSection } from '@/components/landing/features-section'
-import { HowItWorksSection } from '@/components/landing/how-it-works-section'
-import { CtaSection } from '@/components/landing/cta-section'
-import { Footer } from '@/components/landing/footer'
+import { Navbar } from '@/components/organisms/landing/navbar'
+import { HeroSection } from '@/components/organisms/landing/hero-section'
+import { SocialProofBar } from '@/components/organisms/landing/social-proof-bar'
+import { FeaturesSection } from '@/components/organisms/landing/features-section'
+import { HowItWorksSection } from '@/components/organisms/landing/how-it-works-section'
+import { CtaSection } from '@/components/organisms/landing/cta-section'
+import { Footer } from '@/components/organisms/landing/footer'
 
 export const metadata = {
   title: 'Greenroom — Show production software for comedy producers',

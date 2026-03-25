@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation'
 import { getShowDetail } from '@/lib/queries/show'
 import { getCommLog, getRecipientGroups } from '@/lib/queries/comms'
-import { ShowPageLayout } from '@/components/show/show-page-layout'
+import { ShowPageLayout } from '@/components/templates/show-page-layout'
 
 export default async function ShowPage({ params, searchParams }) {
   const { id } = await params
