@@ -7,6 +7,7 @@ import { Input } from '@/components/atoms/input'
 import { fetchSheetAsCSV } from '@/lib/actions/performers'
 import { saveSheetSync, deleteSheetSync, runSheetSync } from '@/lib/actions/sheet-sync'
 import { cn } from '@/lib/utils'
+import { parseCSV } from '@/lib/csv'
 
 // ─── Shared column definitions (mirrors ImportPerformersModal) ─────────────────
 
@@ -51,11 +52,8 @@ function autoDetect(headers) {
   return mapping
 }
 
-async function parseCSVToRows(csvText) {
-  const XLSX = await import('xlsx')
-  const wb = XLSX.read(csvText, { type: 'string' })
-  const ws = wb.Sheets[wb.SheetNames[0]]
-  return XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' })
+function parseCSVToRows(csvText) {
+  return parseCSV(csvText)
 }
 
 // ─── Sub-components ────────────────────────────────────────────────────────────
