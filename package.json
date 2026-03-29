@@ -37,7 +37,7 @@
     "eslint-config-next": "16.2.1",
     "jest": "^30.3.0",
     "jest-environment-jsdom": "^30.3.0",
-    "supabase": "^2.84.0",
+    "supabase": "^2.84.2",
     "tailwindcss": "^4",
     "typescript": "^5"
   }
