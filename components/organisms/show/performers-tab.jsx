@@ -8,6 +8,7 @@ import { useCopyToClipboard } from '@/lib/hooks'
 import {
   togglePerformerPaid,
   updatePerformerRole,
+  addPerformerToShow,
   createCrewMember,
   updateCrewMember,
   deleteCrewMember,
@@ -15,6 +16,7 @@ import {
 import { Button } from '@/components/atoms/button'
 import { Pill } from '@/components/atoms/pill'
 import { Card } from '@/components/atoms/card'
+import { PerformerCombobox } from '@/components/atoms/performer-combobox'
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -332,12 +334,15 @@ function CrewRow({ crew }) {
 
 // ── Main component ────────────────────────────────────────────────────────────
 
-export function PerformersTab({ show }) {
+export function PerformersTab({ show, availablePerformers = [] }) {
   const router = useRouter()
   const pathname = usePathname()
   const [, startTransition] = useTransition()
   const [selectedId, setSelectedId] = useState(null)
   const [addingCrew, setAddingCrew] = useState(false)
+  const [addingPerformer, setAddingPerformer] = useState(false)
+  const [addError, setAddError] = useState(null)
+  const [addPending, setAddPending] = useState(false)
   const [copiedIntake, copyIntake] = useCopyToClipboard()
 
   const selected = show.performers.find((p) => p.showPerformerId === selectedId)
@@ -355,6 +360,16 @@ export function PerformersTab({ show }) {
       await updatePerformerRole(showPerformerId, role)
       router.refresh()
     })
+  }
+
+  async function handleAddPerformer(performerId) {
+    setAddPending(true)
+    setAddError(null)
+    const result = await addPerformerToShow(show.id, performerId)
+    setAddPending(false)
+    if (result?.error) { setAddError(result.error); return }
+    setAddingPerformer(false)
+    router.refresh()
   }
 
   return (
@@ -379,13 +394,25 @@ export function PerformersTab({ show }) {
               Browse database
             </Button>
           </Link>
-          <Link href={`/dashboard/performers?addTo=${show.id}`}>
-            <Button variant="secondary" size="sm">
+          {!addingPerformer && (
+            <Button variant="secondary" size="sm" onClick={() => { setAddingPerformer(true); setAddError(null) }}>
               + Add performer
             </Button>
-          </Link>
+          )}
         </div>
       </div>
+
+      {addingPerformer && (
+        <div className="mb-4">
+          <PerformerCombobox
+            performers={availablePerformers}
+            onSelect={handleAddPerformer}
+            onClose={() => { setAddingPerformer(false); setAddError(null) }}
+            isPending={addPending}
+            error={addError}
+          />
+        </div>
+      )}
 
       <div className="flex flex-col lg:flex-row gap-4">
         {/* Performer list */}

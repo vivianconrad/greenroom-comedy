@@ -81,7 +81,7 @@ begin
                      notes_attendance, notes_energy, notes_worked, notes_next_time)
     values (v_series, current_date - 90, '19:00', '19:30', '20:00', 'The Laughing Crow', 'done',
             15.00, 82, 90,
-            '82/90 — best turnout yet',
+            82,
             'Electric from the start. Crowd was warm and loud all the way through.',
             'Nikki closing was the right call — she absolutely destroyed.',
             'Book Brian and Nikki together again. That lineup is magic.')
@@ -93,7 +93,7 @@ begin
                      notes_attendance, notes_energy, notes_didnt_work)
     values (v_series, current_date - 60, '19:00', '19:30', '20:00', 'The Laughing Crow', 'done',
             15.00, 64, 90,
-            '64/90 — below average, rainy night',
+            64,
             'Slow start. Second half picked up once Jenny warmed the room.',
             'Running order felt off — opener was too dry for a cold crowd.')
     returning id into v_s2;
@@ -104,7 +104,7 @@ begin
                      notes_attendance, notes_worked)
     values (v_series, current_date - 30, '19:00', '19:30', '20:00', 'The Laughing Crow', 'done',
             15.00, 76, 90,
-            '76/90 — solid showing',
+            76,
             'Leslie''s set was a standout. Crowd kept quoting her stuff after the show.')
     returning id into v_s3;
 

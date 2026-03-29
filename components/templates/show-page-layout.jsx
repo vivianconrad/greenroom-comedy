@@ -30,7 +30,7 @@ function DaysAwayPill({ date }) {
   return <Pill variant="info">{days}d away</Pill>
 }
 
-export function ShowPageLayout({ show, duties = [], activeTab, commLog = [], recipientGroups = {}, commsPreset = null }) {
+export function ShowPageLayout({ show, duties = [], activeTab, commLog = [], recipientGroups = {}, commsPreset = null, availablePerformers = [] }) {
   const searchParams = useSearchParams()
   const router = useRouter()
   const pathname = usePathname()
@@ -99,7 +99,7 @@ export function ShowPageLayout({ show, duties = [], activeTab, commLog = [], rec
 
       {activeTab === 'dashboard' && <DashboardTab show={show} />}
       {activeTab === 'checklist' && <ChecklistTab show={show} />}
-      {activeTab === 'performers' && <PerformersTab show={show} />}
+      {activeTab === 'performers' && <PerformersTab show={show} availablePerformers={availablePerformers} />}
       {activeTab === 'runofshow' && <RunOfShowTab show={show} />}
       {activeTab === 'duties' && <DutiesTab show={show} duties={show.duties ?? duties} />}
       {activeTab === 'promo' && <PromoTab show={show} />}

@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation'
-import { getShowDetail } from '@/lib/queries/show'
+import { getShowDetail, getAvailablePerformersForShow } from '@/lib/queries/show'
 import { getCommLog, getRecipientGroups } from '@/lib/queries/comms'
 import { ShowPageLayout } from '@/components/templates/show-page-layout'
 
@@ -7,10 +7,11 @@ export default async function ShowPage({ params, searchParams }) {
   const { id } = await params
   const { tab = 'dashboard', group, template } = await searchParams
 
-  const [show, commLog, recipientGroups] = await Promise.all([
+  const [show, commLog, recipientGroups, availablePerformers] = await Promise.all([
     getShowDetail(id),
     getCommLog(id),
     getRecipientGroups(id),
+    getAvailablePerformersForShow(id),
   ])
 
   if (!show) notFound()
@@ -25,6 +26,7 @@ export default async function ShowPage({ params, searchParams }) {
       commLog={commLog}
       recipientGroups={recipientGroups}
       commsPreset={commsPreset}
+      availablePerformers={availablePerformers}
     />
   )
 }

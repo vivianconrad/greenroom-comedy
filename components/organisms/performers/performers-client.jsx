@@ -9,8 +9,10 @@ import { Modal } from '@/components/atoms/modal'
 import { Textarea } from '@/components/atoms/textarea'
 import { AddPerformerModal } from '@/components/organisms/performers/add-performer-modal'
 import { ImportPerformersModal } from '@/components/organisms/performers/import-performers-modal'
+import { MergePerformersModal } from '@/components/organisms/performers/merge-performers-modal'
+import { MergeSuggestionsModal } from '@/components/organisms/performers/merge-suggestions-modal'
 import { SheetSyncSection } from '@/components/organisms/performers/sheet-sync-section'
-import { updatePerformer, addPerformerToSeries, removePerformerFromSeries, deletePerformers } from '@/lib/actions/performers'
+import { updatePerformer, addPerformerToSeries, removePerformerFromSeries, deletePerformers, findPerformerDuplicates } from '@/lib/actions/performers'
 import { InfoBanner } from '@/components/atoms/info-banner'
 import { formatShortDate, cn } from '@/lib/utils'
 
@@ -402,6 +404,18 @@ export function PerformersClient({ performers, allSeries, sheetSync = null, page
   const [selectedIds, setSelectedIds] = useState(new Set())
   const [deleteConfirm, setDeleteConfirm] = useState(false)
   const [isDeleting, startDeleteTransition] = useTransition()
+  const [mergeOpen, setMergeOpen] = useState(false)
+  const [suggestionsOpen, setSuggestionsOpen] = useState(false)
+  const [suggestions, setSuggestions] = useState(null)
+  const [isFindingDuplicates, startFindTransition] = useTransition()
+
+  function handleFindDuplicates() {
+    startFindTransition(async () => {
+      const result = await findPerformerDuplicates()
+      setSuggestions(result.suggestions ?? [])
+      setSuggestionsOpen(true)
+    })
+  }
 
   const totalPages = Math.ceil(total / pageSize)
   const activeFilter = initialSeries || 'all'
@@ -492,6 +506,9 @@ export function PerformersClient({ performers, allSeries, sheetSync = null, page
       {/* ── Google Sheet sync + action buttons ── */}
       <div className="flex items-start gap-2">
         <div className="flex items-center gap-2 shrink-0">
+          <Button variant="ghost" size="md" onClick={handleFindDuplicates} loading={isFindingDuplicates}>
+            Find duplicates
+          </Button>
           <Button variant="secondary" size="md" onClick={() => setImportOpen(true)}>
             Import
           </Button>
@@ -541,6 +558,11 @@ export function PerformersClient({ performers, allSeries, sheetSync = null, page
             <Button variant="ghost" size="sm" disabled>
               Book for show
             </Button>
+            {selectedIds.size === 2 && (
+              <Button variant="secondary" size="sm" onClick={() => setMergeOpen(true)}>
+                Merge
+              </Button>
+            )}
             {deleteConfirm ? (
               <>
                 <span className="text-mid text-xs">Delete {selectedIds.size}?</span>
@@ -757,6 +779,22 @@ export function PerformersClient({ performers, allSeries, sheetSync = null, page
 
       <AddPerformerModal open={addOpen} onClose={() => setAddOpen(false)} />
       <ImportPerformersModal open={importOpen} onClose={() => setImportOpen(false)} />
+      {mergeOpen && (
+        <MergePerformersModal
+          open={mergeOpen}
+          onClose={() => setMergeOpen(false)}
+          performers={performers.filter((p) => selectedIds.has(p.id))}
+          onSuccess={() => { setSelectedIds(new Set()); router.refresh() }}
+        />
+      )}
+      {suggestionsOpen && suggestions !== null && (
+        <MergeSuggestionsModal
+          open={suggestionsOpen}
+          onClose={() => setSuggestionsOpen(false)}
+          suggestions={suggestions}
+          onMerged={() => router.refresh()}
+        />
+      )}
       <EditPerformerModal
         open={!!editPerformer}
         onClose={() => setEditPerformer(null)}
