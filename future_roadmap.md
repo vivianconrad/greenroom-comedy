@@ -73,6 +73,11 @@ Last updated: March 2026
 - Performer merge (combine duplicate records)
 - Availability calendar view — visual "who's available when" before booking a lineup
 
+### Adding Performers to a Show
+
+- The current flow for booking a performer onto a specific show needs rethinking — too many steps
+- Ideas: quick-add from the performer database with a show picker, drag-from-roster onto show, or a "book for show" button on each performer row that opens a show selector
+
 ---
 
 ## Phase 3: Communications
