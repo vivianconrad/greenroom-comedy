@@ -705,49 +705,53 @@ export function PerformersClient({ performers, allSeries, sheetSync = null, page
       )}
 
       {/* ── Pagination ── */}
-      {totalPages > 1 && (
+      {total > 0 && (
         <div className="flex items-center justify-between text-sm font-body text-soft">
           <span>
-            {page * pageSize + 1}–{Math.min((page + 1) * pageSize, total)} of{' '}
-            <span className="font-semibold text-deep">{total}</span>
+            {totalPages > 1
+              ? <>{page * pageSize + 1}–{Math.min((page + 1) * pageSize, total)} of <span className="font-semibold text-deep">{total}</span></>
+              : <><span className="font-semibold text-deep">{total}</span> {total === 1 ? 'performer' : 'performers'}</>
+            }
           </span>
-          <div className="flex items-center gap-1">
-            <button
-              onClick={() => navigate({ page: 0 })}
-              disabled={page === 0}
-              className="px-2 py-1 rounded hover:bg-peach disabled:opacity-30 disabled:cursor-default transition-colors"
-              title="First page"
-            >
-              ««
-            </button>
-            <button
-              onClick={() => navigate({ page: page - 1 })}
-              disabled={page === 0}
-              className="px-2 py-1 rounded hover:bg-peach disabled:opacity-30 disabled:cursor-default transition-colors"
-              title="Previous page"
-            >
-              ‹ Prev
-            </button>
-            <span className="px-3 text-mid">
-              Page {page + 1} of {totalPages}
-            </span>
-            <button
-              onClick={() => navigate({ page: page + 1 })}
-              disabled={page >= totalPages - 1}
-              className="px-2 py-1 rounded hover:bg-peach disabled:opacity-30 disabled:cursor-default transition-colors"
-              title="Next page"
-            >
-              Next ›
-            </button>
-            <button
-              onClick={() => navigate({ page: totalPages - 1 })}
-              disabled={page >= totalPages - 1}
-              className="px-2 py-1 rounded hover:bg-peach disabled:opacity-30 disabled:cursor-default transition-colors"
-              title="Last page"
-            >
-              »»
-            </button>
-          </div>
+          {totalPages > 1 && (
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => navigate({ page: 0 })}
+                disabled={page === 0}
+                className="px-2 py-1 rounded hover:bg-peach disabled:opacity-30 disabled:cursor-default transition-colors"
+                title="First page"
+              >
+                ««
+              </button>
+              <button
+                onClick={() => navigate({ page: page - 1 })}
+                disabled={page === 0}
+                className="px-2 py-1 rounded hover:bg-peach disabled:opacity-30 disabled:cursor-default transition-colors"
+                title="Previous page"
+              >
+                ‹ Prev
+              </button>
+              <span className="px-3 text-mid">
+                Page {page + 1} of {totalPages}
+              </span>
+              <button
+                onClick={() => navigate({ page: page + 1 })}
+                disabled={page >= totalPages - 1}
+                className="px-2 py-1 rounded hover:bg-peach disabled:opacity-30 disabled:cursor-default transition-colors"
+                title="Next page"
+              >
+                Next ›
+              </button>
+              <button
+                onClick={() => navigate({ page: totalPages - 1 })}
+                disabled={page >= totalPages - 1}
+                className="px-2 py-1 rounded hover:bg-peach disabled:opacity-30 disabled:cursor-default transition-colors"
+                title="Last page"
+              >
+                »»
+              </button>
+            </div>
+          )}
         </div>
       )}
 
