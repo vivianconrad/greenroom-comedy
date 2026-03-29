@@ -15,30 +15,34 @@ import { cn } from '@/lib/utils'
 // ─── Field definitions ─────────────────────────────────────────────────────────
 
 const FIELDS = [
-  { key: 'name', label: 'Name', required: true },
-  { key: 'pronouns', label: 'Pronouns' },
-  { key: 'act_type', label: 'Act type' },
-  { key: 'instagram', label: 'Instagram' },
-  { key: 'email', label: 'Email' },
-  { key: 'contact_method', label: 'Contact method' },
-  { key: 'how_we_met', label: 'How we met' },
-  { key: 'notes', label: 'Notes' },
-  { key: 'tags', label: 'Tags' },
-  { key: 'book_again', label: 'Book again' },
+  { key: 'name',               label: 'Name',               required: true },
+  { key: 'stage_name',         label: 'Stage name' },
+  { key: 'pronouns',           label: 'Pronouns' },
+  { key: 'act_type',           label: 'Act type' },
+  { key: 'instagram',          label: 'Instagram' },
+  { key: 'email',              label: 'Email' },
+  { key: 'contact_method',     label: 'Contact method' },
+  { key: 'how_we_met',         label: 'How we met' },
+  { key: 'clip_url',           label: 'Clip URL' },
+  { key: 'notes',              label: 'Notes' },
+  { key: 'tags',               label: 'Tags' },
+  { key: 'book_again',         label: 'Book again' },
   { key: 'audience_favourite', label: 'Audience favourite' },
 ]
 
 const ALIASES = {
-  name: ['name', 'performer', 'performer name', 'full name', 'act name', 'artist', 'comic'],
-  pronouns: ['pronouns', 'pronoun'],
-  act_type: ['act type', 'acttype', 'type', 'genre', 'style', 'discipline', 'act'],
-  instagram: ['instagram', 'ig', 'insta', 'instagram handle', 'ig handle'],
-  email: ['email', 'e-mail', 'email address'],
-  contact_method: ['contact method', 'contact', 'best way to contact', 'preferred contact', 'contact via'],
-  how_we_met: ['how we met', 'met', 'met at', 'origin', 'source', 'how did we meet'],
-  notes: ['notes', 'note', 'comments', 'bio', 'additional info', 'additional notes'],
-  tags: ['tags', 'tag', 'labels', 'categories'],
-  book_again: ['book again', 'bookagain', 'rebook', 'would book again', 'rebook?', 'book?'],
+  name:               ['name', 'performer', 'performer name', 'full name', 'act name', 'artist', 'comic'],
+  stage_name:         ['stage name', 'stagename', 'stage', 'performing name', 'performance name', 'bill name'],
+  pronouns:           ['pronouns', 'pronoun'],
+  act_type:           ['act type', 'acttype', 'type', 'genre', 'style', 'discipline', 'act'],
+  instagram:          ['instagram', 'ig', 'insta', 'instagram handle', 'ig handle'],
+  email:              ['email', 'e-mail', 'email address'],
+  contact_method:     ['contact method', 'contact', 'best way to contact', 'preferred contact', 'contact via'],
+  how_we_met:         ['how we met', 'met', 'met at', 'origin', 'source', 'how did we meet'],
+  clip_url:           ['clip url', 'clip', 'clip link', 'video', 'video url', 'video link', 'performance clip', 'sample', 'demo'],
+  notes:              ['notes', 'note', 'comments', 'bio', 'additional info', 'additional notes'],
+  tags:               ['tags', 'tag', 'labels', 'categories'],
+  book_again:         ['book again', 'bookagain', 'rebook', 'would book again', 'rebook?', 'book?'],
   audience_favourite: [
     'audience fav', 'audience favourite', 'audience favorite',
     'fan favourite', 'crowd favourite', 'audiencefav',
@@ -61,6 +65,12 @@ function autoDetect(headers) {
     mapping[h] = found
   }
   return mapping
+}
+
+function parseTags(raw) {
+  const str = raw?.toString().trim()
+  if (!str) return null
+  return str.split(',').map((t) => t.trim()).filter(Boolean)
 }
 
 function parseBool(val) {
@@ -101,15 +111,17 @@ function buildPerformers(rawRows, mapping) {
     if (!name) continue
     performers.push({
       name,
-      pronouns: p.pronouns?.toString().trim() || null,
-      act_type: p.act_type?.toString().trim() || null,
-      instagram: p.instagram?.toString().trim() || null,
-      email: p.email?.toString().trim() || null,
-      contact_method: p.contact_method?.toString().trim() || null,
-      how_we_met: p.how_we_met?.toString().trim() || null,
-      notes: p.notes?.toString().trim() || null,
-      tags: p.tags?.toString().trim() || null,
-      book_again: parseBool(p.book_again),
+      stage_name:         p.stage_name?.toString().trim()      || null,
+      pronouns:           p.pronouns?.toString().trim()         || null,
+      act_type:           p.act_type?.toString().trim()         || null,
+      instagram:          p.instagram?.toString().trim()        || null,
+      email:              p.email?.toString().trim()            || null,
+      contact_method:     p.contact_method?.toString().trim()  || null,
+      how_we_met:         p.how_we_met?.toString().trim()       || null,
+      clip_url:           p.clip_url?.toString().trim()         || null,
+      notes:              p.notes?.toString().trim()            || null,
+      tags:               parseTags(p.tags),
+      book_again:         parseBool(p.book_again),
       audience_favourite: parseBool(p.audience_favourite),
     })
   }

@@ -11,7 +11,7 @@ import { Input } from '@/components/atoms/input'
 import { Modal } from '@/components/atoms/modal'
 import { Textarea } from '@/components/atoms/textarea'
 import { Select } from '@/components/atoms/select'
-import { createPerformerFromContact } from '@/lib/actions/performers'
+import { convertContactToPerformer } from '@/lib/actions/performers'
 import { addContactToSeries } from '@/lib/actions/series'
 import { CONTACT_ROLES } from '@/components/organisms/series/info-tab'
 import { cn } from '@/lib/utils'
@@ -155,13 +155,12 @@ function ContactDetailPanel({ row }) {
   const [done, setDone] = useState(false)
   const [error, setError] = useState(null)
 
-  function handleAddAsPerformer() {
+  function handleConvert() {
     startTransition(async () => {
-      const result = await createPerformerFromContact({
-        name: row.name,
-        email: row.email,
-        instagram: row.instagram,
-      })
+      const result = await convertContactToPerformer(
+        { id: row.id, name: row.name, email: row.email, phone: row.phone, notes: row.notes },
+        row.seriesId
+      )
       if (result?.error) {
         setError(result.error)
       } else {
@@ -220,17 +219,17 @@ function ContactDetailPanel({ row }) {
       <div className="flex flex-col gap-3">
         <p className="text-xs font-semibold uppercase tracking-wider text-soft/70 font-body">Actions</p>
         {done ? (
-          <p className="text-sm font-body text-green">Added to performers ✓</p>
+          <p className="text-sm font-body text-green">Converted to performer ✓</p>
         ) : (
           <div className="flex flex-col gap-1">
             <Button
               variant="secondary"
               size="sm"
-              onClick={handleAddAsPerformer}
+              onClick={handleConvert}
               loading={pending}
               className="w-fit"
             >
-              Add as performer
+              Convert to performer
             </Button>
             {error && <p className="text-xs text-red font-body">{error}</p>}
           </div>
@@ -242,7 +241,39 @@ function ContactDetailPanel({ row }) {
 
 // ─── Detail panel: Performer ───────────────────────────────────────────────────
 
-function PerformerDetailPanel({ row }) {
+function PerformerDetailPanel({ row, allSeries }) {
+  const router = useRouter()
+  const [pending, startTransition] = useTransition()
+  const [addedAsContact, setAddedAsContact] = useState(false)
+  const [contactError, setContactError] = useState(null)
+  const [selectedSeriesId, setSelectedSeriesId] = useState('')
+  const [role, setRole] = useState('')
+
+  const fieldCls =
+    'w-full rounded-lg border border-peach bg-cream px-3.5 py-2.5 text-sm text-deep font-body focus:outline-none focus:ring-2 focus:ring-coral focus:border-transparent hover:border-soft transition-colors'
+
+  function handleAddAsContact(e) {
+    e.preventDefault()
+    if (!selectedSeriesId) {
+      setContactError('Please select a series.')
+      return
+    }
+    setContactError(null)
+    startTransition(async () => {
+      const result = await addContactToSeries(selectedSeriesId, {
+        name: row.name,
+        email: row.email || null,
+        role: role.trim() || null,
+      })
+      if (result?.error) {
+        setContactError(result.error)
+      } else {
+        setAddedAsContact(true)
+        router.refresh()
+      }
+    })
+  }
+
   return (
     <div className="bg-cream/60 border-t border-peach px-4 py-5 grid grid-cols-1 sm:grid-cols-2 gap-6">
       {/* Left: profile */}
@@ -293,7 +324,7 @@ function PerformerDetailPanel({ row }) {
         </div>
       </div>
 
-      {/* Right: series + link */}
+      {/* Right: series + add as contact */}
       <div className="flex flex-col gap-3">
         {row.series?.length > 0 && (
           <div>
@@ -305,6 +336,42 @@ function PerformerDetailPanel({ row }) {
             </div>
           </div>
         )}
+
+        {allSeries?.length > 0 && (
+          <div className="flex flex-col gap-2">
+            <p className="text-xs font-semibold uppercase tracking-wider text-soft/70 font-body">Add as contact on series</p>
+            {addedAsContact ? (
+              <p className="text-sm font-body text-green">Added as contact ✓</p>
+            ) : (
+              <form onSubmit={handleAddAsContact} className="flex flex-col gap-2">
+                <select
+                  value={selectedSeriesId}
+                  onChange={(e) => setSelectedSeriesId(e.target.value)}
+                  className={fieldCls}
+                >
+                  <option value="" disabled>Select a series…</option>
+                  {allSeries.map((s) => (
+                    <option key={s.id} value={s.id}>{s.name}</option>
+                  ))}
+                </select>
+                <input
+                  type="text"
+                  placeholder="Role (optional)"
+                  value={role}
+                  onChange={(e) => setRole(e.target.value)}
+                  className={fieldCls}
+                />
+                {contactError && <p className="text-xs text-red font-body">{contactError}</p>}
+                <div>
+                  <Button type="submit" variant="secondary" size="sm" loading={pending} className="w-fit">
+                    Add as contact
+                  </Button>
+                </div>
+              </form>
+            )}
+          </div>
+        )}
+
         <div className="mt-auto pt-2">
           <Link href="/dashboard/performers">
             <Button variant="ghost" size="sm">View in performers →</Button>
@@ -547,7 +614,7 @@ export function ContactsPage({ contacts, performers, allSeries }) {
                     <tr key={`${row._key}-detail`}>
                       <td colSpan={5} className="p-0">
                         {row._type === 'performer' ? (
-                          <PerformerDetailPanel row={row} />
+                          <PerformerDetailPanel row={row} allSeries={allSeries} />
                         ) : (
                           <ContactDetailPanel row={row} />
                         )}

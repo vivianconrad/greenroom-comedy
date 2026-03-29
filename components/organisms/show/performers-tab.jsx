@@ -7,6 +7,7 @@ import { cn, formatTime } from '@/lib/utils'
 import { useCopyToClipboard } from '@/lib/hooks'
 import {
   togglePerformerPaid,
+  togglePerformerConfirmed,
   updatePerformerRole,
   addPerformerToShow,
   removePerformerFromShow,
@@ -19,6 +20,7 @@ import { Button } from '@/components/atoms/button'
 import { Pill } from '@/components/atoms/pill'
 import { Card } from '@/components/atoms/card'
 import { PerformerCombobox } from '@/components/atoms/performer-combobox'
+import { EditPerformerModal } from '@/components/organisms/performers/edit-performer-modal'
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -347,12 +349,20 @@ export function PerformersTab({ show, availablePerformers = [] }) {
   const [addPending, setAddPending] = useState(false)
   const [copiedIntake, copyIntake] = useCopyToClipboard()
   const [confirmRemoveId, setConfirmRemoveId] = useState(null)
+  const [editProfileId, setEditProfileId] = useState(null)
   const [slotForm, setSlotForm] = useState({ set_length: '', call_time: '' })
   const [slotSaving, setSlotSaving] = useState(false)
   const [slotError, setSlotError] = useState(null)
 
   const selected = show.performers.find((p) => p.showPerformerId === selectedId)
   const crew = show.crew ?? []
+
+  function handleToggleConfirmed(showPerformerId) {
+    startTransition(async () => {
+      await togglePerformerConfirmed(showPerformerId)
+      router.refresh()
+    })
+  }
 
   function handleMarkPaid(showPerformerId) {
     startTransition(async () => {
@@ -498,6 +508,14 @@ export function PerformersTab({ show, availablePerformers = [] }) {
                   {selected.pronouns && (
                     <p className="text-xs text-soft">{selected.pronouns}</p>
                   )}
+                  {selected.performerId && (
+                    <button
+                      onClick={() => setEditProfileId(selected.performerId)}
+                      className="text-xs text-coral hover:underline mt-0.5"
+                    >
+                      Edit profile →
+                    </button>
+                  )}
                 </div>
                 <button
                   onClick={() => setSelectedId(null)}
@@ -625,14 +643,24 @@ export function PerformersTab({ show, availablePerformers = [] }) {
                 </Pill>
               </div>
 
-              <Button
-                variant={selected.paid ? 'ghost' : 'secondary'}
-                size="sm"
-                onClick={() => handleMarkPaid(selected.showPerformerId)}
-                className="w-full"
-              >
-                {selected.paid ? 'Mark unpaid' : 'Mark paid'}
-              </Button>
+              <div className="flex gap-2">
+                <Button
+                  variant={selected.confirmed ? 'ghost' : 'secondary'}
+                  size="sm"
+                  onClick={() => handleToggleConfirmed(selected.showPerformerId)}
+                  className="flex-1"
+                >
+                  {selected.confirmed ? 'Mark unconfirmed' : 'Mark confirmed'}
+                </Button>
+                <Button
+                  variant={selected.paid ? 'ghost' : 'secondary'}
+                  size="sm"
+                  onClick={() => handleMarkPaid(selected.showPerformerId)}
+                  className="flex-1"
+                >
+                  {selected.paid ? 'Mark unpaid' : 'Mark paid'}
+                </Button>
+              </div>
 
               <div className="mt-3 pt-3 border-t border-peach">
                 {confirmRemoveId === selected.showPerformerId ? (
@@ -670,6 +698,12 @@ export function PerformersTab({ show, availablePerformers = [] }) {
           </div>
         )}
       </div>
+
+      <EditPerformerModal
+        performerId={editProfileId}
+        open={editProfileId != null}
+        onClose={() => setEditProfileId(null)}
+      />
 
       {/* ── Crew section ───────────────────────────────────────────────── */}
       <section className="mt-8">
