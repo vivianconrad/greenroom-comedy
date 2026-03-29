@@ -32,7 +32,7 @@ const Input = forwardRef(function Input(
         placeholder={placeholder}
         className={cn(
           'w-full rounded-lg border bg-cream px-3.5 py-2.5 text-sm text-deep font-body',
-          'placeholder:text-soft/60',
+          'placeholder:text-soft/80',
           'transition-colors duration-150',
           'focus:outline-none focus:ring-2 focus:ring-coral focus:border-transparent',
           error
