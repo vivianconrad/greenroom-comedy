@@ -8,6 +8,7 @@ import { Modal } from '@/components/atoms/modal'
 import { Button } from '@/components/atoms/button'
 import { Input } from '@/components/atoms/input'
 import { importPerformers, fetchSheetAsCSV } from '@/lib/actions/performers'
+import { parseExcelFile } from '@/lib/actions/parse-file'
 import { cn } from '@/lib/utils'
 
 // ─── Field definitions ─────────────────────────────────────────────────────────
@@ -69,19 +70,50 @@ function parseBool(val) {
   return null
 }
 
+// RFC 4180 CSV parser — handles quoted fields and embedded commas/newlines
+function parseCSV(text) {
+  const rows = []
+  let row = []
+  let cell = ''
+  let inQuotes = false
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i]
+    const next = text[i + 1]
+    if (inQuotes) {
+      if (ch === '"' && next === '"') { cell += '"'; i++ }
+      else if (ch === '"') { inQuotes = false }
+      else { cell += ch }
+    } else {
+      if (ch === '"') { inQuotes = true }
+      else if (ch === ',') { row.push(cell); cell = '' }
+      else if (ch === '\n' || (ch === '\r' && next === '\n')) {
+        if (ch === '\r') i++
+        row.push(cell); cell = ''
+        if (row.some((c) => c !== '')) rows.push(row)
+        row = []
+      } else { cell += ch }
+    }
+  }
+  row.push(cell)
+  if (row.some((c) => c !== '')) rows.push(row)
+  return rows
+}
+
 async function parseFileToRows(file) {
-  const XLSX = await import('xlsx')
-  const buf = await file.arrayBuffer()
-  const wb = XLSX.read(buf, { type: 'array' })
-  const ws = wb.Sheets[wb.SheetNames[0]]
-  return XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' })
+  const name = file.name.toLowerCase()
+  if (name.endsWith('.csv')) {
+    return parseCSV(await file.text())
+  }
+  // .xlsx — parsed server-side via ExcelJS
+  const fd = new FormData()
+  fd.append('file', file)
+  const result = await parseExcelFile(fd)
+  if (result.error) throw new Error(result.error)
+  return result.rows
 }
 
 async function parseCSVToRows(csvText) {
-  const XLSX = await import('xlsx')
-  const wb = XLSX.read(csvText, { type: 'string' })
-  const ws = wb.Sheets[wb.SheetNames[0]]
-  return XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' })
+  return parseCSV(csvText)
 }
 
 function buildPerformers(rawRows, mapping) {
@@ -164,7 +196,7 @@ export function ImportPerformersModal({ open, onClose }) {
     try {
       proceedWithRows(await parseFileToRows(file))
     } catch {
-      setError('Could not read this file. Please try a .xlsx, .xls, or .csv file.')
+      setError('Could not read this file. Please try a .xlsx or .csv file.')
     } finally {
       setLoading(false)
       e.target.value = ''
@@ -226,12 +258,12 @@ export function ImportPerformersModal({ open, onClose }) {
             >
               <FontAwesomeIcon icon={faArrowUpFromBracket} className="h-8 w-8 text-soft/40" aria-hidden="true" />
               <span>{loading ? 'Reading…' : 'Click to choose a file'}</span>
-              <span className="text-xs text-soft/50">.xlsx · .xls · .csv</span>
+              <span className="text-xs text-soft/50">.xlsx · .csv</span>
             </button>
             <input
               ref={fileInputRef}
               type="file"
-              accept=".xlsx,.xls,.csv"
+              accept=".xlsx,.csv"
               className="hidden"
               onChange={handleFileChange}
             />
