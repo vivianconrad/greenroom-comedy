@@ -1,9 +1,9 @@
 'use client'
 
-import { useTransition } from 'react'
+import { useTransition, useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { cn, formatTime, daysUntil } from '@/lib/utils'
-import { toggleChecklistItem } from '@/lib/actions/show'
+import { toggleChecklistItem, setShowStatus } from '@/lib/actions/show'
 import { Card } from '@/components/atoms/card'
 import { Pill } from '@/components/atoms/pill'
 import { ProgressBar } from '@/components/atoms/progress-bar'
@@ -29,6 +29,7 @@ export function DashboardTab({ show }) {
   const router = useRouter()
   const pathname = usePathname()
   const [, startTransition] = useTransition()
+  const [markingDone, setMarkingDone] = useState(false)
 
   const today = new Date()
   today.setHours(0, 0, 0, 0)
@@ -52,6 +53,15 @@ export function DashboardTab({ show }) {
     })
     .sort((a, b) => new Date(a.due_date) - new Date(b.due_date))
     .slice(0, 5)
+
+  function handleMarkDone() {
+    setMarkingDone(true)
+    startTransition(async () => {
+      await setShowStatus(show.id, 'completed')
+      router.refresh()
+      setMarkingDone(false)
+    })
+  }
 
   function handleToggle(itemId) {
     startTransition(async () => {
@@ -111,12 +121,21 @@ export function DashboardTab({ show }) {
               {debriefItems.length > 0 ? debriefItems.join(' · ') : 'Ready to mark as done?'}
             </p>
           </div>
-          <button
-            onClick={() => router.push(`${pathname}?tab=notes`)}
-            className="shrink-0 text-sm font-medium text-amber-700 hover:underline font-body whitespace-nowrap"
-          >
-            Go to Notes →
-          </button>
+          <div className="flex items-center gap-3 shrink-0">
+            <button
+              onClick={() => router.push(`${pathname}?tab=notes`)}
+              className="text-sm font-medium text-amber-700 hover:underline font-body whitespace-nowrap"
+            >
+              Go to Notes →
+            </button>
+            <button
+              onClick={handleMarkDone}
+              disabled={markingDone}
+              className="h-8 px-3 text-sm font-medium font-body rounded-lg bg-amber-600 text-white hover:bg-amber-700 transition-colors disabled:opacity-50 whitespace-nowrap"
+            >
+              {markingDone ? 'Saving…' : 'Mark as done'}
+            </button>
+          </div>
         </div>
       )}
 
@@ -239,6 +258,21 @@ export function DashboardTab({ show }) {
             }
           />
           <DetailRow label="Platform" value={show.ticket_platform} />
+          {show.ticket_url && (
+            <div className="flex justify-between gap-4">
+              <dt className="text-soft shrink-0">Ticket link</dt>
+              <dd className="text-right">
+                <a
+                  href={show.ticket_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-coral hover:underline text-sm font-medium"
+                >
+                  Buy tickets →
+                </a>
+              </dd>
+            </div>
+          )}
           {show.theme && <DetailRow label="Theme" value={show.theme} />}
           {show.hosts && <DetailRow label="Hosts" value={show.hosts} />}
         </dl>

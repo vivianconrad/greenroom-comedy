@@ -23,8 +23,10 @@ export function PerformerCombobox({
   placeholder = 'Search performers…',
 }) {
   const [query, setQuery] = useState('')
+  const [highlightedIndex, setHighlightedIndex] = useState(-1)
   const inputRef = useRef(null)
   const containerRef = useRef(null)
+  const listRef = useRef(null)
 
   // Focus the input on mount
   useEffect(() => {
@@ -49,8 +51,35 @@ export function PerformerCombobox({
       )
     : performers
 
+  // Reset highlight when results change
+  useEffect(() => {
+    setHighlightedIndex(-1)
+  }, [query])
+
+  // Scroll highlighted item into view
+  useEffect(() => {
+    if (highlightedIndex < 0 || !listRef.current) return
+    const item = listRef.current.querySelectorAll('li')[highlightedIndex]
+    item?.scrollIntoView({ block: 'nearest' })
+  }, [highlightedIndex])
+
   function handleKeyDown(e) {
-    if (e.key === 'Escape') onClose?.()
+    if (e.key === 'Escape') {
+      onClose?.()
+    } else if (e.key === 'ArrowDown') {
+      e.preventDefault()
+      setHighlightedIndex((i) => (i + 1) % Math.max(filtered.length, 1))
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault()
+      setHighlightedIndex((i) =>
+        i <= 0 ? filtered.length - 1 : i - 1
+      )
+    } else if (e.key === 'Enter') {
+      e.preventDefault()
+      if (highlightedIndex >= 0 && filtered[highlightedIndex]) {
+        onSelect(filtered[highlightedIndex].id)
+      }
+    }
   }
 
   return (
@@ -63,6 +92,7 @@ export function PerformerCombobox({
         onKeyDown={handleKeyDown}
         placeholder={placeholder}
         disabled={isPending}
+        aria-autocomplete="list"
         className={cn(
           'w-full h-9 px-3 text-sm rounded-lg border border-peach bg-white text-deep',
           'placeholder:text-soft/60 focus:outline-none focus:ring-2 focus:ring-coral/30 focus:border-coral',
@@ -78,20 +108,23 @@ export function PerformerCombobox({
               : 'No performers match your search.'}
           </p>
         ) : (
-          <ul>
-            {filtered.map((p) => (
+          <ul ref={listRef}>
+            {filtered.map((p, i) => (
               <li key={p.id} className="border-b border-peach last:border-0">
                 <button
                   type="button"
                   disabled={isPending}
                   onClick={() => onSelect(p.id)}
-                  className="w-full flex items-center justify-between px-4 py-2.5 hover:bg-peach/50 transition-colors text-left disabled:opacity-50"
+                  className={cn(
+                    'w-full flex items-center justify-between px-4 py-2.5 transition-colors text-left disabled:opacity-50',
+                    i === highlightedIndex ? 'bg-peach/70' : 'hover:bg-peach/50'
+                  )}
                 >
                   <div className="min-w-0">
                     <div className="flex items-baseline gap-2 flex-wrap">
                       <span className="text-sm font-medium text-deep font-body">{p.name}</span>
                       {p.stage_name && (
-                        <span className="text-xs text-soft/60 font-body">"{p.stage_name}"</span>
+                        <span className="text-xs text-soft/60 font-body">&quot;{p.stage_name}&quot;</span>
                       )}
                       {p.act_type && (
                         <span className="text-xs text-soft/60 font-body">{p.act_type}</span>

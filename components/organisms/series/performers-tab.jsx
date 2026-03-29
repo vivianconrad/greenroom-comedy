@@ -7,7 +7,7 @@ import { Pill } from '@/components/atoms/pill'
 import { EmptyState } from '@/components/atoms/empty-state'
 import { AddToSeriesModal } from './add-to-series-modal'
 import { PerformerCombobox } from '@/components/atoms/performer-combobox'
-import { addPerformerToSeries } from '@/lib/actions/performers'
+import { addPerformerToSeries, removePerformerFromSeries } from '@/lib/actions/performers'
 import { formatShortDate } from '@/lib/utils'
 
 function BoolIcon({ value }) {
@@ -44,6 +44,8 @@ export function PerformersTab({ performers, seriesId, availablePerformers }) {
   const [addingPerformer, setAddingPerformer] = useState(false)
   const [addError, setAddError] = useState(null)
   const [addPending, setAddPending] = useState(false)
+  const [removingId, setRemovingId] = useState(null)
+  const [removePending, setRemovePending] = useState(false)
 
   async function handleAddPerformer(performerId) {
     setAddPending(true)
@@ -52,6 +54,15 @@ export function PerformersTab({ performers, seriesId, availablePerformers }) {
     setAddPending(false)
     if (result?.error) { setAddError(result.error); return }
     setAddingPerformer(false)
+    router.refresh()
+  }
+
+  async function handleRemovePerformer(performerId) {
+    setRemovePending(true)
+    const result = await removePerformerFromSeries(performerId, seriesId)
+    setRemovePending(false)
+    if (result?.error) { alert(result.error); return }
+    setRemovingId(null)
     router.refresh()
   }
 
@@ -153,6 +164,7 @@ export function PerformersTab({ performers, seriesId, availablePerformers }) {
                   <Th>Last Performed</Th>
                   <Th className="text-center">Book Again</Th>
                   <Th className="text-center">Audience Fav</Th>
+                  <Th></Th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-peach">
@@ -197,6 +209,32 @@ export function PerformersTab({ performers, seriesId, availablePerformers }) {
                     </Td>
                     <Td className="text-center">
                       <BoolIcon value={p.audience_favourite} />
+                    </Td>
+                    <Td className="text-right whitespace-nowrap">
+                      {removingId === p.id ? (
+                        <span className="inline-flex items-center gap-1.5">
+                          <button
+                            onClick={() => setRemovingId(null)}
+                            className="text-xs text-soft hover:text-mid px-2 py-1 rounded hover:bg-peach transition-colors"
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            onClick={() => handleRemovePerformer(p.id)}
+                            disabled={removePending}
+                            className="text-xs text-red hover:text-red px-2 py-1 rounded bg-red/10 hover:bg-red/20 transition-colors disabled:opacity-50"
+                          >
+                            Confirm remove
+                          </button>
+                        </span>
+                      ) : (
+                        <button
+                          onClick={() => setRemovingId(p.id)}
+                          className="text-xs text-soft/50 hover:text-red px-2 py-1 rounded hover:bg-red/10 transition-colors"
+                        >
+                          Remove
+                        </button>
+                      )}
                     </Td>
                   </tr>
                 ))}

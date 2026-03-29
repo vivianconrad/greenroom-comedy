@@ -72,11 +72,34 @@ Last updated: March 2026
 - Availability tracking (dates they've said they're available or unavailable)
 - Performer merge (combine duplicate records)
 - Availability calendar view — visual "who's available when" before booking a lineup
+- Tag-based filtering in the performer database — tags already exist on performer records but can't be filtered on; same pill-filter pattern as the series filter
+- Performer detail slide-over drawer — replace the current expand-in-table-row with a fixed right-side drawer, giving more space for detail and a more natural feel
+- Structured "how we met" and "contact method" fields — replace free-text with a small set of predefined options (open mic, application, friend referral, saw them perform, etc.) so they become filterable and useful for understanding your pipeline
 
 ### Adding Performers to a Show
 
 - The current flow for booking a performer onto a specific show needs rethinking — too many steps
 - Ideas: quick-add from the performer database with a show picker, drag-from-roster onto show, or a "book for show" button on each performer row that opens a show selector
+
+### Run of Show: Remove Performer Slot
+
+- The Run of Show tab has drag-to-reorder but no way to remove a slot directly
+- A remove button on each RO row (with confirmation) would avoid having to switch to the Performers tab to remove and come back
+- Should also handle reordering slot_order integers after removal
+
+### Copy Performer List
+
+- A "Copy names" button on the show Performers tab that copies a newline-separated list of names + roles to clipboard
+- Useful for posting lineups to Slack, Discord, group chats, or event pages
+- Low effort: `useCopyToClipboard` is already available; format as "Name (Role)" per line
+- Could also live on the Run of Show tab as an alternative to the existing full RO copy
+
+### Instagram Tag List (Promo Tab)
+
+- Auto-generate a list of `@handles` for all performers on the show who have Instagram set and `tags_ok = true`
+- One-click copy for use in captions, stories, and event posts
+- Lives on the Promo tab; eliminates the most tedious manual step in show promotion
+- Data already exists: `show_performers → performers.instagram` + `show_performers.tags_ok`
 
 ---
 
@@ -252,6 +275,19 @@ Last updated: March 2026
 ### Bulk Show Actions *(partially shipped)*
 - ~~Bulk move past shows to trash~~ ✓
 - Still to do: bulk archive (separate from trash), bulk tag/label
+
+### Checklist Task Due Dates
+
+- Add a `days_before` field to checklist templates so each task has a target date relative to the show (e.g. "Post first tease — 14 days before")
+- Per-show checklist items get a computed due date when seeded from the template
+- Overdue tasks surface visually (colour change or badge) on the checklist and show dashboard
+- Foundation for the producer reminders feature (Phase 3) and Google Calendar sync
+
+### One-Off Show → Recurring Prompt
+
+- When a producer creates a second show at the same venue / with the same name, surface a gentle prompt: "Want to make this a recurring series?"
+- Consolidating one-offs into a series retroactively — move existing shows into the new series
+- Prevents the common pattern of accumulating disconnected one-offs that should have been a series from the start
 
 ### Recurring Show Automation
 - Auto-create the next show instance X weeks before the next date in the series

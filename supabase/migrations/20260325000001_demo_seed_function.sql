@@ -99,7 +99,7 @@ begin
   insert into shows (series_id, date, call_time, doors_time, show_time, venue, status,
                      hosts, ticket_price, tickets_sold, capacity,
                      notes_attendance, notes_energy, notes_worked, notes_next_time)
-    values (v_fnl, current_date - 90, '19:00', '19:30', '20:00', 'The Laughing Crow', 'done',
+    values (v_fnl, current_date - 90, '19:00', '19:30', '20:00', 'The Laughing Crow', 'completed',
             'Sam Chen', 12.00, 78, 90,
             '78/90 — great turnout for a cold night',
             'High energy throughout. Crowd was loud and engaged from the start.',
@@ -111,7 +111,7 @@ begin
   insert into shows (series_id, date, call_time, doors_time, show_time, venue, status,
                      hosts, theme, ticket_price, tickets_sold, capacity,
                      notes_attendance, notes_energy, notes_worked)
-    values (v_fnl, current_date - 60, '19:00', '19:30', '20:00', 'The Laughing Crow', 'done',
+    values (v_fnl, current_date - 60, '19:00', '19:30', '20:00', 'The Laughing Crow', 'completed',
             'Sam Chen', 'Valentine''s Special', 12.00, 85, 90,
             '85/90 — almost sold out, theme helped',
             'Great energy. Couples in the room made the Valentine material land extra hard.',
@@ -122,7 +122,7 @@ begin
   insert into shows (series_id, date, call_time, doors_time, show_time, venue, status,
                      hosts, ticket_price, tickets_sold, capacity,
                      notes_attendance, notes_energy, notes_didnt_work)
-    values (v_fnl, current_date - 30, '19:00', '19:30', '20:00', 'The Laughing Crow', 'done',
+    values (v_fnl, current_date - 30, '19:00', '19:30', '20:00', 'The Laughing Crow', 'completed',
             'Sam Chen', 12.00, 61, 90,
             '61/90 — mid-week runover hurt attendance',
             'Crowd was a bit cold first half, warmed up by the end.',
@@ -147,7 +147,7 @@ begin
 
   -- Past show (~6 weeks ago, done)
   insert into shows (series_id, date, show_time, venue, status)
-    values (v_ij, current_date - 45, '19:30', 'Studio B', 'done')
+    values (v_ij, current_date - 45, '19:30', 'Studio B', 'completed')
     returning id into v_s6;
 
   -- Upcoming show (2 weeks out, planning)

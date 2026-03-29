@@ -9,9 +9,9 @@ export default async function ShowPage({ params, searchParams }) {
 
   const [show, commLog, recipientGroups, availablePerformers] = await Promise.all([
     getShowDetail(id),
-    getCommLog(id),
-    getRecipientGroups(id),
-    getAvailablePerformersForShow(id),
+    tab === 'comms'      ? getCommLog(id)                   : Promise.resolve([]),
+    tab === 'comms'      ? getRecipientGroups(id)           : Promise.resolve({}),
+    tab === 'performers' ? getAvailablePerformersForShow(id) : Promise.resolve([]),
   ])
 
   if (!show) notFound()

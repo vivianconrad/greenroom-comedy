@@ -79,7 +79,7 @@ begin
   insert into shows (series_id, date, call_time, doors_time, show_time, venue, status,
                      ticket_price, tickets_sold, capacity,
                      notes_attendance, notes_energy, notes_worked, notes_next_time)
-    values (v_series, current_date - 90, '19:00', '19:30', '20:00', 'The Laughing Crow', 'done',
+    values (v_series, current_date - 90, '19:00', '19:30', '20:00', 'The Laughing Crow', 'completed',
             15.00, 82, 90,
             82,
             'Electric from the start. Crowd was warm and loud all the way through.',
@@ -91,7 +91,7 @@ begin
   insert into shows (series_id, date, call_time, doors_time, show_time, venue, status,
                      ticket_price, tickets_sold, capacity,
                      notes_attendance, notes_energy, notes_didnt_work)
-    values (v_series, current_date - 60, '19:00', '19:30', '20:00', 'The Laughing Crow', 'done',
+    values (v_series, current_date - 60, '19:00', '19:30', '20:00', 'The Laughing Crow', 'completed',
             15.00, 64, 90,
             64,
             'Slow start. Second half picked up once Jenny warmed the room.',
@@ -102,7 +102,7 @@ begin
   insert into shows (series_id, date, call_time, doors_time, show_time, venue, status,
                      ticket_price, tickets_sold, capacity,
                      notes_attendance, notes_worked)
-    values (v_series, current_date - 30, '19:00', '19:30', '20:00', 'The Laughing Crow', 'done',
+    values (v_series, current_date - 30, '19:00', '19:30', '20:00', 'The Laughing Crow', 'completed',
             15.00, 76, 90,
             76,
             'Leslie''s set was a standout. Crowd kept quoting her stuff after the show.')

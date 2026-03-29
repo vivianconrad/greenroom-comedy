@@ -30,7 +30,7 @@ function DaysAwayPill({ date }) {
   return <Pill variant="info">{days}d away</Pill>
 }
 
-export function ShowPageLayout({ show, duties = [], activeTab, commLog = [], recipientGroups = {}, commsPreset = null, availablePerformers = [] }) {
+export function ShowPageLayout({ show, activeTab, commLog = [], recipientGroups = {}, commsPreset = null, availablePerformers = [] }) {
   const searchParams = useSearchParams()
   const router = useRouter()
   const pathname = usePathname()
@@ -51,8 +51,18 @@ export function ShowPageLayout({ show, duties = [], activeTab, commLog = [], rec
     router.push(qs ? `${pathname}?${qs}` : pathname)
   }
 
+  const isPastShow = daysUntil(show.date) < 0 || show.status === 'completed'
+
+  const activeChecklist = (show.checklistItems ?? []).filter((i) => i.enabled !== false)
+  const tabCounts = {
+    performers: show.performers?.length ?? 0,
+    checklist: activeChecklist.length > 0
+      ? { done: activeChecklist.filter((i) => i.done).length, total: activeChecklist.length }
+      : null,
+  }
+
   if (showDayMode) {
-    return <ShowDayMode show={show} duties={show.duties ?? duties} onExit={exitShowDayMode} />
+    return <ShowDayMode show={show} duties={show.duties} onExit={exitShowDayMode} />
   }
 
   const breadcrumb = [
@@ -87,21 +97,23 @@ export function ShowPageLayout({ show, duties = [], activeTab, commLog = [], rec
           <Button variant="secondary" size="sm" onClick={() => setEditOpen(true)}>
             Edit
           </Button>
-          <Button variant="primary" size="sm" onClick={enterShowDayMode}>
-            Show Day Mode →
-          </Button>
+          {!isPastShow && (
+            <Button variant="primary" size="sm" onClick={enterShowDayMode}>
+              Show Day Mode →
+            </Button>
+          )}
           <ShowActionsMenu show={show} />
         </div>
         <EditShowModal open={editOpen} onClose={() => setEditOpen(false)} show={show} />
       </div>
 
-      <ShowTabBar activeTab={activeTab} />
+      <ShowTabBar activeTab={activeTab} counts={tabCounts} />
 
       {activeTab === 'dashboard' && <DashboardTab show={show} />}
       {activeTab === 'checklist' && <ChecklistTab show={show} />}
       {activeTab === 'performers' && <PerformersTab show={show} availablePerformers={availablePerformers} />}
       {activeTab === 'runofshow' && <RunOfShowTab show={show} />}
-      {activeTab === 'duties' && <DutiesTab show={show} duties={show.duties ?? duties} />}
+      {activeTab === 'duties' && <DutiesTab show={show} duties={show.duties} />}
       {activeTab === 'promo' && <PromoTab show={show} />}
       {activeTab === 'tickets' && <TicketsTab show={show} />}
       {activeTab === 'materials' && <MaterialsTab show={show} />}

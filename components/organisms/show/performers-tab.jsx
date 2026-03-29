@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useState, useTransition, useEffect } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { cn, formatTime } from '@/lib/utils'
@@ -9,6 +9,8 @@ import {
   togglePerformerPaid,
   updatePerformerRole,
   addPerformerToShow,
+  removePerformerFromShow,
+  updatePerformerSlot,
   createCrewMember,
   updateCrewMember,
   deleteCrewMember,
@@ -344,6 +346,10 @@ export function PerformersTab({ show, availablePerformers = [] }) {
   const [addError, setAddError] = useState(null)
   const [addPending, setAddPending] = useState(false)
   const [copiedIntake, copyIntake] = useCopyToClipboard()
+  const [confirmRemoveId, setConfirmRemoveId] = useState(null)
+  const [slotForm, setSlotForm] = useState({ set_length: '', call_time: '' })
+  const [slotSaving, setSlotSaving] = useState(false)
+  const [slotError, setSlotError] = useState(null)
 
   const selected = show.performers.find((p) => p.showPerformerId === selectedId)
   const crew = show.crew ?? []
@@ -360,6 +366,34 @@ export function PerformersTab({ show, availablePerformers = [] }) {
       await updatePerformerRole(showPerformerId, role)
       router.refresh()
     })
+  }
+
+  // Sync slot form when selected performer changes
+  useEffect(() => {
+    if (selected) {
+      setSlotForm({
+        set_length: selected.set_length ?? '',
+        call_time: selected.call_time ?? '',
+      })
+      setSlotError(null)
+    }
+  }, [selected?.showPerformerId])
+
+  async function handleUpdateSlot() {
+    setSlotSaving(true)
+    setSlotError(null)
+    const result = await updatePerformerSlot(selected.showPerformerId, slotForm)
+    setSlotSaving(false)
+    if (result?.error) { setSlotError(result.error); return }
+    router.refresh()
+  }
+
+  async function handleRemovePerformer(showPerformerId) {
+    const result = await removePerformerFromShow(showPerformerId)
+    if (result?.error) { alert(result.error); return }
+    setSelectedId(null)
+    setConfirmRemoveId(null)
+    router.refresh()
   }
 
   async function handleAddPerformer(performerId) {
@@ -492,6 +526,46 @@ export function PerformersTab({ show, availablePerformers = [] }) {
                 </select>
               </div>
 
+              {/* Set length + call time */}
+              <div className="mb-4 grid grid-cols-2 gap-2">
+                <div>
+                  <label className="text-xs text-soft uppercase tracking-wide block mb-1">
+                    Set (min)
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={slotForm.set_length}
+                    onChange={(e) => setSlotForm((f) => ({ ...f, set_length: e.target.value }))}
+                    className="w-full h-9 px-3 text-sm rounded-lg border border-peach bg-white text-deep focus:outline-none focus:ring-2 focus:ring-coral/30 focus:border-coral"
+                    placeholder="e.g. 8"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs text-soft uppercase tracking-wide block mb-1">
+                    Call time
+                  </label>
+                  <input
+                    type="time"
+                    value={slotForm.call_time}
+                    onChange={(e) => setSlotForm((f) => ({ ...f, call_time: e.target.value }))}
+                    className="w-full h-9 px-3 text-sm rounded-lg border border-peach bg-white text-deep focus:outline-none focus:ring-2 focus:ring-coral/30 focus:border-coral"
+                  />
+                </div>
+              </div>
+              <div className="mb-4">
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={handleUpdateSlot}
+                  loading={slotSaving}
+                  className="w-full"
+                >
+                  Save slot details
+                </Button>
+                {slotError && <p className="mt-1 text-xs text-red">{slotError}</p>}
+              </div>
+
               {/* Intake link */}
               {selected.performerId && (
                 <div className="mb-4">
@@ -559,6 +633,39 @@ export function PerformersTab({ show, availablePerformers = [] }) {
               >
                 {selected.paid ? 'Mark unpaid' : 'Mark paid'}
               </Button>
+
+              <div className="mt-3 pt-3 border-t border-peach">
+                {confirmRemoveId === selected.showPerformerId ? (
+                  <div className="space-y-2">
+                    <p className="text-xs text-mid text-center">
+                      Remove {selected.name} from this show?
+                    </p>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="flex-1"
+                        onClick={() => setConfirmRemoveId(null)}
+                      >
+                        Cancel
+                      </Button>
+                      <button
+                        onClick={() => handleRemovePerformer(selected.showPerformerId)}
+                        className="flex-1 h-9 px-3 text-sm font-medium font-body rounded-lg bg-red/10 text-red hover:bg-red/20 transition-colors"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => setConfirmRemoveId(selected.showPerformerId)}
+                    className="w-full text-xs text-soft hover:text-red transition-colors py-1"
+                  >
+                    Remove from show
+                  </button>
+                )}
+              </div>
             </Card>
           </div>
         )}
