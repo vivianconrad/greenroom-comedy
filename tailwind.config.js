@@ -14,7 +14,7 @@ module.exports = {
         'coral-hover': '#D4614A',
         deep: '#2C1810',
         mid: '#5C3D2E',
-        soft: '#8B6F5E',
+        soft: '#6B4C3B',
         butter: '#FFF4C2',
         'butter-soft': '#FFF4C2',
         sage: '#A8C5A0',

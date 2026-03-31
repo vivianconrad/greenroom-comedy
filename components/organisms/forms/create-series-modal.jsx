@@ -11,10 +11,17 @@ import { getSystemTemplates } from '@/lib/actions/system-templates'
 
 // ─── Shared UI ────────────────────────────────────────────────────────────────
 
-function RadioGroup({ name, options, value, onChange, columns = false }) {
-  useId() // keep hook count stable
+function RadioGroup({ name, label, options, value, onChange, columns = false }) {
+  const groupId = useId()
   return (
-    <div className={cn('flex flex-wrap gap-2', columns && 'grid grid-cols-2 sm:grid-cols-3')}>
+    <div
+      role="group"
+      aria-labelledby={label ? `${groupId}-label` : undefined}
+      className={cn('flex flex-wrap gap-2', columns && 'grid grid-cols-2 sm:grid-cols-3')}
+    >
+      {label && (
+        <span id={`${groupId}-label`} className="sr-only">{label}</span>
+      )}
       {options.map((opt) => (
         <label
           key={opt.value}
