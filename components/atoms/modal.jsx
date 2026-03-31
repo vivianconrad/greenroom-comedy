@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useCallback } from 'react'
+import { forwardRef, useEffect, useRef, useCallback, useId } from 'react'
 import { createPortal } from 'react-dom'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faXmark } from '@fortawesome/free-solid-svg-icons'
@@ -15,15 +15,20 @@ const FOCUSABLE = [
   '[tabindex]:not([tabindex="-1"])',
 ].join(',')
 
-function Modal({ open = false, onClose, title, children, className }) {
+const Modal = forwardRef(function Modal(
+  { open = false, onClose, title, children, className },
+  ref
+) {
   const overlayRef = useRef(null)
   const dialogRef = useRef(null)
-  const triggerRef = useRef(null)
+  const titleId = useId()
 
-  // Save focus trigger on open
+  // Save focus on open; restore on close or unmount
   useEffect(() => {
-    if (open) {
-      triggerRef.current = document.activeElement
+    if (!open) return
+    const saved = document.activeElement
+    return () => {
+      saved?.focus()
     }
   }, [open])
 
@@ -32,14 +37,6 @@ function Modal({ open = false, onClose, title, children, className }) {
     if (!open || !dialogRef.current) return
     const first = dialogRef.current.querySelector(FOCUSABLE)
     first?.focus()
-  }, [open])
-
-  // Restore focus on close
-  useEffect(() => {
-    if (!open && triggerRef.current) {
-      triggerRef.current.focus()
-      triggerRef.current = null
-    }
   }, [open])
 
   // Escape key
@@ -93,12 +90,16 @@ function Modal({ open = false, onClose, title, children, className }) {
 
   return createPortal(
     <div
-      ref={overlayRef}
+      ref={(node) => {
+        overlayRef.current = node
+        if (typeof ref === 'function') ref(node)
+        else if (ref) ref.current = node
+      }}
       onClick={handleOverlayClick}
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-deep/40 backdrop-blur-sm"
       aria-modal="true"
       role="dialog"
-      aria-labelledby={title ? 'modal-title' : undefined}
+      aria-labelledby={title ? titleId : undefined}
     >
       <div
         ref={dialogRef}
@@ -113,7 +114,7 @@ function Modal({ open = false, onClose, title, children, className }) {
         {title && (
           <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-peach">
             <h2
-              id="modal-title"
+              id={titleId}
               className="text-lg font-semibold text-deep font-display"
             >
               {title}
@@ -133,6 +134,6 @@ function Modal({ open = false, onClose, title, children, className }) {
     </div>,
     document.body
   )
-}
+})
 
 export { Modal }
