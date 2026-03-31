@@ -3,6 +3,8 @@
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faMicrophone } from '@fortawesome/free-solid-svg-icons'
 import { Pill } from '@/components/atoms/pill'
 import { EmptyState } from '@/components/atoms/empty-state'
 import { AddToSeriesModal } from './add-to-series-modal'
@@ -79,7 +81,7 @@ export function PerformersTab({ performers, seriesId, availablePerformers }) {
       {performers.length === 0 ? (
         <div className="pt-6">
           <EmptyState
-            icon="🎤"
+            icon={<FontAwesomeIcon icon={faMicrophone} className="h-8 w-8 text-soft/40" />}
             title="No performers added yet"
             description="Add performers from your database to this series to track bookings."
             className="py-16"

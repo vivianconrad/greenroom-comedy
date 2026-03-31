@@ -3,7 +3,7 @@
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faChevronRight } from '@fortawesome/free-solid-svg-icons'
+import { faChevronRight, faBoxOpen } from '@fortawesome/free-solid-svg-icons'
 import { cn } from '@/lib/utils'
 import { formatShortDate } from '@/lib/utils'
 import { InfoBanner } from '@/components/atoms/info-banner'
@@ -320,7 +320,7 @@ export function CollectionsTab({ collections, seriesId }) {
 
       {collections.length === 0 ? (
         <EmptyState
-          icon="📦"
+          icon={<FontAwesomeIcon icon={faBoxOpen} className="h-8 w-8 text-soft/40" />}
           title="No collections yet"
           description="Collections store reusable content like crowd-work bits, intros, or games."
           className="py-16"

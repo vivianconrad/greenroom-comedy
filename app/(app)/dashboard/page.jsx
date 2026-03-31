@@ -2,6 +2,8 @@ import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { getDashboardData } from '@/lib/queries/dashboard'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faMasksTheater } from '@fortawesome/free-solid-svg-icons'
 import { Button } from '@/components/atoms/button'
 import { EmptyState } from '@/components/atoms/empty-state'
 import { StatBadge } from '@/components/atoms/stat-badge'
@@ -55,7 +57,7 @@ export default async function DashboardPage() {
       {/* ── Content ── */}
       {series.length === 0 ? (
         <EmptyState
-          icon="🎭"
+          icon={<FontAwesomeIcon icon={faMasksTheater} className="h-8 w-8 text-soft/40" />}
           title="No shows yet"
           description="Create your first series to start planning shows, tracking tasks, and booking performers."
           action={<NewSeriesTrigger />}

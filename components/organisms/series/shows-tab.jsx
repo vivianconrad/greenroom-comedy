@@ -3,6 +3,8 @@
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faMasksTheater } from '@fortawesome/free-solid-svg-icons'
 import { Pill } from '@/components/atoms/pill'
 import { ProgressBar } from '@/components/atoms/progress-bar'
 import { EmptyState } from '@/components/atoms/empty-state'
@@ -216,7 +218,7 @@ export function ShowsTab({ series, seriesId }) {
   if (!hasAny) {
     return (
       <EmptyState
-        icon="🎭"
+        icon={<FontAwesomeIcon icon={faMasksTheater} className="h-8 w-8 text-soft/40" />}
         title="No shows yet"
         description="Add the first show to start planning."
         className="py-20"
