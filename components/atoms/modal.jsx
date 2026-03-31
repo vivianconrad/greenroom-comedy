@@ -6,8 +6,41 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faXmark } from '@fortawesome/free-solid-svg-icons'
 import { cn } from '@/lib/utils'
 
+const FOCUSABLE = [
+  'a[href]',
+  'button:not([disabled])',
+  'input:not([disabled])',
+  'select:not([disabled])',
+  'textarea:not([disabled])',
+  '[tabindex]:not([tabindex="-1"])',
+].join(',')
+
 function Modal({ open = false, onClose, title, children, className }) {
   const overlayRef = useRef(null)
+  const dialogRef = useRef(null)
+  const triggerRef = useRef(null)
+
+  // Save focus trigger on open
+  useEffect(() => {
+    if (open) {
+      triggerRef.current = document.activeElement
+    }
+  }, [open])
+
+  // Focus first focusable element when opened
+  useEffect(() => {
+    if (!open || !dialogRef.current) return
+    const first = dialogRef.current.querySelector(FOCUSABLE)
+    first?.focus()
+  }, [open])
+
+  // Restore focus on close
+  useEffect(() => {
+    if (!open && triggerRef.current) {
+      triggerRef.current.focus()
+      triggerRef.current = null
+    }
+  }, [open])
 
   // Escape key
   useEffect(() => {
@@ -29,6 +62,26 @@ function Modal({ open = false, onClose, title, children, className }) {
     }
   }, [open])
 
+  // Focus trap
+  const handleKeyDown = useCallback((e) => {
+    if (e.key !== 'Tab' || !dialogRef.current) return
+    const focusable = Array.from(dialogRef.current.querySelectorAll(FOCUSABLE))
+    if (focusable.length === 0) return
+    const first = focusable[0]
+    const last = focusable[focusable.length - 1]
+    if (e.shiftKey) {
+      if (document.activeElement === first) {
+        e.preventDefault()
+        last.focus()
+      }
+    } else {
+      if (document.activeElement === last) {
+        e.preventDefault()
+        first.focus()
+      }
+    }
+  }, [])
+
   const handleOverlayClick = useCallback(
     (e) => {
       if (e.target === overlayRef.current) onClose?.()
@@ -48,6 +101,8 @@ function Modal({ open = false, onClose, title, children, className }) {
       aria-labelledby={title ? 'modal-title' : undefined}
     >
       <div
+        ref={dialogRef}
+        onKeyDown={handleKeyDown}
         className={cn(
           'relative w-full max-w-lg bg-white rounded-card-lg shadow-xl',
           'flex flex-col max-h-[90vh]',
