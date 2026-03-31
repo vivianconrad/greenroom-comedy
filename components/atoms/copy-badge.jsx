@@ -21,7 +21,10 @@ export function CopyBadge({ label, value, className }) {
       )}
     >
       {label && <span className="text-soft/80">{label}</span>}
-      <span className={cn('font-semibold tracking-wide transition-colors', copied ? 'text-sage' : 'text-deep')}>
+      <span
+        aria-live="polite"
+        className={cn('font-semibold tracking-wide transition-colors', copied ? 'text-sage' : 'text-deep')}
+      >
         {copied ? 'Copied!' : value}
       </span>
     </button>
