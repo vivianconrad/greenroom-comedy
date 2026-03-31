@@ -306,7 +306,7 @@ export function CollectionsTab({ collections, seriesId }) {
 
   return (
     <div className="pt-6 flex flex-col gap-4">
-      <InfoBanner storageKey="collections-info">
+      <InfoBanner>
         <span className="font-semibold">Collections: </span>
         A pool of items for a recurring segment within your show — like a joke wheel, a guest list, or a bit roster.
       </InfoBanner>

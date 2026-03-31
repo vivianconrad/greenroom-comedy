@@ -498,7 +498,7 @@ export function PerformersClient({ performers, allSeries, sheetSync = null, page
   return (
     <>
       {/* ── Application queue banner (placeholder) ── */}
-      <InfoBanner storageKey="performers-applications">
+      <InfoBanner>
         <span className="font-semibold text-deep">0</span>
         <span className="text-mid"> new applications</span>
       </InfoBanner>

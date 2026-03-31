@@ -236,7 +236,7 @@ export function DutyTemplatesTab({ templates, seriesId, commTemplates = [], cont
 
   return (
     <div className="pt-6 flex flex-col gap-4">
-      <InfoBanner storageKey="duty-templates-info">
+      <InfoBanner>
         <span className="font-semibold">Default duties: </span>
         These are copied to every new show in this series. Toggle off any duties that don't apply to every show.
         {commTemplates.length > 0 && (

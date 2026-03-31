@@ -303,7 +303,7 @@ export function ChecklistTemplateTab({ tasks, seriesId, commTemplates = [], cont
 
   return (
     <div className="pt-6 flex flex-col gap-4">
-      <InfoBanner storageKey="checklist-template-info">
+      <InfoBanner>
         <span className="font-semibold">Default checklist: </span>
         These tasks are added automatically to every new show in this series. Uncheck any tasks you don't always need.
         {commTemplates.length > 0 && (

@@ -6,23 +6,14 @@ import { cn } from '@/lib/utils'
 /**
  * A dismissible info banner.
  *
- * @param {string}    storageKey  — localStorage key to persist the dismissed state. Required for persistence.
  * @param {string}    [variant]   — 'yellow' (default) | 'blue' | 'neutral'
  * @param {ReactNode} children
  * @param {string}    [className]
  */
-export function InfoBanner({ storageKey, variant = 'yellow', children, className }) {
-  const [dismissed, setDismissed] = useState(() => {
-    if (!storageKey || typeof window === 'undefined') return false
-    return localStorage.getItem(`banner:${storageKey}`) === '1'
-  })
+export function InfoBanner({ variant = 'yellow', children, className }) {
+  const [dismissed, setDismissed] = useState(false)
 
   if (dismissed) return null
-
-  function handleDismiss() {
-    if (storageKey) localStorage.setItem(`banner:${storageKey}`, '1')
-    setDismissed(true)
-  }
 
   const variants = {
     yellow:  'bg-butter/60 border-butter text-mid',
@@ -41,7 +32,7 @@ export function InfoBanner({ storageKey, variant = 'yellow', children, className
       <div>{children}</div>
       <button
         type="button"
-        onClick={handleDismiss}
+        onClick={() => setDismissed(true)}
         aria-label="Dismiss"
         className="shrink-0 mt-0.5 text-soft/50 hover:text-soft transition-colors"
       >
