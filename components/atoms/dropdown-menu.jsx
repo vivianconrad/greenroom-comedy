@@ -21,17 +21,9 @@ export function DropdownMenu({ trigger, items, align = 'right' }) {
     function handleClickOutside(e) {
       if (ref.current && !ref.current.contains(e.target)) setOpen(false)
     }
-    function handleEscape(e) {
-      if (e.key === 'Escape') {
-        setOpen(false)
-        triggerRef.current?.focus()
-      }
-    }
     document.addEventListener('mousedown', handleClickOutside)
-    document.addEventListener('keydown', handleEscape)
     return () => {
       document.removeEventListener('mousedown', handleClickOutside)
-      document.removeEventListener('keydown', handleEscape)
     }
   }, [])
 
@@ -62,6 +54,10 @@ export function DropdownMenu({ trigger, items, align = 'right' }) {
     } else if (e.key === 'End') {
       e.preventDefault()
       menuItems[menuItems.length - 1]?.focus()
+    } else if (e.key === 'Escape') {
+      e.preventDefault()
+      setOpen(false)
+      triggerRef.current?.focus()
     }
   }, [])
 
@@ -100,8 +96,8 @@ export function DropdownMenu({ trigger, items, align = 'right' }) {
                 tabIndex={-1}
                 onClick={() => {
                   setOpen(false)
-                  triggerRef.current?.focus()
                   item.onClick()
+                  triggerRef.current?.focus()
                 }}
                 className={cn(
                   'w-full text-left px-3 py-2 text-sm font-body transition-colors focus:outline-none focus:bg-peach',
