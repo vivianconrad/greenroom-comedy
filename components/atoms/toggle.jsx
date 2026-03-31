@@ -3,13 +3,17 @@
 import { useId } from 'react'
 import { cn } from '@/lib/utils'
 
-function Toggle({ checked = false, onChange, label, className, ...props }) {
+function Toggle({ checked = false, onChange, label, pending = false, className, ...props }) {
   const id = useId()
 
   return (
     <label
       htmlFor={id}
-      className={cn('inline-flex items-center gap-3 cursor-pointer select-none', className)}
+      className={cn(
+        'inline-flex items-center gap-3 select-none',
+        pending ? 'cursor-wait opacity-60' : 'cursor-pointer',
+        className
+      )}
     >
       <span className="relative inline-flex shrink-0">
         <input
@@ -17,7 +21,8 @@ function Toggle({ checked = false, onChange, label, className, ...props }) {
           type="checkbox"
           role="switch"
           checked={checked}
-          onChange={(e) => onChange?.(e.target.checked)}
+          onChange={(e) => !pending && onChange?.(e.target.checked)}
+          disabled={pending}
           className="sr-only peer"
           {...props}
         />
