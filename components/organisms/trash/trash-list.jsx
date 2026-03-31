@@ -4,8 +4,9 @@ import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { cn, formatShortDate } from '@/lib/utils'
 import { Button } from '@/components/atoms/button'
-import { restoreShow } from '@/lib/actions/show'
-import { restoreSeries } from '@/lib/actions/series'
+import { ConfirmDialog } from '@/components/atoms/confirm-dialog'
+import { restoreShow, permanentlyDeleteShow } from '@/lib/actions/show'
+import { restoreSeries, permanentlyDeleteSeries } from '@/lib/actions/series'
 
 function DaysRemaining({ days }) {
   const urgent = days <= 7
@@ -21,7 +22,7 @@ function DaysRemaining({ days }) {
   )
 }
 
-function TrashRow({ label, sublabel, daysRemaining, onRestore, isPending }) {
+function TrashRow({ label, sublabel, daysRemaining, onRestore, onDelete, isPendingRestore, isPendingDelete }) {
   return (
     <div className="flex items-center gap-3 py-3 border-b border-peach last:border-0">
       <div className="flex-1 min-w-0">
@@ -35,9 +36,19 @@ function TrashRow({ label, sublabel, daysRemaining, onRestore, isPending }) {
         variant="secondary"
         size="sm"
         onClick={onRestore}
-        loading={isPending}
+        loading={isPendingRestore}
+        disabled={isPendingDelete}
       >
         Restore
+      </Button>
+      <Button
+        variant="danger"
+        size="sm"
+        onClick={onDelete}
+        loading={isPendingDelete}
+        disabled={isPendingRestore}
+      >
+        Delete
       </Button>
     </div>
   )
@@ -46,8 +57,9 @@ function TrashRow({ label, sublabel, daysRemaining, onRestore, isPending }) {
 export function TrashList({ deletedSeries, deletedShows }) {
   const router = useRouter()
   const [pending, startTransition] = useTransition()
-  // Track which item is being restored by id
   const [restoringId, setRestoringId] = useState(null)
+  const [deletingId, setDeletingId] = useState(null)
+  const [confirmTarget, setConfirmTarget] = useState(null) // { id, type, label }
 
   function handleRestoreSeries(seriesId) {
     setRestoringId(seriesId)
@@ -69,52 +81,89 @@ export function TrashList({ deletedSeries, deletedShows }) {
     })
   }
 
-  return (
-    <div className="space-y-8">
-      {deletedSeries.length > 0 && (
-        <section>
-          <h2 className="text-xs font-semibold uppercase tracking-wider text-soft/70 font-body mb-2">
-            Series
-          </h2>
-          <div className="rounded-xl border border-peach bg-white px-4">
-            {deletedSeries.map((s) => (
-              <TrashRow
-                key={s.id}
-                label={s.name}
-                sublabel={
-                  s.showCount > 0
-                    ? `${s.showCount} show${s.showCount === 1 ? '' : 's'} will also be restored`
-                    : null
-                }
-                daysRemaining={s.daysRemaining}
-                onRestore={() => handleRestoreSeries(s.id)}
-                isPending={restoringId === s.id}
-              />
-            ))}
-          </div>
-        </section>
-      )}
+  function handleConfirmDelete() {
+    if (!confirmTarget) return
+    const { id, type } = confirmTarget
+    setConfirmTarget(null)
+    setDeletingId(id)
+    startTransition(async () => {
+      const result = type === 'series'
+        ? await permanentlyDeleteSeries(id)
+        : await permanentlyDeleteShow(id)
+      setDeletingId(null)
+      if (result?.error) { alert(result.error); return }
+      router.refresh()
+    })
+  }
 
-      {deletedShows.length > 0 && (
-        <section>
-          <h2 className="text-xs font-semibold uppercase tracking-wider text-soft/70 font-body mb-2">
-            Shows
-          </h2>
-          <div className="rounded-xl border border-peach bg-white px-4">
-            {deletedShows.map((s) => (
-              <TrashRow
-                key={s.id}
-                label={[s.seriesName, s.date ? formatShortDate(s.date) : null, s.theme]
+  const confirmIsSeries = confirmTarget?.type === 'series'
+
+  return (
+    <>
+      <ConfirmDialog
+        open={!!confirmTarget}
+        onClose={() => setConfirmTarget(null)}
+        onConfirm={handleConfirmDelete}
+        title={`Permanently delete ${confirmIsSeries ? 'series' : 'show'}?`}
+        description={`"${confirmTarget?.label}" will be permanently deleted and cannot be recovered.`}
+        warning={confirmIsSeries ? 'All shows in this series will also be permanently deleted.' : undefined}
+        confirmLabel="Delete forever"
+        isPending={!!deletingId}
+      />
+
+      <div className="space-y-8">
+        {deletedSeries.length > 0 && (
+          <section>
+            <h2 className="text-xs font-semibold uppercase tracking-wider text-soft/70 font-body mb-2">
+              Series
+            </h2>
+            <div className="rounded-xl border border-peach bg-white px-4">
+              {deletedSeries.map((s) => (
+                <TrashRow
+                  key={s.id}
+                  label={s.name}
+                  sublabel={
+                    s.showCount > 0
+                      ? `${s.showCount} show${s.showCount === 1 ? '' : 's'} will also be restored`
+                      : null
+                  }
+                  daysRemaining={s.daysRemaining}
+                  onRestore={() => handleRestoreSeries(s.id)}
+                  onDelete={() => setConfirmTarget({ id: s.id, type: 'series', label: s.name })}
+                  isPendingRestore={restoringId === s.id}
+                  isPendingDelete={deletingId === s.id}
+                />
+              ))}
+            </div>
+          </section>
+        )}
+
+        {deletedShows.length > 0 && (
+          <section>
+            <h2 className="text-xs font-semibold uppercase tracking-wider text-soft/70 font-body mb-2">
+              Shows
+            </h2>
+            <div className="rounded-xl border border-peach bg-white px-4">
+              {deletedShows.map((s) => {
+                const showLabel = [s.seriesName, s.date ? formatShortDate(s.date) : null, s.theme]
                   .filter(Boolean)
-                  .join(' · ')}
-                daysRemaining={s.daysRemaining}
-                onRestore={() => handleRestoreShow(s.id)}
-                isPending={restoringId === s.id}
-              />
-            ))}
-          </div>
-        </section>
-      )}
-    </div>
+                  .join(' · ')
+                return (
+                  <TrashRow
+                    key={s.id}
+                    label={showLabel}
+                    daysRemaining={s.daysRemaining}
+                    onRestore={() => handleRestoreShow(s.id)}
+                    onDelete={() => setConfirmTarget({ id: s.id, type: 'show', label: showLabel })}
+                    isPendingRestore={restoringId === s.id}
+                    isPendingDelete={deletingId === s.id}
+                  />
+                )
+              })}
+            </div>
+          </section>
+        )}
+      </div>
+    </>
   )
 }

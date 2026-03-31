@@ -47,13 +47,13 @@ export function DropdownMenu({ trigger, items, align = 'right' }) {
         <div
           role="menu"
           className={cn(
-            'absolute z-50 mt-1 min-w-44 rounded-lg border border-light bg-white shadow-md py-1',
+            'absolute z-50 mt-1 min-w-44 rounded-lg border border-peach bg-white shadow-md py-1',
             align === 'right' ? 'right-0' : 'left-0'
           )}
         >
           {items.map((item, i) =>
             item.separator ? (
-              <hr key={i} className="my-1 border-light" />
+              <hr key={i} className="my-1 border-peach" />
             ) : (
               <button
                 key={i}

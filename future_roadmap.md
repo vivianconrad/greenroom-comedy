@@ -36,6 +36,11 @@ Last updated: March 2026
 - "Mark as done" action on shows (moves show into the Past Shows list)
 - Bulk move past shows to trash from the series shows tab
 - Series Info tab: regular contacts (venue manager, sound engineer, etc.), account logins with copy buttons, series notes
+- Performer merge (combine duplicate records with field-by-field selection and duplicate detection suggestions)
+- Show day mode: live clock, run of show with current/next slot highlighted in real time, day-of duties with completion toggles, floating quick-compose button for sending messages
+- Communications hub on show page: recipient group selector, template selector with variable filling, copy to clipboard, sent log
+- Comm template stages (pre-show, day-of, post-show, booking) for grouping templates in the series Comms tab
+- Pre-show performer intake form at `/intake/[showPerformerId]` — token-based, collects bio, walk-up song, tag preferences, photo consent; auto-populates show_performers fields
 
 ---
 
@@ -50,14 +55,11 @@ Last updated: March 2026
 - Configurable per series (each series can have its own form with different questions)
 - DB needed: `performers.stage_name` (text) — stage name is a distinct field from legal name
 
-### Pre-Show Performer Form
-- Sent automatically when a performer is booked for a show
-- Link: /form/[token] (unique per performer per show)
-- Fields: comfort with show format, superlative suggestions, promo name, short bio, topics to avoid in intro, upcoming projects to mention, promo photo upload, equipment they're bringing, equipment they need from us, background music needs, walk-up song upload, sound check preference, lineup spot preference, photo/video consent, payment method (venmo/zelle/cash), pronouns, instagram, anything else
-- Responses auto-populate show_performers fields (bio, walk_up_song, photo_url, tags_ok, payment_method)
-- Form status tracked: sent, opened, completed
-- Automatic reminder if not filled out X days before show
-- DB needed: `show_performers.form_token` (text, unique), `form_sent_at` (timestamptz), `form_opened_at` (timestamptz) — `form_complete` already exists
+### Pre-Show Performer Form *(partially shipped)*
+
+- ~~Token-based intake form at `/intake/[showPerformerId]` collecting bio, walk-up song, tag preferences, photo consent~~ ✓
+- ~~Responses auto-populate show_performers fields (bio, walk_up_song, tags_ok)~~ ✓
+- Still to do: send form automatically when performer is booked; track form_sent_at / form_opened_at; automatic reminder if not filled out X days before show; photo/walk-up file upload; payment method capture; equipment needs; promo photo upload
 
 ### File Uploads
 - Performer promo photos (stored in Supabase Storage, linked to show_performers.photo_url)
@@ -70,33 +72,62 @@ Last updated: March 2026
 - Performance history across all shows with notes per show
 - "Last contacted" date
 - Availability tracking (dates they've said they're available or unavailable)
-- Performer merge (combine duplicate records)
+- ~~Performer merge (combine duplicate records)~~ ✓
 - Availability calendar view — visual "who's available when" before booking a lineup
+- Tag-based filtering in the performer database — tags already exist on performer records but can't be filtered on; same pill-filter pattern as the series filter
+- Performer detail slide-over drawer — replace the current expand-in-table-row with a fixed right-side drawer, giving more space for detail and a more natural feel
+- Structured "how we met" and "contact method" fields — replace free-text with a small set of predefined options (open mic, application, friend referral, saw them perform, etc.) so they become filterable and useful for understanding your pipeline
+
+### Adding Performers to a Show
+
+- The current flow for booking a performer onto a specific show needs rethinking — too many steps
+- Ideas: quick-add from the performer database with a show picker, drag-from-roster onto show, or a "book for show" button on each performer row that opens a show selector
+
+### Run of Show: Remove Performer Slot
+
+- The Run of Show tab has drag-to-reorder but no way to remove a slot directly
+- A remove button on each RO row (with confirmation) would avoid having to switch to the Performers tab to remove and come back
+- Should also handle reordering slot_order integers after removal
+
+### Copy Performer List
+
+- A "Copy names" button on the show Performers tab that copies a newline-separated list of names + roles to clipboard
+- Useful for posting lineups to Slack, Discord, group chats, or event pages
+- Low effort: `useCopyToClipboard` is already available; format as "Name (Role)" per line
+- Could also live on the Run of Show tab as an alternative to the existing full RO copy
+
+### Instagram Tag List (Promo Tab)
+
+- Auto-generate a list of `@handles` for all performers on the show who have Instagram set and `tags_ok = true`
+- One-click copy for use in captions, stories, and event posts
+- Lives on the Promo tab; eliminates the most tedious manual step in show promotion
+- Data already exists: `show_performers → performers.instagram` + `show_performers.tags_ok`
 
 ---
 
 ## Phase 3: Communications
 
-### Full Communications Hub
-- Recipient group selector: Everyone, All Performers, Hosts Only, Tech & Camera, Custom
-- Preview of who will receive (names + contact method)
-- Template selector with auto-filled show variables
-- Editable message body after template fills
-- Copy to clipboard (primary v1 action)
-- Mark as sent (logs to comm_log)
-- Sent message history per show
+### Full Communications Hub *(partially shipped)*
+
+- ~~Recipient group selector: Everyone, All Performers, Hosts Only, Tech & Camera, Custom~~ ✓
+- ~~Preview of who will receive (names + contact method)~~ ✓
+- ~~Template selector with auto-filled show variables~~ ✓
+- ~~Editable message body after template fills~~ ✓
+- ~~Copy to clipboard (primary v1 action)~~ ✓
+- ~~Mark as sent (logs to comm_log)~~ ✓
+- ~~Sent message history per show~~ ✓
 
 ### Group Messaging
+
 - Per-show group thread view (not real-time chat, just a log of messages sent)
 - Quick-send from multiple places: performer tab, show dashboard, show day mode
 - "Send call time + RO to all performers" one-click flow
 - "Send details to tech/camera crew" one-click flow
 
-### Staged / Grouped Comm Templates
-- Group comm templates by stage or purpose (e.g. "Pre-show", "Day-of", "Post-show", "Booking") to make the template selector easier to scan
-- Stage groups could mirror the checklist stage system (pre / day / post) so linked templates surface in context
-- Could display as optgroup labels in the `<select>` or as collapsible sections in the series Comms tab
-- A `stage` field on `comm_templates` (nullable text) would be sufficient; series-level grouping handles the UI
+### Staged / Grouped Comm Templates *(shipped)*
+
+- ~~Group comm templates by stage or purpose (e.g. "Pre-show", "Day-of", "Post-show", "Booking")~~ ✓
+- ~~`stage` field on `comm_templates` implemented; series Comms tab groups templates by stage~~ ✓
 
 ### Copy Templates Between Series
 - One-click "Copy to series…" button on each comm template card in the series Comms tab
@@ -119,15 +150,16 @@ Last updated: March 2026
 
 ## Phase 4: Show Day Mode
 
-### Enhanced Backstage View
-- Large, phone-optimised layout
-- Live clock showing current time
-- Run of show with current/next slot highlighted based on real time
+### Enhanced Backstage View *(partially shipped)*
+
+- ~~Large, phone-optimised layout~~ ✓
+- ~~Live clock showing current time~~ ✓
+- ~~Run of show with current/next slot highlighted based on real time~~ ✓
 - Tap performer to see contact info
-- Day-of duties grouped by person with completion checkboxes
-- Day-of checklist tasks
+- ~~Day-of duties grouped by person with completion checkboxes~~ ✓
+- ~~Day-of checklist tasks~~ ✓
 - Quick contacts for all performers and crew
-- Floating quick-compose button for sending messages
+- ~~Floating quick-compose button for sending messages~~ ✓
 - Walk-up music playback controls (if files uploaded)
 
 ### Door List
@@ -247,6 +279,19 @@ Last updated: March 2026
 ### Bulk Show Actions *(partially shipped)*
 - ~~Bulk move past shows to trash~~ ✓
 - Still to do: bulk archive (separate from trash), bulk tag/label
+
+### Checklist Task Due Dates
+
+- Add a `days_before` field to checklist templates so each task has a target date relative to the show (e.g. "Post first tease — 14 days before")
+- Per-show checklist items get a computed due date when seeded from the template
+- Overdue tasks surface visually (colour change or badge) on the checklist and show dashboard
+- Foundation for the producer reminders feature (Phase 3) and Google Calendar sync
+
+### One-Off Show → Recurring Prompt
+
+- When a producer creates a second show at the same venue / with the same name, surface a gentle prompt: "Want to make this a recurring series?"
+- Consolidating one-offs into a series retroactively — move existing shows into the new series
+- Prevents the common pattern of accumulating disconnected one-offs that should have been a series from the start
 
 ### Recurring Show Automation
 - Auto-create the next show instance X weeks before the next date in the series

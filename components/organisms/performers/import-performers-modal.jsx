@@ -8,35 +8,41 @@ import { Modal } from '@/components/atoms/modal'
 import { Button } from '@/components/atoms/button'
 import { Input } from '@/components/atoms/input'
 import { importPerformers, fetchSheetAsCSV } from '@/lib/actions/performers'
+import { parseExcelFile } from '@/lib/actions/parse-file'
+import { parseCSV } from '@/lib/csv'
 import { cn } from '@/lib/utils'
 
 // ─── Field definitions ─────────────────────────────────────────────────────────
 
 const FIELDS = [
-  { key: 'name', label: 'Name', required: true },
-  { key: 'pronouns', label: 'Pronouns' },
-  { key: 'act_type', label: 'Act type' },
-  { key: 'instagram', label: 'Instagram' },
-  { key: 'email', label: 'Email' },
-  { key: 'contact_method', label: 'Contact method' },
-  { key: 'how_we_met', label: 'How we met' },
-  { key: 'notes', label: 'Notes' },
-  { key: 'tags', label: 'Tags' },
-  { key: 'book_again', label: 'Book again' },
+  { key: 'name',               label: 'Name',               required: true },
+  { key: 'stage_name',         label: 'Stage name' },
+  { key: 'pronouns',           label: 'Pronouns' },
+  { key: 'act_type',           label: 'Act type' },
+  { key: 'instagram',          label: 'Instagram' },
+  { key: 'email',              label: 'Email' },
+  { key: 'contact_method',     label: 'Contact method' },
+  { key: 'how_we_met',         label: 'How we met' },
+  { key: 'clip_url',           label: 'Clip URL' },
+  { key: 'notes',              label: 'Notes' },
+  { key: 'tags',               label: 'Tags' },
+  { key: 'book_again',         label: 'Book again' },
   { key: 'audience_favourite', label: 'Audience favourite' },
 ]
 
 const ALIASES = {
-  name: ['name', 'performer', 'performer name', 'full name', 'act name', 'artist', 'comic'],
-  pronouns: ['pronouns', 'pronoun'],
-  act_type: ['act type', 'acttype', 'type', 'genre', 'style', 'discipline', 'act'],
-  instagram: ['instagram', 'ig', 'insta', 'instagram handle', 'ig handle'],
-  email: ['email', 'e-mail', 'email address'],
-  contact_method: ['contact method', 'contact', 'best way to contact', 'preferred contact', 'contact via'],
-  how_we_met: ['how we met', 'met', 'met at', 'origin', 'source', 'how did we meet'],
-  notes: ['notes', 'note', 'comments', 'bio', 'additional info', 'additional notes'],
-  tags: ['tags', 'tag', 'labels', 'categories'],
-  book_again: ['book again', 'bookagain', 'rebook', 'would book again', 'rebook?', 'book?'],
+  name:               ['name', 'performer', 'performer name', 'full name', 'act name', 'artist', 'comic'],
+  stage_name:         ['stage name', 'stagename', 'stage', 'performing name', 'performance name', 'bill name'],
+  pronouns:           ['pronouns', 'pronoun'],
+  act_type:           ['act type', 'acttype', 'type', 'genre', 'style', 'discipline', 'act'],
+  instagram:          ['instagram', 'ig', 'insta', 'instagram handle', 'ig handle'],
+  email:              ['email', 'e-mail', 'email address'],
+  contact_method:     ['contact method', 'contact', 'best way to contact', 'preferred contact', 'contact via'],
+  how_we_met:         ['how we met', 'met', 'met at', 'origin', 'source', 'how did we meet'],
+  clip_url:           ['clip url', 'clip', 'clip link', 'video', 'video url', 'video link', 'performance clip', 'sample', 'demo'],
+  notes:              ['notes', 'note', 'comments', 'bio', 'additional info', 'additional notes'],
+  tags:               ['tags', 'tag', 'labels', 'categories'],
+  book_again:         ['book again', 'bookagain', 'rebook', 'would book again', 'rebook?', 'book?'],
   audience_favourite: [
     'audience fav', 'audience favourite', 'audience favorite',
     'fan favourite', 'crowd favourite', 'audiencefav',
@@ -61,6 +67,12 @@ function autoDetect(headers) {
   return mapping
 }
 
+function parseTags(raw) {
+  const str = raw?.toString().trim()
+  if (!str) return null
+  return str.split(',').map((t) => t.trim()).filter(Boolean)
+}
+
 function parseBool(val) {
   if (val == null || val === '') return null
   const s = String(val).toLowerCase().trim()
@@ -70,18 +82,20 @@ function parseBool(val) {
 }
 
 async function parseFileToRows(file) {
-  const XLSX = await import('xlsx')
-  const buf = await file.arrayBuffer()
-  const wb = XLSX.read(buf, { type: 'array' })
-  const ws = wb.Sheets[wb.SheetNames[0]]
-  return XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' })
+  const name = file.name.toLowerCase()
+  if (name.endsWith('.csv')) {
+    return parseCSV(await file.text())
+  }
+  // .xlsx — parsed server-side via ExcelJS
+  const fd = new FormData()
+  fd.append('file', file)
+  const result = await parseExcelFile(fd)
+  if (result.error) throw new Error(result.error)
+  return result.rows
 }
 
 async function parseCSVToRows(csvText) {
-  const XLSX = await import('xlsx')
-  const wb = XLSX.read(csvText, { type: 'string' })
-  const ws = wb.Sheets[wb.SheetNames[0]]
-  return XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' })
+  return parseCSV(csvText)
 }
 
 function buildPerformers(rawRows, mapping) {
@@ -97,15 +111,17 @@ function buildPerformers(rawRows, mapping) {
     if (!name) continue
     performers.push({
       name,
-      pronouns: p.pronouns?.toString().trim() || null,
-      act_type: p.act_type?.toString().trim() || null,
-      instagram: p.instagram?.toString().trim() || null,
-      email: p.email?.toString().trim() || null,
-      contact_method: p.contact_method?.toString().trim() || null,
-      how_we_met: p.how_we_met?.toString().trim() || null,
-      notes: p.notes?.toString().trim() || null,
-      tags: p.tags?.toString().trim() || null,
-      book_again: parseBool(p.book_again),
+      stage_name:         p.stage_name?.toString().trim()      || null,
+      pronouns:           p.pronouns?.toString().trim()         || null,
+      act_type:           p.act_type?.toString().trim()         || null,
+      instagram:          p.instagram?.toString().trim()        || null,
+      email:              p.email?.toString().trim()            || null,
+      contact_method:     p.contact_method?.toString().trim()  || null,
+      how_we_met:         p.how_we_met?.toString().trim()       || null,
+      clip_url:           p.clip_url?.toString().trim()         || null,
+      notes:              p.notes?.toString().trim()            || null,
+      tags:               parseTags(p.tags),
+      book_again:         parseBool(p.book_again),
       audience_favourite: parseBool(p.audience_favourite),
     })
   }
@@ -164,7 +180,7 @@ export function ImportPerformersModal({ open, onClose }) {
     try {
       proceedWithRows(await parseFileToRows(file))
     } catch {
-      setError('Could not read this file. Please try a .xlsx, .xls, or .csv file.')
+      setError('Could not read this file. Please try a .xlsx or .csv file.')
     } finally {
       setLoading(false)
       e.target.value = ''
@@ -226,12 +242,12 @@ export function ImportPerformersModal({ open, onClose }) {
             >
               <FontAwesomeIcon icon={faArrowUpFromBracket} className="h-8 w-8 text-soft/40" aria-hidden="true" />
               <span>{loading ? 'Reading…' : 'Click to choose a file'}</span>
-              <span className="text-xs text-soft/50">.xlsx · .xls · .csv</span>
+              <span className="text-xs text-soft/50">.xlsx · .csv</span>
             </button>
             <input
               ref={fileInputRef}
               type="file"
-              accept=".xlsx,.xls,.csv"
+              accept=".xlsx,.csv"
               className="hidden"
               onChange={handleFileChange}
             />

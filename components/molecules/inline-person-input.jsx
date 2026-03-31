@@ -42,7 +42,7 @@ export function InlinePersonInput({ value, onSave, contacts = [], placeholder = 
           'w-full min-w-0 text-xs font-body rounded-md border px-2 py-1 transition-colors',
           'focus:outline-none focus:ring-1 focus:ring-coral/30 focus:border-coral/50 focus:bg-white',
           isEmpty
-            ? 'border-dashed border-peach bg-transparent text-soft placeholder:text-soft/60 hover:border-soft/50 hover:bg-cream/50'
+            ? 'border-dashed border-peach bg-transparent text-soft placeholder:text-soft/80 hover:border-soft/50 hover:bg-cream/50'
             : 'border-peach bg-cream text-deep hover:border-soft/50'
         )}
       />

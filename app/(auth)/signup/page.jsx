@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from 'react'
 import Link from 'next/link'
-import { signup } from '@/lib/actions/auth'
+import { signup, loginAsDemo } from '@/lib/actions/auth'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/atoms/button'
 import { Input } from '@/components/atoms/input'
@@ -35,6 +35,7 @@ export default function SignupPage() {
   const [errors, setErrors] = useState({})
   const [isPending, startTransition] = useTransition()
   const [oauthPending, setOauthPending] = useState(false)
+  const [demoPending, setDemoPending] = useState(null) // 'populated' | 'empty' | null
 
   function handleSubmit(e) {
     e.preventDefault()
@@ -58,6 +59,15 @@ export default function SignupPage() {
       const result = await signup(formData)
       if (result?.error) setErrors({ form: result.error })
     })
+  }
+
+  async function handleDemo(mode) {
+    setDemoPending(mode)
+    const result = await loginAsDemo(mode)
+    if (result?.error) {
+      setErrors({ form: result.error })
+      setDemoPending(null)
+    }
   }
 
   async function handleGoogle() {
@@ -160,6 +170,51 @@ export default function SignupPage() {
           Log in
         </Link>
       </p>
+
+      {/* Demo mode */}
+      <div className="relative mt-6">
+        <div className="absolute inset-0 flex items-center">
+          <div className="w-full border-t border-peach" />
+        </div>
+        <div className="relative flex justify-center">
+          <span className="bg-white px-3 text-xs text-soft font-body">or try a demo</span>
+        </div>
+      </div>
+
+      <div className="mt-5 grid grid-cols-2 gap-3">
+        <div className="flex flex-col items-center gap-1.5">
+          <Button
+            type="button"
+            variant="secondary"
+            size="md"
+            className="w-full"
+            loading={demoPending === 'populated'}
+            disabled={demoPending !== null && demoPending !== 'populated'}
+            onClick={() => handleDemo('populated')}
+          >
+            Demo — sample data
+          </Button>
+          <p className="text-xs text-soft font-body text-center">
+            Pre-loaded with shows &amp; performers
+          </p>
+        </div>
+        <div className="flex flex-col items-center gap-1.5">
+          <Button
+            type="button"
+            variant="secondary"
+            size="md"
+            className="w-full"
+            loading={demoPending === 'empty'}
+            disabled={demoPending !== null && demoPending !== 'empty'}
+            onClick={() => handleDemo('empty')}
+          >
+            Demo — blank slate
+          </Button>
+          <p className="text-xs text-soft font-body text-center">
+            Start from scratch, no data
+          </p>
+        </div>
+      </div>
     </div>
   )
 }

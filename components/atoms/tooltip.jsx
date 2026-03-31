@@ -90,7 +90,7 @@ function InfoTooltip({ content, side = 'top', className }) {
       <span
         role="img"
         aria-label="More information"
-        className="inline-flex items-center justify-center text-soft/40 hover:text-soft/70 transition-colors rounded-full cursor-default"
+        className="inline-flex items-center justify-center text-soft/70 hover:text-soft transition-colors rounded-full cursor-default"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"

@@ -7,31 +7,36 @@ import { Input } from '@/components/atoms/input'
 import { fetchSheetAsCSV } from '@/lib/actions/performers'
 import { saveSheetSync, deleteSheetSync, runSheetSync } from '@/lib/actions/sheet-sync'
 import { cn } from '@/lib/utils'
+import { parseCSV } from '@/lib/csv'
 
 // ─── Shared column definitions (mirrors ImportPerformersModal) ─────────────────
 
 const FIELDS = [
-  { key: 'name',              label: 'Name',               required: true },
-  { key: 'pronouns',          label: 'Pronouns' },
-  { key: 'act_type',          label: 'Act type' },
-  { key: 'instagram',         label: 'Instagram' },
-  { key: 'email',             label: 'Email' },
-  { key: 'contact_method',    label: 'Contact method' },
-  { key: 'how_we_met',        label: 'How we met' },
-  { key: 'notes',             label: 'Notes' },
-  { key: 'tags',              label: 'Tags' },
-  { key: 'book_again',        label: 'Book again' },
+  { key: 'name',               label: 'Name',               required: true },
+  { key: 'stage_name',         label: 'Stage name' },
+  { key: 'pronouns',           label: 'Pronouns' },
+  { key: 'act_type',           label: 'Act type' },
+  { key: 'instagram',          label: 'Instagram' },
+  { key: 'email',              label: 'Email' },
+  { key: 'contact_method',     label: 'Contact method' },
+  { key: 'how_we_met',         label: 'How we met' },
+  { key: 'clip_url',           label: 'Clip URL' },
+  { key: 'notes',              label: 'Notes' },
+  { key: 'tags',               label: 'Tags' },
+  { key: 'book_again',         label: 'Book again' },
   { key: 'audience_favourite', label: 'Audience favourite' },
 ]
 
 const ALIASES = {
   name:               ['name', 'performer', 'performer name', 'full name', 'act name', 'artist', 'comic'],
+  stage_name:         ['stage name', 'stagename', 'stage', 'performing name', 'performance name', 'bill name'],
   pronouns:           ['pronouns', 'pronoun'],
   act_type:           ['act type', 'acttype', 'type', 'genre', 'style', 'discipline', 'act'],
   instagram:          ['instagram', 'ig', 'insta', 'instagram handle', 'ig handle'],
   email:              ['email', 'e-mail', 'email address'],
   contact_method:     ['contact method', 'contact', 'best way to contact', 'preferred contact', 'contact via'],
   how_we_met:         ['how we met', 'met', 'met at', 'origin', 'source', 'how did we meet'],
+  clip_url:           ['clip url', 'clip', 'clip link', 'video', 'video url', 'video link', 'performance clip', 'sample', 'demo'],
   notes:              ['notes', 'note', 'comments', 'bio', 'additional info', 'additional notes'],
   tags:               ['tags', 'tag', 'labels', 'categories'],
   book_again:         ['book again', 'bookagain', 'rebook', 'would book again', 'rebook?', 'book?'],
@@ -51,11 +56,8 @@ function autoDetect(headers) {
   return mapping
 }
 
-async function parseCSVToRows(csvText) {
-  const XLSX = await import('xlsx')
-  const wb = XLSX.read(csvText, { type: 'string' })
-  const ws = wb.Sheets[wb.SheetNames[0]]
-  return XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' })
+function parseCSVToRows(csvText) {
+  return parseCSV(csvText)
 }
 
 // ─── Sub-components ────────────────────────────────────────────────────────────
