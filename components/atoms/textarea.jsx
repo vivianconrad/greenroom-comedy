@@ -7,6 +7,7 @@ const Textarea = forwardRef(function Textarea(
   {
     label,
     error,
+    required,
     maxLength,
     value,
     defaultValue,
@@ -35,8 +36,9 @@ const Textarea = forwardRef(function Textarea(
   return (
     <div className="flex flex-col gap-1.5">
       {label && (
-        <label htmlFor={id} className="text-sm font-medium text-soft font-body">
+        <label htmlFor={id} className="text-sm font-medium text-mid font-body">
           {label}
+          {required && <span className="text-red ml-0.5" aria-hidden="true">*</span>}
         </label>
       )}
       <textarea
@@ -46,10 +48,11 @@ const Textarea = forwardRef(function Textarea(
         defaultValue={defaultValue}
         maxLength={maxLength}
         placeholder={placeholder}
+        required={required}
         onChange={handleChange}
         className={cn(
           'w-full rounded-lg border bg-cream px-3.5 py-2.5 text-sm text-deep font-body',
-          'placeholder:text-soft/80 resize-y min-h-24',
+          'placeholder:text-soft resize-y min-h-24',
           'transition-colors duration-150',
           'focus:outline-none focus:ring-2 focus:ring-coral focus:border-transparent',
           error
@@ -59,6 +62,7 @@ const Textarea = forwardRef(function Textarea(
         )}
         aria-invalid={!!error}
         aria-describedby={error ? `${id}-error` : undefined}
+        aria-required={required ? 'true' : undefined}
         {...props}
       />
       <div className="flex justify-between items-center">

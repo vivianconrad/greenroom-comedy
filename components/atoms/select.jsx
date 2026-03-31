@@ -9,6 +9,7 @@ const Select = forwardRef(function Select(
   {
     label,
     error,
+    required,
     options = [],
     placeholder,
     className,
@@ -23,14 +24,16 @@ const Select = forwardRef(function Select(
   return (
     <div className="flex flex-col gap-1.5">
       {label && (
-        <label htmlFor={id} className="text-sm font-medium text-soft font-body">
+        <label htmlFor={id} className="text-sm font-medium text-mid font-body">
           {label}
+          {required && <span className="text-red ml-0.5" aria-hidden="true">*</span>}
         </label>
       )}
       <div className="relative">
         <select
           ref={ref}
           id={id}
+          required={required}
           className={cn(
             'w-full appearance-none rounded-lg border bg-cream px-3.5 py-2.5 pr-9',
             'text-sm text-deep font-body',
@@ -43,6 +46,7 @@ const Select = forwardRef(function Select(
           )}
           aria-invalid={!!error}
           aria-describedby={error ? `${id}-error` : undefined}
+          aria-required={required ? 'true' : undefined}
           {...props}
         >
           {placeholder && (
@@ -56,7 +60,6 @@ const Select = forwardRef(function Select(
             </option>
           ))}
         </select>
-        {/* chevron icon */}
         <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center">
           <FontAwesomeIcon icon={faChevronDown} className="h-3.5 w-3.5 text-soft" aria-hidden="true" />
         </div>
